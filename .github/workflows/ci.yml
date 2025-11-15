@@ -1,0 +1,80 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  validation:
+    name: Validate Gradle wrappers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v5
+      - name: Validate Gradle wrappers
+        uses: gradle/actions/wrapper-validation@v5
+  assemble:
+    name: Assemble
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - validation
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: 17
+          cache: "gradle"
+      - name: Assemble
+        run: ./gradlew assemble
+  test:
+    name: Run tests
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - validation
+      - assemble
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: 17
+          cache: "gradle"
+      - name: Run tests
+        run: ./gradlew test
+      - name: Notify Slack if tests fail
+        if: failure() && github.ref == 'refs/heads/main'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,author,message
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  style:
+    name: Check formatting
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - validation
+      - assemble
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: 17
+          cache: "gradle"
+      - name: Check formatting
+        run: ./gradlew spotlessCheck

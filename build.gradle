@@ -1,0 +1,110 @@
+plugins {
+	id 'com.diffplug.spotless' version '8.0.0'
+	id 'net.ltgt.errorprone' version '4.3.0'
+}
+
+repositories {
+	mavenCentral()
+}
+
+allprojects {
+	group = 'frc.team581'
+	version = '2025.0.0'
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'net.ltgt.errorprone'
+
+	java {
+		toolchain {
+			languageVersion = JavaLanguageVersion.of(17)
+		}
+	}
+
+	repositories {
+		mavenCentral()
+	}
+
+	// Error Prone dependencies
+	dependencies {
+		compileOnly "com.google.errorprone:error_prone_annotations:2.44.0"
+		errorprone "com.google.errorprone:error_prone_core:2.42.0"
+		errorprone "tech.picnic.error-prone-support:error-prone-contrib:0.26.0"
+		errorprone "tech.picnic.error-prone-support:refaster-runner:0.26.0"
+
+		testImplementation "org.assertj:assertj-core:3.27.6"
+	}
+
+	tasks.withType(JavaCompile) {
+		// Configure string concat to always inline compile
+		options.compilerArgs.add '-XDstringConcat=inline'
+		options.release = 17
+	}
+
+	// Error Prone configuration
+	tasks.withType(JavaCompile).configureEach {
+		options.errorprone.disableWarningsInGeneratedCode = true
+		options.errorprone.disable("Var", "BooleanParameter", "InlineMeSuggester", "ImmutableEnumChecker")
+
+		// Set the ERRORPRONE_AUTOFIX environment variable to fix files in place
+		if (System.getenv().containsKey("ERRORPRONE_AUTOFIX")) {
+			options.errorprone.errorproneArgs.add "-XepPatchLocation:IN_PLACE"
+		}
+
+		options.errorprone.excludedPaths = "LimelightHelpers.java"
+	}
+
+	// Common test configuration
+	test {
+		useJUnitPlatform()
+		systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+	}
+}
+
+// Spotless configuration applied to all projects
+
+spotless {
+	enforceCheck = false
+
+	encoding = 'UTF-8'
+	lineEndings = 'UNIX'
+
+	java {
+		target 'shared/**/*.java', 'comp-bot/**/*.java', 'offseason-bot/**/*.java', 'new-member-bot/**/*.java'
+		googleJavaFormat()
+		licenseHeader ''
+
+		targetExclude('**/generated/**')
+	}
+
+	groovyGradle {
+		target '**/*.gradle'
+		greclipse()
+		leadingSpacesToTabs()
+		endWithNewline()
+	}
+
+	json {
+		target '**/*.json'
+		simple().indentWithSpaces(2)
+
+		targetExclude('.pathplanner/**')
+	}
+}
+
+// Prevent root deploy to avoid dangerous parallel deployments
+task deploy {
+	doLast {
+		throw new GradleException("""
+❌ Running the deploy task without specifying a robot is disabled to prevent dangerous parallel deployments!
+
+Instead, deploy to a specific robot:
+./gradlew comp-bot:deploy       - Deploy to competition robot
+./gradlew offseason-bot:deploy  - Deploy to offseason robot
+./gradlew new-member-bot:deploy - Deploy to new member robot
+
+This prevents race conditions where each robot tries to deploy at the same time, causing the wrong code to be deployed.
+		""".trim())
+	}
+}
