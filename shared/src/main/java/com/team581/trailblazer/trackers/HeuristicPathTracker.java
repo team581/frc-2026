@@ -1,19 +1,21 @@
 package com.team581.trailblazer.trackers;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import com.google.common.collect.ImmutableList;
+import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.AutoPoint;
-import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import java.util.List;
 
 public class HeuristicPathTracker implements PathTracker {
+  private final PoseErrorTolerance defaultTransitionTolerance;
   private List<AutoPoint> points = ImmutableList.of();
   private Pose2d currentPose = Pose2d.kZero;
-  private static final double PROXIMITY_RADIUS = 0.5;
   private int currentPointIndex = 0;
+
+  public HeuristicPathTracker(PoseErrorTolerance defaultTransitionTolerance) {
+    this.defaultTransitionTolerance = defaultTransitionTolerance;
+  }
 
   @Override
   public void resetAndSetPoints(List<AutoPoint> points) {
@@ -27,24 +29,18 @@ public class HeuristicPathTracker implements PathTracker {
 
   @Override
   public Pose2d getTargetPose() {
-    AutoPoint currentPoint = points.get(getCurrentPointIndex());
-    Pose2d currentTargetPose = currentPoint.poseSupplier.get();
+    var currentPoint = points.get(getCurrentPointIndex());
+    var currentTargetPose = currentPoint.poseSupplier().get().getPose();
 
-    /// DogLog.log("Autos/Trailblazer/CurrentWaypoint", currentPoint);
-    DogLog.log("Autos/Trailblazer/NextPointIndex", currentPointIndex);
-    DogLog.log("Autos/Trailblazer/CurrentTargetPose", currentTargetPose);
-
-    double distanceToTarget =
-        currentPose.getTranslation().getDistance(currentTargetPose.getTranslation());
-
-    if (distanceToTarget < PROXIMITY_RADIUS && currentPointIndex < points.size() - 1) {
+    if (currentPointIndex < points.size() - 1
+        && currentPoint
+            .positionTolerance()
+            .orElse(defaultTransitionTolerance)
+            .atPose(currentTargetPose, currentPose)) {
       currentPointIndex++;
     }
 
-    var targetPose = points.get(currentPointIndex).poseSupplier.get();
-
-    DogLog.log("Autos/Trailblazer/TargetPose", targetPose);
-    DogLog.log("Autos/Trailblazer/DistanceToTarget", distanceToTarget, Meters);
+    var targetPose = points.get(currentPointIndex).poseSupplier().get().getPose();
 
     return targetPose;
   }

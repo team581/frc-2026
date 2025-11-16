@@ -1,6 +1,7 @@
-package com.team581.trailblazer.constraints;
+package com.team581.trailblazer;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 
 public record AutoConstraintOptions(
     /** Max linear velocity allowed in meters per second. Set to 0 to disable. */
@@ -13,27 +14,19 @@ public record AutoConstraintOptions(
     double maxAngularAcceleration) {
   /** Default constraint options to use if no point or segment specific options are set. */
   public AutoConstraintOptions() {
-    this(4.75, 71.5, 8.5, 35.2);
+    this(4.75, Units.rotationsToRadians(2), 4, Units.rotationsToRadians(2));
   }
 
-  public AutoConstraintOptions withMaxLinearVelocity(double maxLinearVelocity) {
+  public AutoConstraintOptions withLinearConstraints(
+      double maxLinearVelocity, double maxLinearAcceleration) {
     return new AutoConstraintOptions(
-        maxLinearVelocity, maxAngularVelocity(), maxLinearAcceleration(), maxAngularAcceleration());
+        maxLinearVelocity, maxAngularVelocity(), maxLinearAcceleration, maxAngularAcceleration());
   }
 
-  public AutoConstraintOptions withMaxAngularVelocity(double maxAngularVelocity) {
+  public AutoConstraintOptions withAngularConstraints(
+      double maxAngularVelocity, double maxAngularAcceleration) {
     return new AutoConstraintOptions(
-        maxLinearVelocity(), maxAngularVelocity, maxLinearAcceleration(), maxAngularAcceleration());
-  }
-
-  public AutoConstraintOptions withMaxLinearAcceleration(double maxLinearAcceleration) {
-    return new AutoConstraintOptions(
-        maxLinearVelocity(), maxAngularVelocity(), maxLinearAcceleration, maxAngularAcceleration());
-  }
-
-  public AutoConstraintOptions withMaxAngularAcceleration(double maxAngularAcceleration) {
-    return new AutoConstraintOptions(
-        maxLinearVelocity(), maxAngularVelocity(), maxLinearAcceleration(), maxAngularAcceleration);
+        maxLinearVelocity(), maxAngularVelocity, maxLinearAcceleration(), maxAngularAcceleration);
   }
 
   public TrapezoidProfile.Constraints getLinearConstraints() {
