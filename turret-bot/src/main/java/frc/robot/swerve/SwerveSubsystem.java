@@ -8,7 +8,6 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
-import com.team581.trailblazer.SwerveBase;
 import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
@@ -27,7 +26,7 @@ import frc.robot.generated.RobotTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.jspecify.annotations.Nullable;
 
-public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implements SwerveBase {
+public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> {
   public static final double MAX_SPEED = 4.75;
 
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
@@ -38,7 +37,7 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
   private static final PhoenixPIDController ORIGINAL_HEADING_PID =
       RobotConfig.get().swerve().snapController();
 
-  private final TunerSwerveDrivetrain drivetrain;
+  public final TunerSwerveDrivetrain drivetrain;
 
   private final SwerveRequest.FieldCentric teleopRequest =
       new SwerveRequest.FieldCentric()
@@ -86,7 +85,6 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
     return robotRelativeSpeeds;
   }
 
-  @Override
   public ChassisSpeeds getFieldRelativeSpeeds() {
     return fieldRelativeSpeeds;
   }
@@ -162,7 +160,6 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
     }
   }
 
-  @Override
   public void trailblazerDriveRequest(ChassisSpeeds speeds) {
     trailblazerRequest.withSpeeds(speeds);
     setStateFromRequest(SwerveState.TRAILBLAZER);

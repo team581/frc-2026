@@ -26,7 +26,6 @@ public class Robot extends Base581Robot {
 
   private final Trailblazer trailblazer =
       new Trailblazer(
-          localization,
           new HeuristicPathTracker(new PoseErrorTolerance(0.1, 5)),
           new PidPathFollower(new PIDController(3.5, 0, 0), new PIDController(4.0, 0, 0)));
 

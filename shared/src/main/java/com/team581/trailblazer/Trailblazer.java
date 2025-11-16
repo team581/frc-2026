@@ -3,6 +3,7 @@ package com.team581.trailblazer;
 import com.team581.autos.Point;
 import com.team581.trailblazer.followers.PathFollower;
 import com.team581.trailblazer.trackers.PathTracker;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import java.util.Arrays;
 import java.util.List;
@@ -30,15 +31,12 @@ public class Trailblazer {
     return new AutoSegmentBuilder(List.of(waypoints));
   }
 
-  private final LocalizationBase localization;
   private final PathTracker pathTracker;
   private final PathFollower pathFollower;
   private int currentIndex = -1;
   private Optional<AutoSegment> currentSegment = Optional.empty();
 
-  public Trailblazer(
-      LocalizationBase localization, PathTracker pathTracker, PathFollower pathFollower) {
-    this.localization = localization;
+  public Trailblazer(PathTracker pathTracker, PathFollower pathFollower) {
     this.pathTracker = pathTracker;
     this.pathFollower = pathFollower;
   }
@@ -53,19 +51,17 @@ public class Trailblazer {
     pathTracker.resetAndSetPoints(segment.points());
   }
 
-  public boolean atGoal() {
-    return currentSegment
-        .filter(segment -> segment.atGoal(localization.getPose(), currentIndex))
-        .isPresent();
+  public boolean atGoal(Pose2d currentPose) {
+    return currentSegment.filter(segment -> segment.atGoal(currentPose, currentIndex)).isPresent();
   }
 
-  public ChassisSpeeds getFieldRelativeSetpoint(ChassisSpeeds currentFieldRelativeSpeeds) {
+  public ChassisSpeeds getFieldRelativeSetpoint(
+      Pose2d currentPose, ChassisSpeeds currentFieldRelativeSpeeds) {
     if (currentSegment.isEmpty()) {
       return new ChassisSpeeds();
     }
 
     var segment = currentSegment.orElseThrow();
-    var currentPose = localization.getPose();
 
     // Update tracker with current robot state
     pathTracker.updateRobotState(currentPose, currentFieldRelativeSpeeds);
