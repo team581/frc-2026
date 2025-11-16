@@ -14,9 +14,8 @@ public record PoseErrorTolerance(double linearErrorTolerance, double angularErro
 
     // Linear error within tolerance
     return MathUtil.isNear(0, linearError, linearErrorTolerance)
-        &&
         // Rotation error within tolerance
-        MathUtil.isNear(
+        && MathUtil.isNear(
             expected.getRotation().getDegrees(),
             actual.getRotation().getDegrees(),
             angularErrorTolerance,
