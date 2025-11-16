@@ -10,7 +10,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.autos.Autos;
 import frc.robot.generated.BuildConstants;
-import frc.robot.imu.ImuSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.robot_manager.RobotManager;
 import frc.robot.swerve.SwerveSubsystem;
@@ -18,8 +17,7 @@ import frc.robot.swerve.SwerveSubsystem;
 public class Robot extends Base581Robot {
   private final Hardware hardware = new Hardware();
 
-  private final SwerveSubsystem swerve = new SwerveSubsystem();
-  
+  private final SwerveSubsystem swerve = new SwerveSubsystem(hardware.drivetrain);
 
   private final LocalizationSubsystem localization = new LocalizationSubsystem(swerve);
 

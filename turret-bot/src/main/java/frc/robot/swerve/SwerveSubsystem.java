@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.config.RobotConfig;
-import frc.robot.generated.RobotTunerConstants;
 import frc.robot.generated.RobotTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.jspecify.annotations.Nullable;
@@ -39,13 +38,7 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
   private static final PhoenixPIDController ORIGINAL_HEADING_PID =
       RobotConfig.get().swerve().snapController();
 
-  public final TunerSwerveDrivetrain drivetrain =
-      new TunerSwerveDrivetrain(
-          RobotTunerConstants.DrivetrainConstants,
-          RobotTunerConstants.FrontLeft,
-          RobotTunerConstants.FrontRight,
-          RobotTunerConstants.BackLeft,
-          RobotTunerConstants.BackRight);
+  private final TunerSwerveDrivetrain drivetrain;
 
   private final SwerveRequest.FieldCentric teleopRequest =
       new SwerveRequest.FieldCentric()
@@ -78,8 +71,9 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
 
   private double teleopSlowModePercent = 1.0;
 
-  public SwerveSubsystem() {
+  public SwerveSubsystem(TunerSwerveDrivetrain drivetrain) {
     super(SubsystemPriority.SWERVE, SwerveState.TELEOP);
+    this.drivetrain = drivetrain;
 
     if (Utils.isSimulation()) {
       startSimThread();
