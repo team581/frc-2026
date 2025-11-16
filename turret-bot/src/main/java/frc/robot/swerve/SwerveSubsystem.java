@@ -163,10 +163,6 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
   }
 
   @Override
-  public void setFieldRelativeAutoSpeeds(ChassisSpeeds speeds) {
-    trailblazerRequest.withSpeeds(speeds);
-  }
-
   public void trailblazerDriveRequest(ChassisSpeeds speeds) {
     trailblazerRequest.withSpeeds(speeds);
     setStateFromRequest(SwerveState.TRAILBLAZER);
