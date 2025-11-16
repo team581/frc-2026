@@ -11,6 +11,20 @@ public class MathHelpers {
   private static final double EPSILON = Math.ulp(1.0);
 
   /**
+   * Constructs a Rotation2d with the given x and y (cosine and sine) components.
+   *
+   * @param x The x component or cosine of the rotation.
+   * @param y The y component or sine of the rotation.
+   */
+  public static Rotation2d rotation2d(double x, double y) {
+    if (Math.hypot(x, y) < 1e-6) {
+      return Rotation2d.kZero;
+    }
+
+    return new Rotation2d(x, y);
+  }
+
+  /**
    * Returns a value rounded to the specified number of decimal places.
    *
    * @param value The value

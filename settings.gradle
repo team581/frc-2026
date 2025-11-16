@@ -37,3 +37,4 @@ rootProject.name = 'team581-frc-2026'
 
 // Include all projects
 include 'shared'
+include "turret-bot"

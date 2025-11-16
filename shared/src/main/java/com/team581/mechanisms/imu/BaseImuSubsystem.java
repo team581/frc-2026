@@ -38,10 +38,6 @@ public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
     return robotAngularVelocity;
   }
 
-  public void setAngle(double zeroAngle) {
-    drivetrain.getPigeon2().setYaw(zeroAngle);
-  }
-
   @Override
   public void whileInState(ImuState currentState) {
     DogLog.log("Imu/RobotHeading", robotHeading, Degrees);
