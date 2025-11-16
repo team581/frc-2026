@@ -1,6 +1,8 @@
 package com.team581.autos;
 
 import com.team581.math.MathHelpers;
+import com.team581.math.PoseErrorTolerance;
+import com.team581.trailblazer.AutoPoint;
 import com.team581.util.FmsUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 
@@ -15,5 +17,18 @@ public record Point(Pose2d redPose, Pose2d bluePose) {
 
   public Pose2d getPose() {
     return FmsUtil.isRedAlliance() ? redPose : bluePose;
+  }
+
+  public AutoPoint withLinearConstraints(double maxVelocity, double maxAcceleration) {
+    return AutoPoint.of(this).withLinearConstraints(maxVelocity, maxAcceleration);
+  }
+
+  public AutoPoint withAngularConstraints(
+      double maxAngularVelocity, double maxAngularAcceleration) {
+    return AutoPoint.of(this).withAngularConstraints(maxAngularVelocity, maxAngularAcceleration);
+  }
+
+  public AutoPoint withPositionTolerance(PoseErrorTolerance positionTolerance) {
+    return AutoPoint.of(this).withPositionTolerance(positionTolerance);
   }
 }
