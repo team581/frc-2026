@@ -16,7 +16,6 @@ public interface PathFollower {
    * @param currentPose The current pose of the robot.
    * @param targetPose The pose the robot should drive to.
    * @param currentPoint The current point being tracked (for constraint information).
-   * @param allPoints All points in the path (for lookahead constraint information).
    * @param currentPointIndex The index of the current point being tracked.
    * @return The field relative chassis speeds the robot should drive at to reach the target pose.
    */

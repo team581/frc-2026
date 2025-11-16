@@ -40,9 +40,7 @@ public class HeuristicPathTracker implements PathTracker {
       currentPointIndex++;
     }
 
-    var targetPose = points.get(currentPointIndex).poseSupplier().get().getPose();
-
-    return targetPose;
+    return points.get(currentPointIndex).poseSupplier().get().getPose();
   }
 
   @Override

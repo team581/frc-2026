@@ -55,8 +55,8 @@ public class Trailblazer {
 
   public boolean atGoal() {
     return currentSegment
-        .map(segment -> segment.atGoal(localization.getPose(), currentIndex))
-        .orElse(false);
+        .filter(segment -> segment.atGoal(localization.getPose(), currentIndex))
+        .isPresent();
   }
 
   public ChassisSpeeds getFieldRelativeSetpoint(ChassisSpeeds currentFieldRelativeSpeeds) {
