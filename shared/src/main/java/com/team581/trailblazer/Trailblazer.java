@@ -4,6 +4,8 @@ import com.team581.autos.Point;
 import com.team581.trailblazer.followers.PathFollower;
 import com.team581.trailblazer.trackers.PathTracker;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,7 +23,11 @@ import java.util.Optional;
  */
 public class Trailblazer {
   public static AutoSegmentBuilder segment(Point... waypoints) {
-    return new AutoSegmentBuilder(waypoints);
+    return new AutoSegmentBuilder(Arrays.stream(waypoints).map(AutoPoint::of).toList());
+  }
+
+  public static AutoSegmentBuilder segment(AutoPoint... waypoints) {
+    return new AutoSegmentBuilder(List.of(waypoints));
   }
 
   private final LocalizationBase localization;

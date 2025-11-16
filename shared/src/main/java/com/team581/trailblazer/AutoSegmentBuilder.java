@@ -1,8 +1,6 @@
 package com.team581.trailblazer;
 
-import com.team581.autos.Point;
 import com.team581.math.PoseErrorTolerance;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,8 +9,8 @@ public class AutoSegmentBuilder {
   private Optional<AutoConstraintOptions> constraints = Optional.empty();
   private Optional<PoseErrorTolerance> positionTolerance = Optional.empty();
 
-  AutoSegmentBuilder(Point... waypoints) {
-    this.points = Arrays.stream(waypoints).map(AutoPoint::of).toList();
+  AutoSegmentBuilder(List<AutoPoint> waypoints) {
+    this.points = waypoints;
   }
 
   private AutoSegment build() {
