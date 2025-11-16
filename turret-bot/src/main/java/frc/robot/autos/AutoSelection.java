@@ -7,15 +7,11 @@ import frc.robot.robot_manager.RobotManager;
 import java.util.function.BiFunction;
 
 public enum AutoSelection implements AutoSelectionBase {
-  DO_NOTHING(DoNothingAuto::new, DoNothingAuto::new);
+  DO_NOTHING(DoNothingAuto::new);
 
-  public final BiFunction<RobotManager, Trailblazer, BaseImperativeAuto<?>> redAuto;
-  public final BiFunction<RobotManager, Trailblazer, BaseImperativeAuto<?>> blueAuto;
+  public final BiFunction<RobotManager, Trailblazer, BaseImperativeAuto<?>> auto;
 
-  private AutoSelection(
-      BiFunction<RobotManager, Trailblazer, BaseImperativeAuto<?>> redAuto,
-      BiFunction<RobotManager, Trailblazer, BaseImperativeAuto<?>> blueAuto) {
-    this.redAuto = redAuto;
-    this.blueAuto = blueAuto;
+  private AutoSelection(BiFunction<RobotManager, Trailblazer, BaseImperativeAuto<?>> auto) {
+    this.auto = auto;
   }
 }
