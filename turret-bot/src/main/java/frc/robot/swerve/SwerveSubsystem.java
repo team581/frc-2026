@@ -108,6 +108,9 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
    * @param rotation The rotation [-1, 1] as a percentage of the maximum angular rate.
    */
   public void setTeleopInputs(double translationMagnitude, Rotation2d direction, double rotation) {
+    drivetrain.setOperatorPerspectiveForward(
+        FmsUtil.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);
+
     var translation = new Translation2d(translationMagnitude, direction);
 
     var forwardVelocity = translation.getY();
@@ -178,8 +181,6 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
 
   @Override
   public void whileInState(SwerveState currentState) {
-    drivetrain.setOperatorPerspectiveForward(
-        FmsUtil.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);
     DogLog.log("Swerve/SnapAngle", teleopSnapsRequest.TargetDirection.getDegrees(), Degrees);
     DogLog.log("Swerve/ModuleStates", drivetrainState.ModuleStates);
     DogLog.log("Swerve/ModuleTargets", drivetrainState.ModuleTargets);
