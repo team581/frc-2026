@@ -17,17 +17,16 @@ import frc.robot.swerve.SwerveSubsystem;
 public class Robot extends Base581Robot {
   private final Hardware hardware = new Hardware();
 
-  private final SwerveSubsystem swerve = new SwerveSubsystem(hardware.drivetrain);
-
-  private final LocalizationSubsystem localization =
-      new LocalizationSubsystem(swerve, hardware.drivetrain);
-
-  private final RobotManager robotManager = new RobotManager(localization, swerve);
-
   private final Trailblazer trailblazer =
       new Trailblazer(
           new HeuristicPathTracker(new PoseErrorTolerance(0.1, 5)),
           new PidPathFollower(new PIDController(3.5, 0, 0), new PIDController(4.0, 0, 0)));
+
+  private final SwerveSubsystem swerve = new SwerveSubsystem(hardware.drivetrain, trailblazer);
+
+  private final LocalizationSubsystem localization = new LocalizationSubsystem(swerve, hardware.drivetrain);
+
+  private final RobotManager robotManager = new RobotManager(localization, swerve);
 
   @SuppressWarnings("unused") // Registers itself as a subsystem
   private final Autos autos = new Autos(robotManager, trailblazer);

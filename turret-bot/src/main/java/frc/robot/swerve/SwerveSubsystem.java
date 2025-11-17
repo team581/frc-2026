@@ -8,6 +8,8 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
+import com.team581.trailblazer.AutoSegment;
+import com.team581.trailblazer.Trailblazer;
 import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
@@ -38,6 +40,7 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> {
       RobotConfig.get().swerve().snapController();
 
   public final TunerSwerveDrivetrain drivetrain;
+  private final Trailblazer trailblazer;
 
   private final SwerveRequest.FieldCentric teleopRequest =
       new SwerveRequest.FieldCentric()
@@ -70,9 +73,10 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> {
 
   private double teleopSlowModePercent = 1.0;
 
-  public SwerveSubsystem(TunerSwerveDrivetrain drivetrain) {
+  public SwerveSubsystem(TunerSwerveDrivetrain drivetrain, Trailblazer trailblazer) {
     super(SubsystemPriority.SWERVE, SwerveState.TELEOP);
     this.drivetrain = drivetrain;
+    this.trailblazer = trailblazer;
 
     if (Utils.isSimulation()) {
       startSimThread();
@@ -148,7 +152,10 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> {
           drivetrain.setControl(teleopRequest);
         }
       }
-      case TRAILBLAZER -> drivetrain.setControl(trailblazerRequest);
+      case TRAILBLAZER ->
+          drivetrain.setControl(
+              trailblazerRequest.withSpeeds(
+                  trailblazer.getFieldRelativeSetpoint(drivetrainState.Pose, fieldRelativeSpeeds)));
     }
   }
 
@@ -160,9 +167,10 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> {
     }
   }
 
-  public void trailblazerDriveRequest(ChassisSpeeds speeds) {
-    trailblazerRequest.withSpeeds(speeds);
+  public void trailblazerDriveRequest(AutoSegment segment) {
+    trailblazer.followSegment(segment);
     setStateFromRequest(SwerveState.TRAILBLAZER);
+    sendSwerveRequest();
   }
 
   public void snapsDriveRequest(double snapAngle) {
