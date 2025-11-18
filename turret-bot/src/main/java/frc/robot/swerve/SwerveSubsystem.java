@@ -102,6 +102,8 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
   }
 
   /**
+   * Sets the teleop joystick inputs for the swerve drivetrain.
+   *
    * @param translationMagnitude The magnitude [-1, 1] of the translation vector.
    * @param direction The direction of the translation vector from the driver perspective (forward
    *     is positive y, right is positive x).
