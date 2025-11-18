@@ -6,22 +6,25 @@ import com.team581.trailblazer.LocalizationBase;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
+import frc.robot.generated.RobotTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class LocalizationSubsystem extends StateMachineSubsystem<LocalizationState>
     implements LocalizationBase {
   private final SwerveSubsystem swerve;
+  private final TunerSwerveDrivetrain drivetrain;
   private Pose2d robotPose = Pose2d.kZero;
 
-  public LocalizationSubsystem(SwerveSubsystem swerve) {
+  public LocalizationSubsystem(SwerveSubsystem swerve, TunerSwerveDrivetrain drivetrain) {
     super(SubsystemPriority.LOCALIZATION, LocalizationState.DEFAULT_STATE);
     this.swerve = swerve;
+    this.drivetrain = drivetrain;
   }
 
   @Override
   protected void collectInputs() {
-    robotPose = swerve.drivetrain.getState().Pose;
+    robotPose = drivetrain.getState().Pose;
   }
 
   @Override
@@ -31,7 +34,7 @@ public class LocalizationSubsystem extends StateMachineSubsystem<LocalizationSta
 
   public Pose2d getPose(double timestamp) {
     var newTimestamp = Utils.fpgaToCurrentTime(timestamp);
-    return swerve.drivetrain.samplePoseAt(newTimestamp).orElseGet(this::getPose);
+    return drivetrain.samplePoseAt(newTimestamp).orElseGet(this::getPose);
   }
 
   public Pose2d getLookaheadPose(double lookahead) {
@@ -44,10 +47,10 @@ public class LocalizationSubsystem extends StateMachineSubsystem<LocalizationSta
   }
 
   public void zeroGyro() {
-    swerve.drivetrain.seedFieldCentric();
+    drivetrain.seedFieldCentric();
   }
 
   public void resetPose(Pose2d estimatedPose) {
-    swerve.drivetrain.resetPose(estimatedPose);
+    drivetrain.resetPose(estimatedPose);
   }
 }

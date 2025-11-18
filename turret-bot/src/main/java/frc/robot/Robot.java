@@ -19,7 +19,8 @@ public class Robot extends Base581Robot {
 
   private final SwerveSubsystem swerve = new SwerveSubsystem(hardware.drivetrain);
 
-  private final LocalizationSubsystem localization = new LocalizationSubsystem(swerve);
+  private final LocalizationSubsystem localization =
+      new LocalizationSubsystem(swerve, hardware.drivetrain);
 
   private final RobotManager robotManager = new RobotManager(localization, swerve);
 
