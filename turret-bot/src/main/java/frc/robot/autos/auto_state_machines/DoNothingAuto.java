@@ -1,5 +1,6 @@
 package frc.robot.autos.auto_state_machines;
 
+import com.team581.autos.Point;
 import com.team581.trailblazer.Trailblazer;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.autos.BaseImperativeAuto;
@@ -11,7 +12,7 @@ public class DoNothingAuto extends BaseImperativeAuto<DoNothingAutoState> {
   }
 
   @Override
-  public Pose2d getStartingPose() {
-    return Pose2d.kZero;
+  public Point getStartingPoint() {
+    return Point.ofBlue(Pose2d.kZero);
   }
 }

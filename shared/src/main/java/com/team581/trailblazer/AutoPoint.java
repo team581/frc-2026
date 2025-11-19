@@ -1,64 +1,44 @@
 package com.team581.trailblazer;
 
-import com.team581.math.MathHelpers;
-import com.team581.trailblazer.constraints.AutoConstraintOptions;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import com.team581.autos.Point;
+import com.team581.math.PoseErrorTolerance;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-// TODO: Convert to record
-public class AutoPoint {
-  private static Command emptyCommand() {
-    return Commands.none().withName("AutoPointEmptyCommand");
+public record AutoPoint(
+    Supplier<Point> poseSupplier,
+    Optional<AutoConstraintOptions> constraints,
+    Optional<PoseErrorTolerance> transitionTolerance) {
+  public static AutoPoint of(Point pose) {
+    return new AutoPoint(() -> pose, Optional.empty(), Optional.empty());
   }
 
-  public final Supplier<Pose2d> poseSupplier;
-  public final Optional<AutoConstraintOptions> constraints;
-  public final Command command;
-
-  public AutoPoint(
-      Supplier<Pose2d> poseSupplier, Command command, Optional<AutoConstraintOptions> constraints) {
-    this.poseSupplier = poseSupplier;
-    this.command = command;
-    this.constraints = constraints;
+  public static AutoPoint of(Supplier<Point> poseSupplier) {
+    return new AutoPoint(poseSupplier, Optional.empty(), Optional.empty());
   }
 
-  public AutoPoint(
-      Supplier<Pose2d> poseSupplier, Command command, AutoConstraintOptions constraints) {
-    this(poseSupplier, command, Optional.of(constraints));
+  public AutoPoint withLinearConstraints(double maxVelocity, double maxAcceleration) {
+    return new AutoPoint(
+        poseSupplier,
+        Optional.of(
+            constraints
+                .orElseGet(AutoConstraintOptions::new)
+                .withLinearConstraints(maxVelocity, maxAcceleration)),
+        transitionTolerance);
   }
 
-  public AutoPoint(Supplier<Pose2d> poseSupplier, Command command) {
-    this(poseSupplier, command, Optional.empty());
+  public AutoPoint withAngularConstraints(
+      double maxAngularVelocity, double maxAngularAcceleration) {
+    return new AutoPoint(
+        poseSupplier,
+        Optional.of(
+            constraints
+                .orElseGet(AutoConstraintOptions::new)
+                .withAngularConstraints(maxAngularVelocity, maxAngularAcceleration)),
+        transitionTolerance);
   }
 
-  public AutoPoint(Supplier<Pose2d> poseSupplier, AutoConstraintOptions constraints) {
-    this(poseSupplier, emptyCommand(), constraints);
-  }
-
-  public AutoPoint(Supplier<Pose2d> poseSupplier) {
-    this(poseSupplier, emptyCommand(), Optional.empty());
-  }
-
-  public AutoPoint(Pose2d pose, Command command, AutoConstraintOptions constraints) {
-    this(() -> pose, command, constraints);
-  }
-
-  public AutoPoint(Pose2d pose, Command command) {
-    this(() -> pose, command);
-  }
-
-  public AutoPoint(Pose2d pose, AutoConstraintOptions constraints) {
-    this(pose, emptyCommand(), constraints);
-  }
-
-  public AutoPoint(Pose2d pose) {
-    this(pose, emptyCommand());
-  }
-
-  public AutoPoint pathflipped() {
-    return new AutoPoint(() -> MathHelpers.pathflip(poseSupplier.get()), command, constraints);
+  public AutoPoint withTransitionTolerance(PoseErrorTolerance transitionTolerance) {
+    return new AutoPoint(poseSupplier, constraints, Optional.of(transitionTolerance));
   }
 }

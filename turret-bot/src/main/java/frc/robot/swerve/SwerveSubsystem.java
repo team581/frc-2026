@@ -8,7 +8,8 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
-import com.team581.trailblazer.SwerveBase;
+import com.team581.trailblazer.AutoSegment;
+import com.team581.trailblazer.Trailblazer;
 import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
@@ -27,7 +28,7 @@ import frc.robot.generated.RobotTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.jspecify.annotations.Nullable;
 
-public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implements SwerveBase {
+public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> {
   public static final double MAX_SPEED = 4.75;
 
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
@@ -38,7 +39,8 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
   private static final PhoenixPIDController ORIGINAL_HEADING_PID =
       RobotConfig.get().swerve().snapController();
 
-  private final TunerSwerveDrivetrain drivetrain;
+  public final TunerSwerveDrivetrain drivetrain;
+  private final Trailblazer trailblazer;
 
   private final SwerveRequest.FieldCentric teleopRequest =
       new SwerveRequest.FieldCentric()
@@ -71,9 +73,10 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
 
   private double teleopSlowModePercent = 1.0;
 
-  public SwerveSubsystem(TunerSwerveDrivetrain drivetrain) {
+  public SwerveSubsystem(TunerSwerveDrivetrain drivetrain, Trailblazer trailblazer) {
     super(SubsystemPriority.SWERVE, SwerveState.TELEOP);
     this.drivetrain = drivetrain;
+    this.trailblazer = trailblazer;
 
     if (Utils.isSimulation()) {
       startSimThread();
@@ -86,7 +89,6 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
     return robotRelativeSpeeds;
   }
 
-  @Override
   public ChassisSpeeds getFieldRelativeSpeeds() {
     return fieldRelativeSpeeds;
   }
@@ -150,7 +152,10 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
           drivetrain.setControl(teleopRequest);
         }
       }
-      case TRAILBLAZER -> drivetrain.setControl(trailblazerRequest);
+      case TRAILBLAZER ->
+          drivetrain.setControl(
+              trailblazerRequest.withSpeeds(
+                  trailblazer.getFieldRelativeSetpoint(drivetrainState.Pose, fieldRelativeSpeeds)));
     }
   }
 
@@ -162,14 +167,10 @@ public class SwerveSubsystem extends StateMachineSubsystem<SwerveState> implemen
     }
   }
 
-  @Override
-  public void setFieldRelativeAutoSpeeds(ChassisSpeeds speeds) {
-    trailblazerRequest.withSpeeds(speeds);
-  }
-
-  public void trailblazerDriveRequest(ChassisSpeeds speeds) {
-    trailblazerRequest.withSpeeds(speeds);
+  public void trailblazerDriveRequest(AutoSegment segment) {
+    trailblazer.followSegment(segment);
     setStateFromRequest(SwerveState.TRAILBLAZER);
+    sendSwerveRequest();
   }
 
   public void snapsDriveRequest(double snapAngle) {

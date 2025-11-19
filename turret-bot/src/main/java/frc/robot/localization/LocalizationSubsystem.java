@@ -2,7 +2,6 @@ package frc.robot.localization;
 
 import com.ctre.phoenix6.Utils;
 import com.team581.math.MathHelpers;
-import com.team581.trailblazer.LocalizationBase;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,8 +9,7 @@ import frc.robot.generated.RobotTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 
-public class LocalizationSubsystem extends StateMachineSubsystem<LocalizationState>
-    implements LocalizationBase {
+public class LocalizationSubsystem extends StateMachineSubsystem<LocalizationState> {
   private final SwerveSubsystem swerve;
   private final TunerSwerveDrivetrain drivetrain;
   private Pose2d robotPose = Pose2d.kZero;
@@ -27,7 +25,6 @@ public class LocalizationSubsystem extends StateMachineSubsystem<LocalizationSta
     robotPose = drivetrain.getState().Pose;
   }
 
-  @Override
   public Pose2d getPose() {
     return robotPose;
   }

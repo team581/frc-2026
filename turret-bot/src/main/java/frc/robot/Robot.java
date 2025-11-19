@@ -3,10 +3,10 @@ package frc.robot;
 import com.team581.Base581Robot;
 import com.team581.controller.ControllerHelpers;
 import com.team581.math.MathHelpers;
+import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.followers.PidPathFollower;
-import com.team581.trailblazer.trackers.pure_pursuit.PurePursuitPathTracker;
-import dev.doglog.DogLog;
+import com.team581.trailblazer.trackers.HeuristicPathTracker;
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.autos.Autos;
 import frc.robot.generated.BuildConstants;
@@ -17,22 +17,16 @@ import frc.robot.swerve.SwerveSubsystem;
 public class Robot extends Base581Robot {
   private final Hardware hardware = new Hardware();
 
-  private final SwerveSubsystem swerve = new SwerveSubsystem(hardware.drivetrain);
-
-  private final LocalizationSubsystem localization =
-      new LocalizationSubsystem(swerve, hardware.drivetrain);
-
-  private final RobotManager robotManager = new RobotManager(localization, swerve);
-
   private final Trailblazer trailblazer =
       new Trailblazer(
-          swerve,
-          localization,
-          new PurePursuitPathTracker(true, true),
-          new PidPathFollower(
-              new PIDController(3.7, 0, 0),
-              new PIDController(3.7, 0, 0),
-              new PIDController(3.0, 0, 0)));
+          new HeuristicPathTracker(new PoseErrorTolerance(0.1, 5)),
+          new PidPathFollower(new PIDController(3.5, 0, 0), new PIDController(4.0, 0, 0)));
+
+  private final SwerveSubsystem swerve = new SwerveSubsystem(hardware.drivetrain, trailblazer);
+
+  private final LocalizationSubsystem localization = new LocalizationSubsystem(swerve, hardware.drivetrain);
+
+  private final RobotManager robotManager = new RobotManager(localization, swerve);
 
   @SuppressWarnings("unused") // Registers itself as a subsystem
   private final Autos autos = new Autos(robotManager, trailblazer);
@@ -58,13 +52,9 @@ public class Robot extends Base581Robot {
     var leftY = -hardware.driverController.getLeftY();
     var rightX = hardware.driverController.getRightX();
 
-    DogLog.log("DEBUG/TeleopInputs/RightX", rightX);
-
     var translationMagnitude = ControllerHelpers.getJoystickMagnitude(leftX, leftY, 2);
     var rotationMagnitude =
         Math.copySign(ControllerHelpers.getJoystickMagnitude(rightX, 0, 5), rightX);
-
-    DogLog.log("DEBUG/TeleopInputs/RotationMagnitude", rotationMagnitude);
 
     swerve.setTeleopInputs(
         translationMagnitude, MathHelpers.rotation2d(leftX, leftY), rotationMagnitude);
