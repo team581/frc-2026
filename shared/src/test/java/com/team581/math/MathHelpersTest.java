@@ -17,13 +17,6 @@ final class MathHelpersTest {
   }
 
   @Test
-  void signedExpTest() {
-    var result = MathHelpers.signedExp(-4, 2);
-
-    assertEquals(-16, result);
-  }
-
-  @Test
   void signedSqrtTest() {
     var result = MathHelpers.signedSqrt(-36);
 

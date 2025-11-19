@@ -59,10 +59,6 @@ public class MathHelpers {
     return new Pose2d(x, y, theta);
   }
 
-  public static double signedExp(double value, double exponent) {
-    return Math.copySign(Math.pow(Math.abs(value), exponent), value);
-  }
-
   public static double signedSqrt(double value) {
     return Math.copySign(Math.sqrt(Math.abs(value)), value);
   }
