@@ -34,7 +34,7 @@ public class HeuristicPathTracker implements PathTracker {
 
     if (currentPointIndex < points.size() - 1
         && currentPoint
-            .positionTolerance()
+            .transitionTolerance()
             .orElse(defaultTransitionTolerance)
             .atPose(currentTargetPose, currentPose)) {
       currentPointIndex++;

@@ -28,7 +28,7 @@ public record Point(Pose2d redPose, Pose2d bluePose) {
     return AutoPoint.of(this).withAngularConstraints(maxAngularVelocity, maxAngularAcceleration);
   }
 
-  public AutoPoint withPositionTolerance(PoseErrorTolerance positionTolerance) {
-    return AutoPoint.of(this).withPositionTolerance(positionTolerance);
+  public AutoPoint withTransitionTolerance(PoseErrorTolerance transitionTolerance) {
+    return AutoPoint.of(this).withTransitionTolerance(transitionTolerance);
   }
 }

@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 public record AutoPoint(
     Supplier<Point> poseSupplier,
     Optional<AutoConstraintOptions> constraints,
-    Optional<PoseErrorTolerance> positionTolerance) {
+    Optional<PoseErrorTolerance> transitionTolerance) {
   public static AutoPoint of(Point pose) {
     return new AutoPoint(() -> pose, Optional.empty(), Optional.empty());
   }
@@ -24,7 +24,7 @@ public record AutoPoint(
             constraints
                 .orElseGet(AutoConstraintOptions::new)
                 .withLinearConstraints(maxVelocity, maxAcceleration)),
-        positionTolerance);
+        transitionTolerance);
   }
 
   public AutoPoint withAngularConstraints(
@@ -35,10 +35,10 @@ public record AutoPoint(
             constraints
                 .orElseGet(AutoConstraintOptions::new)
                 .withAngularConstraints(maxAngularVelocity, maxAngularAcceleration)),
-        positionTolerance);
+        transitionTolerance);
   }
 
-  public AutoPoint withPositionTolerance(PoseErrorTolerance positionTolerance) {
-    return new AutoPoint(poseSupplier, constraints, Optional.of(positionTolerance));
+  public AutoPoint withTransitionTolerance(PoseErrorTolerance transitionTolerance) {
+    return new AutoPoint(poseSupplier, constraints, Optional.of(transitionTolerance));
   }
 }
