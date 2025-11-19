@@ -6,7 +6,6 @@ import com.team581.math.MathHelpers;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.followers.PidPathFollower;
 import com.team581.trailblazer.trackers.pure_pursuit.PurePursuitPathTracker;
-import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.autos.Autos;
 import frc.robot.generated.BuildConstants;
@@ -58,13 +57,9 @@ public class Robot extends Base581Robot {
     var leftY = -hardware.driverController.getLeftY();
     var rightX = hardware.driverController.getRightX();
 
-    DogLog.log("DEBUG/TeleopInputs/RightX", rightX);
-
     var translationMagnitude = ControllerHelpers.getJoystickMagnitude(leftX, leftY, 2);
     var rotationMagnitude =
         Math.copySign(ControllerHelpers.getJoystickMagnitude(rightX, 0, 5), rightX);
-
-    DogLog.log("DEBUG/TeleopInputs/RotationMagnitude", rotationMagnitude);
 
     swerve.setTeleopInputs(
         translationMagnitude, MathHelpers.rotation2d(leftX, leftY), rotationMagnitude);
