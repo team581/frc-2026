@@ -1,6 +1,5 @@
 package com.team581.trailblazer;
 
-import com.team581.math.PoseErrorTolerance;
 import edu.wpi.first.math.geometry.Pose2d;
 import java.util.List;
 import java.util.Optional;
@@ -8,7 +7,7 @@ import java.util.Optional;
 public record AutoSegment(
     List<AutoPoint> points,
     Optional<AutoConstraintOptions> constraints,
-    Optional<PoseErrorTolerance> positionTolerance) {
+    AutoSegmentEndBehavior endBehavior) {
   public Optional<AutoPoint> lastPoint() {
     if (points.isEmpty()) {
       return Optional.empty();
@@ -34,14 +33,16 @@ public record AutoSegment(
       return false;
     }
 
-    if (positionTolerance.isEmpty()) {
-      return false;
-    }
-
-    var lastPoint = points.get(points.size() - 1);
-    return positionTolerance
-        .orElseThrow()
-        .atPose(lastPoint.poseSupplier().get().getPose(), robotPose);
+    return switch (endBehavior) {
+      case FOREVER -> false;
+      case LAST_POINT_TRANSITION_TOLERANCE -> {
+        var lastPoint = points.get(points.size() - 1);
+        yield lastPoint
+            .transitionTolerance()
+            .orElseThrow()
+            .atPose(lastPoint.poseSupplier().get().getPose(), robotPose);
+      }
+    };
   }
 
   /**
