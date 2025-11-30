@@ -13,7 +13,7 @@ public record AutoSegment(
       return Optional.empty();
     }
 
-    return Optional.of(points.get(points.size() - 1));
+    return Optional.of(points.getLast());
   }
 
   /**
@@ -36,7 +36,7 @@ public record AutoSegment(
     return switch (endBehavior) {
       case FOREVER -> false;
       case LAST_POINT_TRANSITION_TOLERANCE -> {
-        var lastPoint = points.get(points.size() - 1);
+        var lastPoint = points.getLast();
         yield lastPoint
             .transitionTolerance()
             .orElseThrow()
