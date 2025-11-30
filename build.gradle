@@ -48,6 +48,9 @@ subprojects {
 		options.errorprone.disableWarningsInGeneratedCode = true
 		options.errorprone.disable("Var", "BooleanParameter", "InlineMeSuggester", "ImmutableEnumChecker")
 
+		// Exclude specific Refaster rules (these can't be disabled with disable(), they require NamePattern)
+		options.errorprone.errorproneArgs.add "-XepOpt:Refaster:NamePattern=^(?!.*SequencedCollectionGetLast).*"
+
 		// Set the ERRORPRONE_AUTOFIX environment variable to fix files in place
 		if (System.getenv().containsKey("ERRORPRONE_AUTOFIX")) {
 			options.errorprone.errorproneArgs.add "-XepPatchLocation:IN_PLACE"

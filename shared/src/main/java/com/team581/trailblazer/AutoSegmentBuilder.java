@@ -69,7 +69,7 @@ public class AutoSegmentBuilder {
       return forever();
     }
 
-    var lastPoint = points.getLast();
+    var lastPoint = points.get(points.size() - 1);
 
     if (lastPoint.transitionTolerance().isEmpty()) {
       throw new NoSuchElementException(
