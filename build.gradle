@@ -1,6 +1,9 @@
 plugins {
 	id 'com.diffplug.spotless' version '8.1.0'
 	id 'net.ltgt.errorprone' version '4.3.0'
+	// Declared here with apply false so the plugin is loaded once by the root classloader
+	// This fixes Windows issues with the VS Code language server
+	id "edu.wpi.first.GradleRIO" version "2026.1.1-beta-1" apply false
 }
 
 repositories {

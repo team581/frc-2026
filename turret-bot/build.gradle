@@ -1,5 +1,5 @@
 plugins {
-	id "edu.wpi.first.GradleRIO" version "2026.1.1-beta-1"
+	id "edu.wpi.first.GradleRIO"
 	id "com.peterabeles.gversion" version "1.10.3"
 }
 
