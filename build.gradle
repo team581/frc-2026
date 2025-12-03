@@ -12,7 +12,7 @@ repositories {
 
 allprojects {
 	group = 'frc.team581'
-	version = '2025.0.0'
+	version = '2026.0.0'
 }
 
 subprojects {
