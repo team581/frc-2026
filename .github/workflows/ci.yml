@@ -26,10 +26,31 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: "temurin"
-          java-version: 25
+          java-version: 21
           cache: "gradle"
       - name: Assemble
         run: ./gradlew assemble
+  build:
+    name: Build
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - validation
+      - assemble
+      - test
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: 21
+          cache: "gradle"
+      - name: Build
+        run: ./gradlew build
   test:
     name: Run tests
 
@@ -46,7 +67,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: "temurin"
-          java-version: 25
+          java-version: 21
           cache: "gradle"
       - name: Run tests
         run: ./gradlew test
@@ -74,7 +95,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: "temurin"
-          java-version: 25
+          java-version: 21
           cache: "gradle"
       - name: Check formatting
         run: ./gradlew spotlessCheck
