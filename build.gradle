@@ -43,6 +43,8 @@ subprojects {
 	tasks.withType(JavaCompile) {
 		// Configure string concat to always inline compile
 		options.compilerArgs.add '-XDstringConcat=inline'
+		// Required by Error Prone on JDK 21+
+		options.compilerArgs.add '-XDaddTypeAnnotationsToSymbol=true'
 		options.release = 17
 	}
 
