@@ -48,17 +48,6 @@ public class MathHelpers {
     return MathUtil.inputModulus(angleDegrees, -180, 180);
   }
 
-  public static Pose2d poseLookahead(Pose2d current, ChassisSpeeds velocity, double lookahead) {
-    var x = current.getX() + velocity.vxMetersPerSecond * lookahead;
-    var y = current.getY() + velocity.vyMetersPerSecond * lookahead;
-    var theta =
-        current
-            .getRotation()
-            .plus(Rotation2d.fromRadians(velocity.omegaRadiansPerSecond * lookahead));
-
-    return new Pose2d(x, y, theta);
-  }
-
   public static double signedSqrt(double value) {
     return Math.copySign(Math.sqrt(Math.abs(value)), value);
   }
