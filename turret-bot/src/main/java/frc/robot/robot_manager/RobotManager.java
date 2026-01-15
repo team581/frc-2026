@@ -50,5 +50,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     vision.addTurretObservation(
         Timer.getFPGATimestamp(), Rotation2d.fromDegrees(turret.getAngle()));
+
+    MechanismVisualizer.log(turret.getAngle());
   }
 }
