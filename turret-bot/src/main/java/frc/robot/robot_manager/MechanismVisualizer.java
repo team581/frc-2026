@@ -1,49 +1,31 @@
 package frc.robot.robot_manager;
 
-import com.team581.GlobalConfig;
+import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 
-/** Visualizes the turret rotation on a top-down view of the robot. */
 public final class MechanismVisualizer {
-  // Robot frame dimensions (top-down view)
-  private static final double ROBOT_WIDTH_METERS = Units.inchesToMeters(28);
-  private static final double TURRET_LENGTH_METERS = Units.inchesToMeters(12);
+  /** Height of the turret pivot point from the floor. */
+  private static final double TURRET_HEIGHT_METERS = Units.inchesToMeters(24);
 
-  // Add padding around the robot for visualization
-  private static final double CANVAS_SIZE = ROBOT_WIDTH_METERS + Units.inchesToMeters(4);
+  public static void log(Pose2d robotPose, double turretAngleDegrees) {
+    // Transform from robot center to turret, including height and turret rotation
+    var turretTransform =
+        new Transform3d(
+            new Translation3d(0, 0, TURRET_HEIGHT_METERS),
+            new Rotation3d(0, 0, Units.degreesToRadians(turretAngleDegrees)));
 
-  private static final Mechanism2d MECHANISM =
-      new Mechanism2d(CANVAS_SIZE, CANVAS_SIZE, new Color8Bit(new Color("#121212")));
+    // Convert robot pose to 3D and apply the turret transform
+    var robotPose3d = new Pose3d(robotPose);
+    var turretPose = robotPose3d.transformBy(turretTransform);
 
-  // Root at the center of the robot (turret pivot point)
-  private static final MechanismRoot2d ROOT =
-      MECHANISM.getRoot("turret_pivot", CANVAS_SIZE / 2.0, CANVAS_SIZE / 2.0);
-
-  // Turret ligament pointing in the direction the turret is aiming
-  private static final MechanismLigament2d TURRET =
-      ROOT.append(
-          new MechanismLigament2d(
-              "turret", TURRET_LENGTH_METERS, 0, 8, new Color8Bit(Color.kFirstRed)));
-
-  /**
-   * Logs the turret visualization to SmartDashboard.
-   *
-   * @param turretAngleDegrees The current turret angle in degrees.
-   */
-  public static void log(double turretAngleDegrees) {
-    if (!GlobalConfig.IS_DEVELOPMENT) {
-      return;
-    }
-
-    SmartDashboard.putData("TurretVisualization", MECHANISM);
-
-    TURRET.setAngle(turretAngleDegrees);
+    // Add this as a Pose3d displayed as a cone in the 3D field view
+    // Or as an arrow in the 2D field view
+    DogLog.log("Turret/Pose3d", turretPose);
   }
 
   private MechanismVisualizer() {}
