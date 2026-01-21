@@ -13,6 +13,8 @@ public class FeatureFlags {
       FeatureFlag.of("TurretAngleComp", true);
   public static final BooleanSupplier VISION_HUB_TAGS_FILTER =
       FeatureFlag.of("OnlyUseHubTags", true);
+  public static final BooleanSupplier TRENCH_ASSIST =
+      FeatureFlag.of("TrenchAssist", false);
 
   private FeatureFlags() {}
 }

@@ -27,13 +27,14 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.config.FeatureFlags;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.jspecify.annotations.Nullable;
 
 public class Swerve extends StateMachineSubsystem<SwerveState> {
-  private final DoubleSubscriber TRENCH_ASSIST_VELOCITY_THRESHOLD = DogLog.tunable("Swerve", 0.0);
-  private final DoubleSubscriber TRENCH_ASSIST_ANGLE_THRESHOLD = DogLog.tunable("Swerve", 0.0);
+  private final DoubleSubscriber TRENCH_ASSIST_VELOCITY_THRESHOLD = DogLog.tunable("Swerve", 4.0);
+  private final DoubleSubscriber TRENCH_ASSIST_ANGLE_THRESHOLD = DogLog.tunable("Swerve", 40.0);
 
   public static final double MAX_SPEED = 4.75;
 
@@ -151,26 +152,33 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   private void sendSwerveRequest() {
     switch (getState()) {
-      case TELEOP -> drivetrain.setControl(teleopRequest);
+      case TELEOP -> {
+        if (FeatureFlags.TRENCH_ASSIST.getAsBoolean()) {
+          if (ableToTrenchAssist()) {
+            var robotPose = drivetrain.getState().Pose;
+            var trenchAssistVelocity = getTrenchAssistVelocity(robotPose.getY());
+            if (MathUtil.isNear(teleopRequest.RotationalRate, 0, teleopRequest.RotationalDeadband)) {
+              var snapAngle = Math.round(robotPose.getRotation().getDegrees() / 90.0) * 90.0;
+
+              drivetrain.setControl(
+                  teleopSnapsRequest
+                      .withVelocityY(trenchAssistVelocity)
+                      .withTargetDirection(Rotation2d.fromDegrees(snapAngle)));
+            } else {
+              drivetrain.setControl(teleopRequest.withVelocityY(trenchAssistVelocity));
+            }
+          } else {
+            drivetrain.setControl(teleopRequest);
+          }
+        } else {
+          drivetrain.setControl(teleopRequest);
+        }
+      }
       case TELEOP_SNAPS -> {
         if (MathUtil.isNear(teleopRequest.RotationalRate, 0, teleopRequest.RotationalDeadband)) {
           drivetrain.setControl(teleopSnapsRequest);
         } else {
           drivetrain.setControl(teleopRequest);
-        }
-      }
-      case TRENCH_ASSIST -> {
-        var robotPose = drivetrain.getState().Pose;
-        var trenchAssistVelocity = getTrenchAssistVelocity(robotPose.getY());
-        if (MathUtil.isNear(teleopRequest.RotationalRate, 0, teleopRequest.RotationalDeadband)) {
-          var snapAngle = Math.round(robotPose.getRotation().getDegrees() / 90.0) * 90.0;
-
-          drivetrain.setControl(
-              teleopSnapsRequest
-                  .withVelocityY(trenchAssistVelocity)
-                  .withTargetDirection(Rotation2d.fromDegrees(snapAngle)));
-        } else {
-          drivetrain.setControl(teleopRequest.withVelocityY(trenchAssistVelocity));
         }
       }
       case TRAILBLAZER ->
@@ -217,8 +225,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   private double getTrenchAssistVelocity(double currentY) {
     return currentY < FieldUtil.FIELD_WIDTH / 2.0
-        ? trenchPidController.calculate(currentY, 0.632968)
-        : trenchPidController.calculate(currentY, 7.436358);
+        ? trenchPidController.calculate(currentY, FieldUtil.BOTTOM_TRENCH_Y)
+        : trenchPidController.calculate(currentY, FieldUtil.TOP_TRENCH_Y);
   }
 
   private boolean ableToTrenchAssist() {
@@ -247,6 +255,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
         < TRENCH_ASSIST_ANGLE_THRESHOLD.get();
   }
 
+  // TODO: Add more logging to debug trench assist
   @Override
   public void whileInState(SwerveState currentState) {
     DogLog.log("Swerve/SnapsNearGoal", snapsNearGoal());
