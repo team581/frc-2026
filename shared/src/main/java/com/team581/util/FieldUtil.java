@@ -87,7 +87,8 @@ public class FieldUtil {
 
   // Custom zones to enable trench assist for driver to cleanly drive through with speed
   public static final double BOTTOM_TRENCH_Y = Units.inchesToMeters(TRENCH_LENGTH_Y / 2.0);
-  public static final double TOP_TRENCH_Y = Units.inchesToMeters(FIELD_WIDTH - TRENCH_LENGTH_Y / 2.0);
+  public static final double TOP_TRENCH_Y =
+      Units.inchesToMeters(FIELD_WIDTH - TRENCH_LENGTH_Y / 2.0);
   private static final double TRENCH_ASSIST_ZONE_LENGTH_X = Units.inchesToMeters(70.0);
   private static final double TRENCH_ASSIST_ZONE_LENGTH_Y = Units.inchesToMeters(75.0);
   private static final Rectangle2d RED_LEFT_TRENCH_ASSIST_ZONE =
@@ -120,13 +121,13 @@ public class FieldUtil {
           BLUE_LEFT_TRENCH_ASSIST_ZONE,
           BLUE_RIGHT_TRENCH_ASSIST_ZONE);
 
+  public static Rectangle2d getAllianceZone() {
+    return FmsUtil.isRedAlliance() ? RED_ALLIANCE_ZONE : BLUE_ALLIANCE_ZONE;
+  }
+
   /** Returns the trench assist zone that the robot is currently in, if it exists. */
   public static Optional<Rectangle2d> getCurrentTrenchAssistZone(Translation2d robotPose) {
     return TRENCH_ASSIST_ZONES.stream().filter(zone -> zone.contains(robotPose)).findFirst();
-  }
-
-  public static Rectangle2d getAllianceZone() {
-    return FmsUtil.isRedAlliance() ? RED_ALLIANCE_ZONE : BLUE_ALLIANCE_ZONE;
   }
 
   public static Translation2d getFeed1Pose() {

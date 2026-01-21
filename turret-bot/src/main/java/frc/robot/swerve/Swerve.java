@@ -157,7 +157,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
           if (ableToTrenchAssist()) {
             var robotPose = drivetrain.getState().Pose;
             var trenchAssistVelocity = getTrenchAssistVelocity(robotPose.getY());
-            if (MathUtil.isNear(teleopRequest.RotationalRate, 0, teleopRequest.RotationalDeadband)) {
+            if (MathUtil.isNear(
+                teleopRequest.RotationalRate, 0, teleopRequest.RotationalDeadband)) {
               var snapAngle = Math.round(robotPose.getRotation().getDegrees() / 90.0) * 90.0;
 
               drivetrain.setControl(
