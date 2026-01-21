@@ -75,8 +75,8 @@ public class Robot extends Base581Robot {
   protected void configureBindings() {
     var driverLeftTrigger =
         enabledEvent.and(hardware.driverController.leftTrigger(0.5, buttonBindingsLoop));
-    driverLeftTrigger.rising().ifHigh(intake::intakeRequest);
-    driverLeftTrigger.falling().ifHigh(intake::idleRequest);
+    driverLeftTrigger.rising().ifHigh(robotManager::intakeRequest);
+    driverLeftTrigger.falling().ifHigh(robotManager::cancelIntakeRequest);
 
     var driverRightTrigger =
         enabledEvent.and(hardware.driverController.rightTrigger(0.5, buttonBindingsLoop));

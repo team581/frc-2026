@@ -114,7 +114,7 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
                     .withStatorCurrentLimit(100)
                     .withSupplyCurrentLimit(100))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
-            .withSlot0(new Slot0Configs().withKP(3.0).withKV(0.01).withKS(5.0))
+            .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0).withKS(0.0))
             .withTorqueCurrent(
                 new TorqueCurrentConfigs()
                     .withPeakForwardTorqueCurrent(200)
