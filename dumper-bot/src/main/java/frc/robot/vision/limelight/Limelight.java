@@ -147,10 +147,10 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
         updatedLimelightPos = true;
       }
       if (config.model() == LimelightModel.FOUR) {
-        LimelightHelpers.setLimelightNTDouble(limelightTableName, "throttle_set", 10);
+        LimelightHelpers.SetThrottle(limelightTableName, 10);
       }
     } else {
-      LimelightHelpers.setLimelightNTDouble(limelightTableName, "throttle_set", 0);
+      LimelightHelpers.SetThrottle(limelightTableName, 0);
     }
     DogLog.log("Vision/" + name + "/State", getState());
 
@@ -191,7 +191,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
   }
 
   private void updateHealth(ReusableOptional<?> result) {
-    var newHeartbeat = LimelightHelpers.getLimelightNTDouble(limelightTableName, "hb");
+    var newHeartbeat = LimelightHelpers.getHeartbeat(limelightTableName);
     DogLog.log("Vision/" + name + "/Heartbeat", newHeartbeat);
     if (limelightHeartbeat != newHeartbeat) {
       limelightTimer.restart();
