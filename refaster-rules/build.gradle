@@ -1,0 +1,31 @@
+plugins {
+	id "java"
+	id "net.ltgt.errorprone"
+	id "edu.wpi.first.GradleRIO"
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Refaster annotations for writing template rules
+	compileOnly "com.google.errorprone:error_prone_refaster:2.46.0"
+	// Additional annotations from error-prone-support (like @OnlineDocumentation)
+	compileOnly "tech.picnic.error-prone-support:refaster-support:0.28.0"
+	// Annotation processor that compiles templates into .refaster files
+	annotationProcessor "tech.picnic.error-prone-support:refaster-compiler:0.28.0"
+
+	// WPILib types (like ChassisSpeeds)
+	implementation wpi.java.deps.wpilib()
+
+	// Our shared module for MathHelpers
+	implementation project(':shared')
+}
+
+tasks.withType(JavaCompile).configureEach {
+	// Enable the Refaster rule compiler plugin
+	options.compilerArgs.add "-Xplugin:RefasterRuleCompiler"
+	// Disable Error Prone checks when compiling Refaster rules
+	options.errorprone.enabled = false
+}

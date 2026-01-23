@@ -40,6 +40,13 @@ subprojects {
 		testImplementation "org.assertj:assertj-core:3.27.6"
 	}
 
+	// Add custom Refaster rules to subprojects (except refaster-rules itself and shared, which refaster-rules depends on)
+	if (project.name != 'refaster-rules' && project.name != 'shared') {
+		dependencies {
+			errorprone project(':refaster-rules')
+		}
+	}
+
 	tasks.withType(JavaCompile) {
 		// Configure string concat to always inline compile
 		options.compilerArgs.add '-XDstringConcat=inline'

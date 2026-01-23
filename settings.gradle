@@ -37,6 +37,7 @@ rootProject.name = 'team581-frc-2026'
 
 // Include all projects
 include 'shared'
+include 'refaster-rules'
 include "turret-bot"
 include "dumper-bot"
 include "comp-bot"
