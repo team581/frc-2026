@@ -271,10 +271,14 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             robotPose, FieldUtil.getClosestTrenchCenter(robotPose.getTranslation()));
     DogLog.log(
         "Swerve/TrenchAssist/AngleThreshold",
-        Math.abs(velocityAngle.getDegrees() - angleToTrench.getDegrees())
-            < TRENCH_ASSIST_ANGLE_THRESHOLD.get());
-    return Math.abs(velocityAngle.getDegrees() - angleToTrench.getDegrees())
-        < TRENCH_ASSIST_ANGLE_THRESHOLD.get();
+        MathUtil.isNear(
+            velocityAngle.getDegrees(),
+            angleToTrench.getDegrees(),
+            TRENCH_ASSIST_ANGLE_THRESHOLD.get()));
+    return MathUtil.isNear(
+        velocityAngle.getDegrees(),
+        angleToTrench.getDegrees(),
+        TRENCH_ASSIST_ANGLE_THRESHOLD.get());
   }
 
   @Override

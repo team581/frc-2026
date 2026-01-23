@@ -285,8 +285,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     DogLog.log("Swerve/WallSnaps/AngleToWall", angleToWall.getDegrees(), Degrees);
 
     var velocityAngleTowardWall =
-        Math.hypot(fieldRelativeSpeeds.vxMetersPerSecond, fieldRelativeSpeeds.vyMetersPerSecond)
-                > 0.01
+        MathHelpers.getLinearVelocity(fieldRelativeSpeeds) > 0.01
             && MathUtil.isNear(
                 angleToWall.getDegrees(),
                 velocityAngle.getDegrees(),

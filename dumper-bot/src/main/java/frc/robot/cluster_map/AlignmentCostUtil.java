@@ -17,7 +17,7 @@ public class AlignmentCostUtil {
       return distanceCost;
     }
 
-    if (Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) == 0.0) {
+    if (MathHelpers.getLinearVelocity(robotVelocity) == 0.0) {
       return distanceCost;
     }
 
