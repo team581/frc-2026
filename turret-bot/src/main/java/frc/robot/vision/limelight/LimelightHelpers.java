@@ -1,7 +1,8 @@
 package frc.robot.vision.limelight;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.NUMBER;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -90,7 +91,7 @@ public class LimelightHelpers {
     @JsonProperty("ts_rio")
     public double timestamp_RIOFPGA_capture;
 
-    @JsonFormat(shape = Shape.NUMBER)
+    @JsonFormat(shape = NUMBER)
     @JsonProperty("v")
     public boolean valid;
 
@@ -517,8 +518,8 @@ public class LimelightHelpers {
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
-      if (!(obj instanceof PoseEstimate)) return false;
-      PoseEstimate that = (PoseEstimate) obj;
+      if (!(obj instanceof PoseEstimate that)) return false;
+
       // We don't compare the timestampSeconds as it isn't relevant for equality and makes
       // unit testing harder
       return Double.compare(that.latency, latency) == 0
@@ -604,8 +605,8 @@ public class LimelightHelpers {
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
-      if (!(obj instanceof RawFiducial)) return false;
-      RawFiducial other = (RawFiducial) obj;
+      if (!(obj instanceof RawFiducial other)) return false;
+
       return id == other.id
           && Double.compare(txnc, other.txnc) == 0
           && Double.compare(tync, other.tync) == 0
@@ -631,8 +632,8 @@ public class LimelightHelpers {
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
-      if (!(obj instanceof RawTarget)) return false;
-      RawTarget other = (RawTarget) obj;
+      if (!(obj instanceof RawTarget other)) return false;
+
       return Double.compare(txnc, other.txnc) == 0
           && Double.compare(tync, other.tync) == 0
           && Double.compare(ta, other.ta) == 0;
@@ -1142,7 +1143,7 @@ public class LimelightHelpers {
 
   public static URL getLimelightURLString(String tableName, String request) {
     String urlString = "http://" + sanitizeName(tableName) + ".local:5807/" + request;
-    URL url;
+
     try {
       return new URL(urlString);
 
