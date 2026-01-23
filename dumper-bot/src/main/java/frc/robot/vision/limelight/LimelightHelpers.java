@@ -90,8 +90,8 @@ public class LimelightHelpers {
     @JsonProperty("ts_rio")
     public double timestamp_RIOFPGA_capture;
 
-    @JsonProperty("v")
     @JsonFormat(shape = Shape.NUMBER)
+    @JsonProperty("v")
     public boolean valid;
 
     @JsonProperty("botpose")
@@ -517,7 +517,7 @@ public class LimelightHelpers {
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
-      if (obj == null || getClass() != obj.getClass()) return false;
+      if (!(obj instanceof PoseEstimate)) return false;
       PoseEstimate that = (PoseEstimate) obj;
       // We don't compare the timestampSeconds as it isn't relevant for equality and makes
       // unit testing harder
@@ -604,7 +604,7 @@ public class LimelightHelpers {
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
-      if (obj == null || getClass() != obj.getClass()) return false;
+      if (!(obj instanceof RawFiducial)) return false;
       RawFiducial other = (RawFiducial) obj;
       return id == other.id
           && Double.compare(txnc, other.txnc) == 0
@@ -631,7 +631,7 @@ public class LimelightHelpers {
     @Override
     public boolean equals(Object obj) {
       if (this == obj) return true;
-      if (obj == null || getClass() != obj.getClass()) return false;
+      if (!(obj instanceof RawTarget)) return false;
       RawTarget other = (RawTarget) obj;
       return Double.compare(txnc, other.txnc) == 0
           && Double.compare(tync, other.tync) == 0
@@ -639,7 +639,8 @@ public class LimelightHelpers {
     }
   }
 
-  private static final Map<String, DoubleArrayEntry> doubleArrayEntries = new ConcurrentHashMap<>();
+  private static final Map<String, DoubleArrayEntry> DOUBLE_ARRAY_ENTRIES =
+      new ConcurrentHashMap<>();
 
   private static ObjectMapper mapper;
 
@@ -783,36 +784,21 @@ public class LimelightHelpers {
     return getLimelightNTDoubleArray(limelightName, "botpose");
   }
 
-  /**
-   * Gets the Pose2d for easy use with Odometry vision pose estimator (addVisionMeasurement)
-   *
-   * @param limelightName
-   * @return
-   */
+  /** Gets the Pose2d for easy use with Odometry vision pose estimator (addVisionMeasurement) */
   public static Pose2d getBotPose2d(String limelightName) {
 
     double[] result = getBotPose(limelightName);
     return toPose2D(result);
   }
 
-  /**
-   * Gets the Pose2d for easy use with Odometry vision pose estimator (addVisionMeasurement)
-   *
-   * @param limelightName
-   * @return
-   */
+  /** Gets the Pose2d for easy use with Odometry vision pose estimator (addVisionMeasurement) */
   public static Pose2d getBotPose2d_wpiBlue(String limelightName) {
 
     double[] result = getBotPose_wpiBlue(limelightName);
     return toPose2D(result);
   }
 
-  /**
-   * Gets the Pose2d for easy use with Odometry vision pose estimator (addVisionMeasurement)
-   *
-   * @param limelightName
-   * @return
-   */
+  /** Gets the Pose2d for easy use with Odometry vision pose estimator (addVisionMeasurement) */
   public static Pose2d getBotPose2d_wpiRed(String limelightName) {
 
     double[] result = getBotPose_wpiRed(limelightName);
@@ -862,9 +848,6 @@ public class LimelightHelpers {
   /**
    * Gets the MegaTag1 Pose2d and timestamp for use with WPILib pose estimator
    * (addVisionMeasurement) in the WPILib Blue alliance coordinate system.
-   *
-   * @param limelightName
-   * @return
    */
   public static PoseEstimate getBotPoseEstimate_wpiBlue(String limelightName) {
     return getBotPoseEstimate(limelightName, "botpose_wpiblue", false);
@@ -874,9 +857,6 @@ public class LimelightHelpers {
    * Gets the MegaTag2 Pose2d and timestamp for use with WPILib pose estimator
    * (addVisionMeasurement) in the WPILib Blue alliance coordinate system. Make sure you are calling
    * setRobotOrientation() before calling this method.
-   *
-   * @param limelightName
-   * @return
    */
   public static PoseEstimate getBotPoseEstimate_wpiBlue_MegaTag2(String limelightName) {
     return getBotPoseEstimate(limelightName, "botpose_orb_wpiblue", true);
@@ -885,9 +865,6 @@ public class LimelightHelpers {
   /**
    * Gets the Pose2d and timestamp for use with WPILib pose estimator (addVisionMeasurement) when
    * you are on the RED alliance
-   *
-   * @param limelightName
-   * @return
    */
   public static PoseEstimate getBotPoseEstimate_wpiRed(String limelightName) {
     return getBotPoseEstimate(limelightName, "botpose_wpired", false);
@@ -896,9 +873,6 @@ public class LimelightHelpers {
   /**
    * Gets the Pose2d and timestamp for use with WPILib pose estimator (addVisionMeasurement) when
    * you are on the RED alliance
-   *
-   * @param limelightName
-   * @return
    */
   public static PoseEstimate getBotPoseEstimate_wpiRed_MegaTag2(String limelightName) {
     return getBotPoseEstimate(limelightName, "botpose_orb_wpired", true);
@@ -916,34 +890,19 @@ public class LimelightHelpers {
     return getLimelightNTDoubleArray(limelightName, "botpose_wpired");
   }
 
-  /**
-   * Switch to getBotPose
-   *
-   * @param limelightName
-   * @return
-   */
+  /** Switch to getBotPose */
   @Deprecated
   public static double[] getBotpose(String limelightName) {
     return getLimelightNTDoubleArray(limelightName, "botpose");
   }
 
-  /**
-   * Switch to getBotPose_wpiBlue
-   *
-   * @param limelightName
-   * @return
-   */
+  /** Switch to getBotPose_wpiBlue */
   @Deprecated
   public static double[] getBotpose_wpiBlue(String limelightName) {
     return getLimelightNTDoubleArray(limelightName, "botpose_wpiblue");
   }
 
-  /**
-   * Switch to getBotPose_wpiRed
-   *
-   * @param limelightName
-   * @return
-   */
+  /** Switch to getBotPose_wpiRed */
   @Deprecated
   public static double[] getBotpose_wpiRed(String limelightName) {
     return getLimelightNTDoubleArray(limelightName, "botpose_wpired");
@@ -1149,7 +1108,7 @@ public class LimelightHelpers {
 
   public static DoubleArrayEntry getLimelightDoubleArrayEntry(String tableName, String entryName) {
     String key = tableName + "/" + entryName;
-    return doubleArrayEntries.computeIfAbsent(
+    return DOUBLE_ARRAY_ENTRIES.computeIfAbsent(
         key,
         k -> {
           NetworkTable table = getLimelightNTTable(tableName);
@@ -1185,8 +1144,8 @@ public class LimelightHelpers {
     String urlString = "http://" + sanitizeName(tableName) + ".local:5807/" + request;
     URL url;
     try {
-      url = new URL(urlString);
-      return url;
+      return new URL(urlString);
+
     } catch (MalformedURLException e) {
       System.err.println("bad LL URL");
     }
