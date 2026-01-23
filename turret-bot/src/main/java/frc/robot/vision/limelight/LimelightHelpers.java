@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -530,6 +531,13 @@ public class LimelightHelpers {
           && pose.equals(that.pose)
           && Arrays.equals(rawFiducials, that.rawFiducials);
     }
+
+    @Override
+    public int hashCode() {
+      int result = Objects.hash(pose, latency, tagCount, tagSpan, avgTagDist, avgTagArea);
+      result = 31 * result + Arrays.hashCode(rawFiducials);
+      return result;
+    }
   }
 
   /** Represents a Limelight Raw Neural Detector result from Limelight's NetworkTables output. */
@@ -615,6 +623,11 @@ public class LimelightHelpers {
           && Double.compare(distToRobot, other.distToRobot) == 0
           && Double.compare(ambiguity, other.ambiguity) == 0;
     }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(id, txnc, tync, ta, distToCamera, distToRobot, ambiguity);
+    }
   }
 
   /** Represents a Limelight Raw Target/Contour result from Limelight's NetworkTables output. */
@@ -637,6 +650,11 @@ public class LimelightHelpers {
       return Double.compare(txnc, other.txnc) == 0
           && Double.compare(tync, other.tync) == 0
           && Double.compare(ta, other.ta) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(txnc, tync, ta);
     }
   }
 
