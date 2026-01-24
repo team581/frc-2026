@@ -14,7 +14,7 @@ dependencies {
 	// Additional annotations from error-prone-support (like @OnlineDocumentation)
 	compileOnly "tech.picnic.error-prone-support:refaster-support:0.26.0"
 	// Annotation processor that compiles templates into .refaster files
-	annotationProcessor "tech.picnic.error-prone-support:refaster-compiler:0.26.0"
+	annotationProcessor "tech.picnic.error-prone-support:refaster-compiler:0.28.0"
 
 	// Depend on the shared library
 	implementation project(':shared')
