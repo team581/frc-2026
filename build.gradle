@@ -37,7 +37,7 @@ subprojects {
 		errorprone "tech.picnic.error-prone-support:error-prone-contrib:0.28.0"
 		errorprone "tech.picnic.error-prone-support:refaster-runner:0.28.0"
 
-		testImplementation "org.assertj:assertj-core:3.27.6"
+		testImplementation "org.assertj:assertj-core:3.27.7"
 	}
 
 	// Add custom Refaster rules to subprojects (except refaster-rules itself and shared, which refaster-rules depends on)
