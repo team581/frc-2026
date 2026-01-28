@@ -1,5 +1,5 @@
 plugins {
-	id 'com.diffplug.spotless' version '8.2.0'
+	id 'com.diffplug.spotless' version '8.2.1'
 	id 'net.ltgt.errorprone' version '4.4.0'
 	// Declared here with apply false so the plugin is loaded once by the root classloader
 	// This fixes Windows issues with the VS Code language server
