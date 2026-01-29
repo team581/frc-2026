@@ -3,9 +3,9 @@ package frc.robot;
 import com.team581.Base581Robot;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
-import com.team581.controller.ControllerHelpers;
-import com.team581.math.MathHelpers;
 import com.team581.math.PoseErrorTolerance;
+import com.team581.swerve.DriveSource;
+import com.team581.swerve.XboxControllerDriveSource;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.followers.PidPathFollower;
 import com.team581.trailblazer.trackers.HeuristicPathTracker;
@@ -37,7 +37,11 @@ public class Robot extends Base581Robot {
           new HeuristicPathTracker(new PoseErrorTolerance(0.5, 10)),
           new PidPathFollower(new PIDController(3.5, 0, 0), new PIDController(4.0, 0, 0)));
 
-  private final Swerve swerve = new Swerve(hardware.drivetrain, trailblazer);
+  private final DriveSource teleopDriverSource =
+      new XboxControllerDriveSource(
+          hardware.driverController, Swerve.MAX_SPEED, Swerve.TELEOP_MAX_ANGULAR_RATE);
+
+  private final Swerve swerve = new Swerve(hardware.drivetrain, teleopDriverSource);
   private final Imu imu = new Imu(swerve.drivetrain);
 
   private final ShooterHood shooterHood = new ShooterHood(hardware.shooterHoodMotor);
@@ -94,7 +98,7 @@ public class Robot extends Base581Robot {
           lights);
 
   @SuppressWarnings("unused") // Registers itself as a subsystem
-  private final Autos autos = new Autos(robotManager, trailblazer);
+  private final Autos autos = new Autos(robotManager, trailblazer, teleopDriverSource);
 
   public Robot() {
     logMetadata(
@@ -108,20 +112,6 @@ public class Robot extends Base581Robot {
     finalizeInit();
 
     FieldUtil.debugLogFieldZones();
-  }
-
-  @Override
-  public void teleopPeriodic() {
-    var leftX = hardware.driverController.getLeftX();
-    var leftY = -hardware.driverController.getLeftY();
-    var rightX = hardware.driverController.getRightX();
-
-    var translationMagnitude = ControllerHelpers.getJoystickMagnitude(leftX, leftY, 2);
-    var rotationMagnitude =
-        Math.copySign(ControllerHelpers.getJoystickMagnitude(rightX, 0, 5), rightX);
-
-    swerve.setTeleopInputs(
-        translationMagnitude, MathHelpers.rotation2d(leftX, leftY), rotationMagnitude);
   }
 
   @Override

@@ -1,6 +1,8 @@
 package frc.robot.autos;
 
 import com.team581.autos.AutoChooser;
+import com.team581.swerve.DriveSource;
+import com.team581.swerve.TrailblazerDriveSource;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,15 +14,25 @@ public class Autos extends StateMachineSubsystem<AutoSelection> {
   private final AutoChooser<AutoSelection> autoChooser;
   private final RobotManager robotManager;
   private final Trailblazer trailblazer;
+
+  private final DriveSource teleopDriveSource;
+  private final DriveSource trailblazerDriveSource;
+
   private boolean hasEnabledAuto = false;
   private BaseImperativeAuto<?> selectedAuto;
 
-  public Autos(RobotManager robotManager, Trailblazer trailblazer) {
+  public Autos(RobotManager robotManager, Trailblazer trailblazer, DriveSource teleopDriveSource) {
     super(SubsystemPriority.AUTOS, AutoSelection.DO_NOTHING);
 
     autoChooser = new AutoChooser<>(AutoSelection.values(), AutoSelection.DO_NOTHING);
     this.robotManager = robotManager;
     this.trailblazer = trailblazer;
+    this.teleopDriveSource = teleopDriveSource;
+    this.trailblazerDriveSource =
+        new TrailblazerDriveSource(
+            trailblazer,
+            robotManager.localization::getPose,
+            robotManager.swerve::getFieldRelativeSpeeds);
 
     selectedAuto = AutoSelection.DO_NOTHING.auto.apply(robotManager, trailblazer);
   }
@@ -59,6 +71,10 @@ public class Autos extends StateMachineSubsystem<AutoSelection> {
     if (selectedAuto.shouldRun()) {
       selectedAuto.beforePeriodic();
       selectedAuto.periodic();
+      robotManager.swerve.setDriveSource(trailblazerDriveSource);
+    } else {
+      // Restore teleop drive source
+      robotManager.swerve.setDriveSource(teleopDriveSource);
     }
   }
 }

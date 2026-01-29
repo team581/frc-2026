@@ -1,6 +1,6 @@
 package frc.robot.swerve;
 
 public enum SwerveState {
-  TELEOP,
-  TRAILBLAZER;
+  MANUAL,
+  HUB_AIM;
 }
