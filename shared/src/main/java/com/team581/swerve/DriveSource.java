@@ -11,7 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * {@link TrailblazerDriveSource}.
  */
 public interface DriveSource {
-  ChassisSpeeds getRequestedSpeeds();
-
   DriveSourceType getDriveSourceType();
+
+  ChassisSpeeds getRequestedSpeeds();
 }

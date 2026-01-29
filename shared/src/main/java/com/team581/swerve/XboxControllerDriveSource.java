@@ -19,6 +19,11 @@ public class XboxControllerDriveSource implements DriveSource {
   }
 
   @Override
+  public DriveSourceType getDriveSourceType() {
+    return DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP;
+  }
+
+  @Override
   public ChassisSpeeds getRequestedSpeeds() {
     var leftX = controller.getLeftX();
     var leftY = -controller.getLeftY();
@@ -34,10 +39,5 @@ public class XboxControllerDriveSource implements DriveSource {
         rotationMagnitude,
         maxLinearVelocity,
         maxAngularVelocity);
-  }
-
-  @Override
-  public DriveSourceType getDriveSourceType() {
-    return DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP;
   }
 }

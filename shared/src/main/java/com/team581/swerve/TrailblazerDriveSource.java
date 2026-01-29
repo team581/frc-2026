@@ -20,13 +20,13 @@ public class TrailblazerDriveSource implements DriveSource {
   }
 
   @Override
-  public ChassisSpeeds getRequestedSpeeds() {
-    return trailblazer.getFieldRelativeSetpoint(
-        currentPose.get(), currentFieldRelativeSpeeds.get());
+  public DriveSourceType getDriveSourceType() {
+    return DriveSourceType.FIELD_CENTRIC_CLOSED_LOOP;
   }
 
   @Override
-  public DriveSourceType getDriveSourceType() {
-    return DriveSourceType.FIELD_CENTRIC_CLOSED_LOOP;
+  public ChassisSpeeds getRequestedSpeeds() {
+    return trailblazer.getFieldRelativeSetpoint(
+        currentPose.get(), currentFieldRelativeSpeeds.get());
   }
 }
