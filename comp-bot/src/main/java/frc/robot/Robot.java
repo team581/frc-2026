@@ -3,6 +3,7 @@ package frc.robot;
 import com.team581.Base581Robot;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
+import com.team581.controller.Joysticks;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.swerve.DriveSource;
 import com.team581.swerve.XboxControllerDriveSource;
@@ -26,6 +27,7 @@ import frc.robot.shooter.Shooter;
 import frc.robot.shooter_hood.ShooterHood;
 import frc.robot.swerve.Swerve;
 import frc.robot.turret.Turret;
+import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.Vision;
 import frc.robot.vision.limelight.Limelight;
 import frc.robot.vision.limelight.LimelightState;
@@ -85,8 +87,12 @@ public class Robot extends Base581Robot {
       new Localization(swerve, hardware.drivetrain, vision, imu);
   private final Turret turret = new Turret(hardware.turretMotor, vision);
   private final HealthManager health = new HealthManager(turretLimelight, backLimelight);
+
+  private final Joysticks driverJoysticks = new Joysticks(SubsystemPriority.JOYSTICKS, hardware.driverController);
+
   private final RobotManager robotManager =
       new RobotManager(
+          driverJoysticks,
           shooterHood,
           localization,
           swerve,

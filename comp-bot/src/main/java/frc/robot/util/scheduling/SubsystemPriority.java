@@ -9,6 +9,7 @@ public enum SubsystemPriority implements SubsystemPriorityBase {
   HEALTH(28),
 
   // 10-19 is for sensor subsystems
+  JOYSTICKS(12),
   LOCALIZATION(11),
   IMU(10),
   // Vision inputs run before localization so that it has fresh vision data for pose estimator
