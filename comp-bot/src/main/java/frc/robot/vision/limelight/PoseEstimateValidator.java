@@ -1,12 +1,13 @@
 package frc.robot.vision.limelight;
 
+import com.team581.vision.limelight.LimelightHelpers.PoseEstimate;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.vision.limelight.LimelightHelpers.PoseEstimate;
 
 public class PoseEstimateValidator {
 
-  public static boolean shouldTrust(PoseEstimate poseEstimate, double angularVelocity, String name) {
+  public static boolean shouldTrust(
+      PoseEstimate poseEstimate, double angularVelocity, String name) {
     if (poseEstimate == null) {
       return false;
     }
