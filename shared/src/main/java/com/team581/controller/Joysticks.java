@@ -2,7 +2,6 @@ package com.team581.controller;
 
 import com.team581.util.scheduling.SubsystemPriorityBase;
 import com.team581.util.state_machines.StateMachineSubsystem;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 
@@ -19,10 +18,11 @@ public class Joysticks extends StateMachineSubsystem<JoystickState> {
 
   @Override
   protected JoystickState getNextState(JoystickState currentState) {
-      return switch (currentState) {
-        case NOT_SEEN_INPUT_TELEOP -> DriverStation.isTeleop() && inputting ? JoystickState.SEEN_INPUT_TELEOP : currentState;
-        case SEEN_INPUT_TELEOP -> currentState;
-      };
+    return switch (currentState) {
+      case NOT_SEEN_INPUT_TELEOP ->
+          DriverStation.isTeleop() && inputting ? JoystickState.SEEN_INPUT_TELEOP : currentState;
+      case SEEN_INPUT_TELEOP -> currentState;
+    };
   }
 
   @Override
@@ -31,7 +31,8 @@ public class Joysticks extends StateMachineSubsystem<JoystickState> {
     var leftY = controller.getLeftY();
     var rightX = controller.getRightX();
 
-    var overLeftThreshold = ControllerHelpers.getJoystickMagnitude(leftX, leftY, 1.0) > INPUT_THRESHOLD;
+    var overLeftThreshold =
+        ControllerHelpers.getJoystickMagnitude(leftX, leftY, 1.0) > INPUT_THRESHOLD;
     var overRightThreshold = Math.abs(rightX) > INPUT_THRESHOLD;
 
     inputting = overLeftThreshold || overRightThreshold;
@@ -43,6 +44,6 @@ public class Joysticks extends StateMachineSubsystem<JoystickState> {
 
   @Override
   public void teleopInit() {
-      setStateFromRequest(JoystickState.NOT_SEEN_INPUT_TELEOP);
+    setStateFromRequest(JoystickState.NOT_SEEN_INPUT_TELEOP);
   }
 }

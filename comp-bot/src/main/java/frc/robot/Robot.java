@@ -88,7 +88,8 @@ public class Robot extends Base581Robot {
   private final Turret turret = new Turret(hardware.turretMotor, vision);
   private final HealthManager health = new HealthManager(turretLimelight, backLimelight);
 
-  private final Joysticks driverJoysticks = new Joysticks(SubsystemPriority.JOYSTICKS, hardware.driverController);
+  private final Joysticks driverJoysticks =
+      new Joysticks(SubsystemPriority.JOYSTICKS, hardware.driverController);
 
   private final RobotManager robotManager =
       new RobotManager(
