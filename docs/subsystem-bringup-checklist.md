@@ -26,9 +26,8 @@ Checklist to complete before bringing up a new subsystem on the robot.
 ### Testing plan
 
 - [ ] Identify which `RobotManager` states will be used to test
-- [ ] Determine if custom bringup-only states are needed
-  - ex. `BRINGUP_SHOOTER` state that only runs the shooter at a fixed RPM
-- [ ] Document state transitions to test
+  - [ ] Determine if custom bringup-only states and/or button bindings are needed
+- [ ] Plan state transitions to test
 
 ## On-robot verification
 
