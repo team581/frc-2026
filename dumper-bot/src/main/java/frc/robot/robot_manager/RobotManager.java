@@ -9,6 +9,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.Hardware;
 import frc.robot.cluster_map.ClusterMap;
 import frc.robot.config.FeatureFlags;
 import frc.robot.feeder.Feeder;
@@ -24,6 +25,7 @@ import frc.robot.vision.Vision;
 import frc.robot.vision.VisionState;
 
 public class RobotManager extends StateMachineSubsystem<RobotState> {
+  public final Hardware hardware;
   private final HealthManager health;
   private final Intake intake;
   private final Hopper hopper;
@@ -54,6 +56,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private double timeOfFlight = 0.0;
 
   public RobotManager(
+      Hardware hardware,
       HealthManager health,
       Intake intake,
       Hopper hopper,
@@ -65,6 +68,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       Localization localization) {
     super(SubsystemPriority.ROBOT_MANAGER, RobotState.IDLE);
 
+    this.hardware = hardware;
     this.health = health;
     this.intake = intake;
     this.hopper = hopper;
