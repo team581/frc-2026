@@ -79,7 +79,16 @@ public class Robot extends Base581Robot {
   private final Feeder feeder = new Feeder(hardware.feederMotor);
   private final RobotManager robotManager =
       new RobotManager(
-          hardware, health, intake, hopper, shooter, feeder, swerve, vision, clusterMap, localization);
+          hardware,
+          health,
+          intake,
+          hopper,
+          shooter,
+          feeder,
+          swerve,
+          vision,
+          clusterMap,
+          localization);
 
   @SuppressWarnings("unused") // Registers itself as a subsystem
   private final Autos autos = new Autos(robotManager, trailblazer, teleopDriveSource);
