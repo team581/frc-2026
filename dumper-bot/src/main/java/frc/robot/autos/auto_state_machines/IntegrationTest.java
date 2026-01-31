@@ -18,11 +18,9 @@ import frc.robot.robot_manager.RobotManager;
 
 public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
 
-  private IntegrationTestState beforePauseState = IntegrationTestState.PAUSED;
   private static final double MAX_VELOCITY = 1.0;
   private static final double MAX_ACCELERATION = 1.0;
 
-  private boolean aButtonReleased = true;
   private boolean bButtonReleased = true;
   private boolean xButtonReleased = true;
 
@@ -68,18 +66,6 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
     super(IntegrationTestState.SEGMENT_1_DRIVE_TO_START, robotManager, trailblazer);
   }
 
-  public void pauseRequest() {
-    if (getState() == IntegrationTestState.PAUSED) {
-      DogLog.timestamp("IntegrationTest/UndoPause");
-      setStateFromRequest(beforePauseState);
-    }
-
-    var state = getState();
-    beforePauseState = state;
-    DogLog.log("IntegrationTest/GetStateBeforeSet", state);
-    setStateFromRequest(IntegrationTestState.PAUSED);
-  }
-
   public void skipRequest() {
     setStateFromRequest(getState().nextState());
   }
@@ -99,7 +85,6 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
       return switch (currentState) {
         case SEGMENT_2_CLOSE_CENTERED_WITH_HUB ->
             timeout(2.0) ? IntegrationTestState.SEGMENT_3_BACK_CENTERED_WITH_HUB : currentState;
-        case PAUSED -> currentState;
         default -> currentState.nextState();
       };
     }
@@ -108,18 +93,8 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
 
   @Override
   protected void whileInState(IntegrationTestState newState) {
-    DogLog.log("IntegrationTest/BeforePauseState", beforePauseState);
     if (FeatureFlags.INTEGRATION_TEST.getAsBoolean()) {
-      if (robotManager.hardware.driverController.getAButton()) {
-        if (aButtonReleased) {
-          DogLog.timestamp("IntegrationTest/AButton");
-          aButtonReleased = false;
-          pauseRequest();
-        }
-      } else {
-        aButtonReleased = true;
-      }
-      if (robotManager.hardware.driverController.getBButton()) {
+      if (robotManager.hardware.operatorController.getBButton()) {
         if (bButtonReleased) {
           DogLog.timestamp("IntegrationTest/BButton");
 
@@ -129,7 +104,7 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
       } else {
         bButtonReleased = true;
       }
-      if (robotManager.hardware.driverController.getXButton()) {
+      if (robotManager.hardware.operatorController.getXButton()) {
         if (xButtonReleased) {
           DogLog.timestamp("IntegrationTest/XButton");
 
@@ -160,9 +135,6 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
       case SEGMENT_5_LEFT_RAMP -> {
         trailblazer.setActiveSegment(segment5RightTrench);
         robotManager.scoreRequest();
-      }
-      case PAUSED -> {
-        robotManager.idleRequest();
       }
     }
   }

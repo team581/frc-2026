@@ -7,8 +7,7 @@ public enum IntegrationTestState {
   SEGMENT_2_CLOSE_CENTERED_WITH_HUB,
   SEGMENT_3_BACK_CENTERED_WITH_HUB,
   SEGMENT_4_RIGHT_TRENCH,
-  SEGMENT_5_LEFT_RAMP,
-  PAUSED;
+  SEGMENT_5_LEFT_RAMP;
 
   private static final ImmutableMap<IntegrationTestState, IntegrationTestState> NEXT_STATE =
       ImmutableMap.of(
