@@ -118,7 +118,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     setState(TurretState.IDLE_SCORE);
   }
 
-  public void idleFeedReuqest(double goalAngle) {
+  public void idleFeedRequest(double goalAngle) {
     this.goalAngle = goalAngle;
     setState(TurretState.IDLE_FEED);
   }
