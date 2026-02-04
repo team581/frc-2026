@@ -9,8 +9,10 @@ import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 public class FieldUtil {
 
@@ -203,6 +205,16 @@ public class FieldUtil {
           BLUE_DEPOT_TRENCH_SIDE_BUMP_POINT,
           RED_DEPOT_TRENCH_SIDE_BUMP_POINT,
           RED_OUTPOST_TRENCH_SIDE_BUMP_POINT);
+  // TODO: Validate these points
+  private static final Pose2d BLUE_LEFT_FALLBACK =
+      new Pose2d(BLUE_OBSTACLE_X + TRENCH_LENGTH_X / 2.0, AprilTags.TAG_7.getY(), new Rotation2d());
+  private static final Pose2d BLUE_RIGHT_FALLBACK =
+      new Pose2d(
+          BLUE_OBSTACLE_X + TRENCH_LENGTH_X / 2.0, AprilTags.TAG_12.getY(), new Rotation2d());
+  private static final Pose2d RED_LEFT_FALLBACK =
+      new Pose2d(RED_OBSTACLE_X - TRENCH_LENGTH_X / 2.0, AprilTags.TAG_17.getY(), new Rotation2d());
+  private static final Pose2d RED_RIGHT_FALLBACK =
+      new Pose2d(RED_OBSTACLE_X - TRENCH_LENGTH_X / 2.0, AprilTags.TAG_22.getY(), new Rotation2d());
 
   public static Pose2d clampPoseToAllianceZone(Pose2d robot) {
     if (isRobotInAllianceZone(robot.getTranslation())) {
@@ -387,6 +399,21 @@ public class FieldUtil {
   /** Returns the trench assist zone that the robot is currently in, if it exists. */
   public static Optional<Rectangle2d> getCurrentTrenchAssistZone(Translation2d robotPose) {
     return TRENCH_ASSIST_ZONES.stream().filter(zone -> zone.contains(robotPose)).findFirst();
+  }
+
+  public static Pose2d getFallbackScorePoint() {
+    // TODO: Validate this logic
+    if (FmsUtil.isRedAlliance()) {
+      if (DriverStation.getLocation() == OptionalInt.of(1)) {
+        return RED_LEFT_FALLBACK;
+      } else {
+        return RED_RIGHT_FALLBACK;
+      }
+    }
+    if (DriverStation.getLocation() == OptionalInt.of(3)) {
+      return BLUE_LEFT_FALLBACK;
+    }
+    return BLUE_RIGHT_FALLBACK;
   }
 
   public static double getObstacleX() {
