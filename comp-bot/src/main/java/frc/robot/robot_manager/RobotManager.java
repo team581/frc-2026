@@ -1,5 +1,6 @@
 package frc.robot.robot_manager;
 
+import com.team581.math.MathHelpers;
 import com.team581.swerve.SwerveAssist;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
@@ -537,7 +538,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     deploy.stowRequest();
   }
 
-
   public void unjamRequest() {
     if (!getState().isClimbingOrRehoming()) {
       setStateFromRequest(RobotState.UNJAM);
@@ -620,7 +620,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     robotPose = localization.getPose();
     vision.setEstimatedPoseAngle(robotPose.getRotation().getDegrees());
     var speeds = swerve.getFieldRelativeSpeeds();
-    isMoving = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) > 0.001;
+    isMoving = MathHelpers.getLinearVelocity(speeds) > 0.001;
 
     feedLocation =
         DSOptions.FEED_LOCATION_OVERRIDE.get() && feedLocationOverride.isPresent()
@@ -633,8 +633,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     scoringParameters =
         AimParameterUtil.getScoringParameters(
-          // TODO: This should require you to pass in the distance to get the ToF
-          health.isAllCamerasHealthy()?  robotPose : FieldUtil.getFallbackScorePoint(), swerve.getFieldRelativeSpeeds(), shooter.getScoreTimeOfFlight());
+            // TODO: This should require you to pass in the distance to get the ToF
+            health.isAllCamerasHealthy() ? robotPose : FieldUtil.getFallbackScorePoint(),
+            swerve.getFieldRelativeSpeeds(),
+            shooter.getScoreTimeOfFlight());
     feedingParameters =
         AimParameterUtil.getFeedingParameters(
             feedLocation,

@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -404,13 +405,13 @@ public class FieldUtil {
   public static Pose2d getFallbackScorePoint() {
     // TODO: Validate this logic
     if (FmsUtil.isRedAlliance()) {
-      if (DriverStation.getLocation() == OptionalInt.of(1)) {
+      if (Objects.equals(DriverStation.getLocation(), OptionalInt.of(1))) {
         return RED_LEFT_FALLBACK;
       } else {
         return RED_RIGHT_FALLBACK;
       }
     }
-    if (DriverStation.getLocation() == OptionalInt.of(3)) {
+    if (Objects.equals(DriverStation.getLocation(), OptionalInt.of(3))) {
       return BLUE_LEFT_FALLBACK;
     }
     return BLUE_RIGHT_FALLBACK;
