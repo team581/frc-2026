@@ -90,7 +90,8 @@ public class Robot extends Base581Robot {
   private final HealthManager health = new HealthManager(turretLimelight, backLimelight);
 
   private final JoystickTracker driverJoysticks =
-      new JoystickTracker(SubsystemPriority.JOYSTICKS, hardware.driverController, FeatureFlags.DO_AUTO_SAFE_CHECK);
+      new JoystickTracker(
+          SubsystemPriority.JOYSTICKS, hardware.driverController, FeatureFlags.DO_AUTO_SAFE_CHECK);
 
   private final RobotManager robotManager =
       new RobotManager(

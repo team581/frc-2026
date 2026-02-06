@@ -35,7 +35,8 @@ public class JoystickTracker extends StateMachineSubsystem<JoystickState> {
               : currentState;
       // If it is autonomous enabled or teleop disabled reset to NOT_SEEN_INPUT_TELEOP
       case SEEN_INPUT_TELEOP ->
-          DriverStation.isAutonomousEnabled() || (DriverStation.isTeleop() && DriverStation.isDisabled())
+          DriverStation.isAutonomousEnabled()
+                  || (DriverStation.isTeleop() && DriverStation.isDisabled())
               ? JoystickState.NOT_SEEN_INPUT_TELEOP
               : currentState;
     };
