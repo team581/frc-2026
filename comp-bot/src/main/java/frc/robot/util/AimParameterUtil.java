@@ -9,8 +9,7 @@ import frc.robot.turret.TurretCalculator;
 
 public class AimParameterUtil {
   public static double getFeedingDistance(FeedLocation feedLocation, Pose2d robot) {
-    var distanceToGoal = robot.getTranslation().getDistance(feedLocation.getTranslation(robot));
-    return distanceToGoal;
+    return robot.getTranslation().getDistance(feedLocation.getTranslation(robot));
   }
 
   public static AimingParameters getFeedingParameters(
@@ -31,11 +30,9 @@ public class AimParameterUtil {
 
   public static double getScoringDistance(Pose2d robot) {
     var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
-    var distanceToGoal =
-        robotPoseInAllianceZone
-            .getTranslation()
-            .getDistance(FieldUtil.HUB_POSE.getPose().getTranslation());
-    return distanceToGoal;
+    return robotPoseInAllianceZone
+        .getTranslation()
+        .getDistance(FieldUtil.HUB_POSE.getPose().getTranslation());
   }
 
   public static AimingParameters getScoringParameters(
