@@ -208,11 +208,13 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
     shooterSimulation.update();
   }
 
-  public double getScoreTimeOfFlight() {
+  public double getScoreTimeOfFlight(double distance) {
+    this.scoreDistance = distance;
     return DISTANCE_TO_SCORE_TOF.get(scoreDistance);
   }
 
-  public double getFeedTimeOfFlight() {
+  public double getFeedTimeOfFlight(double distance) {
+    this.feedDistance = distance;
     return DISTANCE_TO_FEED_TOF.get(feedDistance);
   }
 }

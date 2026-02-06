@@ -46,12 +46,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
   private AimingParameters scoringParameters = new AimingParameters(0, 0);
   private AimingParameters feedingParameters = new AimingParameters(0, 0);
-  // TODO: Get feed distance for offline
-  private double presetFeedDistance = 0.0;
+  private static final double presetFeedDistance = 0.0;
   private boolean isMoving = false;
 
   private FeedLocation feedLocation = FeedLocation.CLOSEST;
-  private Optional<FeedLocation> feedLocationOverride = Optional.empty();
 
   public RobotManager(
       ShooterHood shooterHood,
@@ -517,11 +515,15 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   public void setFeedGoalLeftRequest() {
-    feedLocationOverride = Optional.of(FeedLocation.LEFT);
+    feedLocation = FeedLocation.LEFT;
   }
 
   public void setFeedGoalRightRequest() {
-    feedLocationOverride = Optional.of(FeedLocation.RIGHT);
+    feedLocation =FeedLocation.RIGHT;
+  }
+
+  public void setFeedGoalClosestRequest() {
+    feedLocation = FeedLocation.CLOSEST;
   }
 
   public void intakeRequest() {
@@ -620,28 +622,25 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     robotPose = localization.getPose();
     vision.setEstimatedPoseAngle(robotPose.getRotation().getDegrees());
     var speeds = swerve.getFieldRelativeSpeeds();
-    isMoving = MathHelpers.getLinearVelocity(speeds) > 0.001;
-
-    feedLocation =
-        DSOptions.FEED_LOCATION_OVERRIDE.get() && feedLocationOverride.isPresent()
-            ? feedLocationOverride.orElseThrow()
-            : FeedLocation.CLOSEST;
+    isMoving = MathHelpers.getLinearVelocity(speeds) > 0.2;
 
     nearTrench =
         FieldUtil.inTrench(robotPose.getTranslation())
             || SwerveAssist.ableToTrenchAssist(robotPose, swerve.getFieldRelativeSpeeds());
+    var scoringDistance = AimParameterUtil.getScoringDistance(robotPose);
+    var feedingDistance = AimParameterUtil.getFeedingDistance(feedLocation, robotPose);
 
     scoringParameters =
         AimParameterUtil.getScoringParameters(
             // TODO: This should require you to pass in the distance to get the ToF
             health.isAllCamerasHealthy() ? robotPose : FieldUtil.getFallbackScorePoint(),
             swerve.getFieldRelativeSpeeds(),
-            shooter.getScoreTimeOfFlight());
+            shooter.getScoreTimeOfFlight(scoringDistance));
     feedingParameters =
         AimParameterUtil.getFeedingParameters(
             feedLocation,
             robotPose,
             swerve.getFieldRelativeSpeeds(),
-            shooter.getFeedTimeOfFlight());
+            shooter.getFeedTimeOfFlight(feedingDistance));
   }
 }

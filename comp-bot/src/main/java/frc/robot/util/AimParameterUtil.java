@@ -8,6 +8,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.turret.TurretCalculator;
 
 public class AimParameterUtil {
+  public static double getFeedingDistance(FeedLocation feedLocation, Pose2d robot) {
+    var distanceToGoal = robot.getTranslation().getDistance(feedLocation.getTranslation(robot));
+    return distanceToGoal;
+  }
+
   public static AimingParameters getFeedingParameters(
       FeedLocation feedLocation,
       Pose2d robot,
@@ -22,6 +27,15 @@ public class AimParameterUtil {
     var distanceToGoal = robot.getTranslation().getDistance(feedTranslation);
 
     return new AimingParameters(turretAngle, distanceToGoal);
+  }
+
+  public static double getScoringDistance(Pose2d robot) {
+    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
+    var distanceToGoal =
+        robotPoseInAllianceZone
+            .getTranslation()
+            .getDistance(FieldUtil.HUB_POSE.getPose().getTranslation());
+    return distanceToGoal;
   }
 
   public static AimingParameters getScoringParameters(

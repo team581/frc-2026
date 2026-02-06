@@ -6,8 +6,6 @@ import edu.wpi.first.networktables.BooleanSubscriber;
 public final class DSOptions {
   public static final BooleanSubscriber SENSOR_OVERRIDE = DSOption.of("SensorOverride", false);
   public static final BooleanSubscriber USE_TAG_LIMELIGHTS = DSOption.of("UseTagLimelights", true);
-  public static final BooleanSubscriber FEED_LOCATION_OVERRIDE =
-      DSOption.of("FeedLocationOverride", false);
 
   private DSOptions() {}
 }
