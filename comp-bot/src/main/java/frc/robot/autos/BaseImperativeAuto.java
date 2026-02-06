@@ -3,7 +3,6 @@ package frc.robot.autos;
 import com.team581.autos.BaseAuto;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.util.state_machines.StateMachine;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.robot_manager.RobotManager;
 
@@ -20,10 +19,10 @@ public abstract class BaseImperativeAuto<S extends Enum<S>> extends StateMachine
 
   @Override
   public boolean shouldRun() {
-      if (DriverStation.isAutonomous()) {
-        return true;
-      }
+    if (DriverStation.isAutonomous()) {
+      return true;
+    }
 
-      return !robotManager.driverJoysticks.hasInputInTeleop();
+    return !robotManager.driverJoysticks.hasInputInTeleop();
   }
 }

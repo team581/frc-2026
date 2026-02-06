@@ -1,6 +1,6 @@
 package frc.robot.robot_manager;
 
-import com.team581.controller.Joysticks;
+import com.team581.controller.JoystickTracker;
 import com.team581.math.SwerveAssist;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
@@ -35,7 +35,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private final Vision vision;
   private final Lights lights;
   private final HealthManager health;
-  public final Joysticks driverJoysticks;
+  public final JoystickTracker driverJoysticks;
 
   private Pose2d robotPose = Pose2d.kZero;
   private boolean nearTrench = false;
@@ -48,7 +48,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private double feedDistance = 0.0;
 
   public RobotManager(
-      Joysticks driverJoysticks,
+      JoystickTracker driverJoysticks,
       ShooterHood shooterHood,
       Localization localization,
       Swerve swerve,

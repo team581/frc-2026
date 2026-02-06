@@ -3,7 +3,7 @@ package frc.robot;
 import com.team581.Base581Robot;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
-import com.team581.controller.Joysticks;
+import com.team581.controller.JoystickTracker;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.swerve.DriveSource;
 import com.team581.swerve.XboxControllerDriveSource;
@@ -14,6 +14,7 @@ import com.team581.util.FieldUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import frc.robot.autos.Autos;
+import frc.robot.config.FeatureFlags;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.generated.BuildConstants;
@@ -88,7 +89,8 @@ public class Robot extends Base581Robot {
   private final Turret turret = new Turret(hardware.turretMotor, vision);
   private final HealthManager health = new HealthManager(turretLimelight, backLimelight);
 
-  private final Joysticks driverJoysticks = new Joysticks(SubsystemPriority.JOYSTICKS, hardware.driverController);
+  private final JoystickTracker driverJoysticks =
+      new JoystickTracker(SubsystemPriority.JOYSTICKS, hardware.driverController, FeatureFlags.DO_AUTO_SAFE_CHECK);
 
   private final RobotManager robotManager =
       new RobotManager(
@@ -103,7 +105,7 @@ public class Robot extends Base581Robot {
           deploy,
           vision,
           lights,
-        health);
+          health);
 
   @SuppressWarnings("unused") // Registers itself as a subsystem
   private final Autos autos = new Autos(robotManager, trailblazer, teleopDriveSource);
