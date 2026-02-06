@@ -7,7 +7,6 @@ import com.team581.util.FieldUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.config.DSOptions;
 import frc.robot.deploy.Deploy;
 import frc.robot.deploy.DeployState;
 import frc.robot.dye_rotor.DyeRotor;
@@ -26,7 +25,6 @@ import frc.robot.util.AimParameterUtil.AimingParameters;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.Vision;
 import frc.robot.vision.VisionState;
-import java.util.Optional;
 
 public class RobotManager extends StateMachineSubsystem<RobotState> {
   public final Localization localization;
@@ -46,7 +44,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
   private AimingParameters scoringParameters = new AimingParameters(0, 0);
   private AimingParameters feedingParameters = new AimingParameters(0, 0);
-  private static final double presetFeedDistance = 0.0;
+  private static final double PRESET_FEED_DISTANCE = 0.0;
   private boolean isMoving = false;
 
   private FeedLocation feedLocation = FeedLocation.CLOSEST;
@@ -282,16 +280,16 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         lights.setState(LightsState.SHOOTING);
       }
       case PREPARE_PRESET_FEED -> {
-        shooter.feedRequest(presetFeedDistance);
-        shooterHood.feedRequest(presetFeedDistance);
+        shooter.feedRequest(PRESET_FEED_DISTANCE);
+        shooterHood.feedRequest(PRESET_FEED_DISTANCE);
         dyeRotor.shootRequest();
         turret.feedRequest(0);
         swerve.normalDriveRequest();
         lights.setState(LightsState.WAITING_TO_SHOOT);
       }
       case PRESET_FEED -> {
-        shooter.feedRequest(presetFeedDistance);
-        shooterHood.feedRequest(presetFeedDistance);
+        shooter.feedRequest(PRESET_FEED_DISTANCE);
+        shooterHood.feedRequest(PRESET_FEED_DISTANCE);
         dyeRotor.shootRequest();
         turret.feedRequest(0);
         intake.shootingRequest();
@@ -519,7 +517,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   public void setFeedGoalRightRequest() {
-    feedLocation =FeedLocation.RIGHT;
+    feedLocation = FeedLocation.RIGHT;
   }
 
   public void setFeedGoalClosestRequest() {
