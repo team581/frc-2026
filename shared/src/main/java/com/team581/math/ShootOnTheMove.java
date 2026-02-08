@@ -34,7 +34,8 @@ public class ShootOnTheMove {
       Translation2d offset = new Translation2d(radialVelocityMagnitude * tof, angleToTarget);
       result = target.minus(offset);
     }
-    DogLog.log("ShootOnTheMove/RadialVelocityCompensatedGoal", new Pose2d(result, result.getAngle()));
+    DogLog.log(
+        "ShootOnTheMove/RadialVelocityCompensatedGoal", new Pose2d(result, result.getAngle()));
     return result;
   }
 
@@ -49,7 +50,8 @@ public class ShootOnTheMove {
       Translation2d radialDirection = target.minus(robot).div(robot.getDistance(target));
 
       // 2. Get the tangential vector (rotate radial by 90 degrees)
-      Translation2d tangentialDirection = new Translation2d(-radialDirection.getY(), radialDirection.getX());
+      Translation2d tangentialDirection =
+          new Translation2d(-radialDirection.getY(), radialDirection.getX());
 
       // 3. Project robot velocity onto the tangential vector
       double tangentialVelocityMagnitude =
@@ -59,7 +61,8 @@ public class ShootOnTheMove {
       // 4. Offset target sideways
       result = target.minus(tangentialDirection.times(tangentialVelocityMagnitude * tof));
     }
-    DogLog.log("ShootOnTheMove/TangentialVelocityCompensatedGoal", new Pose2d(result, result.getAngle()));
+    DogLog.log(
+        "ShootOnTheMove/TangentialVelocityCompensatedGoal", new Pose2d(result, result.getAngle()));
     return result;
   }
 

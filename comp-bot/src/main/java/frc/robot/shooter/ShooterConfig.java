@@ -46,8 +46,7 @@ public class ShooterConfig {
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
-          "Shooter/DistanceToFeedToF",
-          Map.entry(Units.inchesToMeters(57.0), 0.0));
+          "Shooter/DistanceToFeedToF", Map.entry(Units.inchesToMeters(57.0), 0.0));
 
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIGS =
       new TalonFXConfiguration()
