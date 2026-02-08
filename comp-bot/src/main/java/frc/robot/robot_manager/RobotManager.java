@@ -620,15 +620,35 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       case PREPARE_SCORE -> {
         smartTurretHoodPrepareScoreRequest();
+        if (intake.getState() == IntakeState.INTAKING) {
+          swerve.intakeScoringDriveRequest();
+        } else {
+          swerve.scoringDriveRequest();
+        }
       }
       case SCORE -> {
         turret.scoreRequest(scoringParameters.turretAngle());
+        if (intake.getState() == IntakeState.INTAKING) {
+          swerve.intakeScoringDriveRequest();
+        } else {
+          swerve.scoringDriveRequest();
+        }
       }
       case PREPARE_FEED -> {
         turret.feedRequest(feedingParameters.turretAngle());
+        if (intake.getState() == IntakeState.INTAKING) {
+          swerve.intakeDriveRequest();
+        } else {
+          swerve.normalDriveRequest();
+        }
       }
       case FEED -> {
         turret.feedRequest(feedingParameters.turretAngle());
+        if (intake.getState() == IntakeState.INTAKING) {
+          swerve.intakeDriveRequest();
+        } else {
+          swerve.normalDriveRequest();
+        }
       }
       case PREPARE_PRESET_SCORE -> {
         // Automatically update scoring parameters with preset pose
@@ -638,19 +658,39 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           shooterHood.scoreRequest(scoringParameters.distance());
         }
         turret.scoreRequest(scoringParameters.turretAngle());
+        if (intake.getState() == IntakeState.INTAKING) {
+          swerve.intakeDriveRequest();
+        } else {
+          swerve.normalDriveRequest();
+        }
       }
       case PRESET_SCORE -> {
         // Automatically update scoring parameters with preset pose
         shooterHood.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(scoringParameters.turretAngle());
+        if (intake.getState() == IntakeState.INTAKING) {
+          swerve.intakeDriveRequest();
+        } else {
+          swerve.normalDriveRequest();
+        }
       }
       case PREPARE_PRESET_FEED -> {
         // TODO: Get turret feed angle
         turret.feedRequest(0);
+        if (intake.getState() == IntakeState.INTAKING) {
+          swerve.intakeDriveRequest();
+        } else {
+          swerve.normalDriveRequest();
+        }
       }
       case PRESET_FEED -> {
         // TODO: get turret feed angle
         turret.feedRequest(0);
+        if (intake.getState() == IntakeState.INTAKING) {
+          swerve.intakeDriveRequest();
+        } else {
+          swerve.normalDriveRequest();
+        }
       }
       case AUTOMATIC_CLIMB_1_LINEUP_L1 -> {
         turret.climbRequest(robotPose);
@@ -684,14 +724,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/IsHubActive", isHubActive);
     DogLog.log("RobotManager/TimeSinceMatchStart", timeSinceMatchStart);
     DogLog.log("RobotManager/TimeSinceTeleopEnable", teleopTimer.get());
-
-    if (!getState().isClimbing()) {
-      if (intake.getState() == IntakeState.INTAKING) {
-        swerve.intakeDriveRequest();
-      } else {
-        swerve.normalDriveRequest();
-      }
-    }
 
     MechanismVisualizer.log(
         robotPose,

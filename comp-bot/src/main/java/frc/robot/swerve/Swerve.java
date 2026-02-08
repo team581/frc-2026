@@ -1,6 +1,6 @@
 package frc.robot.swerve;
 
-import static edu.wpi.first.units.Units.Degrees;
+import org.jspecify.annotations.Nullable;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
@@ -19,14 +19,17 @@ import com.team581.trailblazer.Trailblazer;
 import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import static edu.wpi.first.units.Units.Degrees;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
@@ -34,7 +37,6 @@ import frc.robot.config.FeatureFlags;
 import frc.robot.generated.RobotTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
 import frc.robot.util.scheduling.SubsystemPriority;
-import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public class Swerve extends StateMachineSubsystem<SwerveState> {
@@ -144,6 +146,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private Translation2d lastWallIntakePoint = Translation2d.kZero;
   private double distanceToWallIntakePoint = 0.0;
   private Rotation2d filteredLastDriveDirection = Rotation2d.kZero;
+  private final SlewRateLimiter scoringXSlewRateLimiter = new SlewRateLimiter(3);
+  private final SlewRateLimiter scoringYSlewRateLimiter = new SlewRateLimiter(3);
 
   public Swerve(
       TunerSwerveDrivetrain drivetrain,
@@ -194,6 +198,14 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   public void climbAssistDriveRequest() {
     setStateFromRequest(SwerveState.CLIMB_ASSIST);
+  }
+
+  public void scoringDriveRequest() {
+    setStateFromRequest(SwerveState.MANUAL_SCORING);
+  }
+
+  public void intakeScoringDriveRequest() {
+    setStateFromRequest(SwerveState.INTAKE_SCORING);
   }
 
   @Override
@@ -295,6 +307,46 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
           drivetrain.setControl(
               swerveRequest
+                  .withVelocityX(speeds.vxMetersPerSecond)
+                  .withVelocityY(speeds.vyMetersPerSecond)
+                  .withRotationalRate(speeds.omegaRadiansPerSecond));
+        }
+      }
+      case MANUAL_SCORING -> {
+        var speeds = driveSource.getRequestedSpeeds();
+        if (ableToTrenchAssist) {
+
+          DogLog.timestamp("TrenchAssistActive");
+          var trenchAssistSpeeds =
+              SwerveAssist.getTrenchAssistSpeeds(drivetrainState.Pose.getTranslation(), speeds);
+          drivetrain.setControl(
+              drivePerspectiveSnapsOpenLoop
+                  .withVelocityX(trenchAssistSpeeds.vxMetersPerSecond)
+                  .withVelocityY(trenchAssistSpeeds.vyMetersPerSecond)
+                  .withTargetDirection(
+                      Rotation2d.fromDegrees(
+                              SwerveAssist.getTrenchSnapAngle(drivetrainState.Pose.getRotation()))
+                          .rotateBy(Rotation2d.k180deg)));
+        } else if (ableToBumpAssist) {
+          drivetrain.setControl(
+              drivePerspectiveSnapsOpenLoop
+                  .withVelocityX(speeds.vxMetersPerSecond)
+                  .withVelocityY(speeds.vyMetersPerSecond)
+                  .withTargetDirection(
+                      Rotation2d.fromDegrees(
+                          SwerveAssist.getBumpSnapAngle(speeds.vxMetersPerSecond))));
+        } else if (driveSource.getDriveSourceType()
+            == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP) {
+
+          drivetrain.setControl(
+              driverPerspectiveOpenLoop
+                  .withVelocityX(scoringXSlewRateLimiter.calculate(speeds.vxMetersPerSecond))
+                  .withVelocityY(scoringYSlewRateLimiter.calculate(speeds.vyMetersPerSecond))
+                  .withRotationalRate(speeds.omegaRadiansPerSecond));
+        } else {
+
+          drivetrain.setControl(
+              fieldCentricClosedLoop
                   .withVelocityX(speeds.vxMetersPerSecond)
                   .withVelocityY(speeds.vyMetersPerSecond)
                   .withRotationalRate(speeds.omegaRadiansPerSecond));
