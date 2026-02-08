@@ -33,7 +33,7 @@ public interface PathTracker {
    *
    * @param points The new list of points to store.
    */
-  public void resetAndSetPoints(List<AutoPoint> points);
+  public void resetAndSetPoints(List<? extends AutoPoint<?>> points);
 
   /**
    * Runs once per loop cycle to update the tracker with the current robot state.

@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class AutoSegmentForever extends AutoSegment {
-  public AutoSegmentForever(List<AutoPoint> points, Optional<AutoConstraintOptions> constraints) {
+  public AutoSegmentForever(
+      List<AutoPoint<?>> points, Optional<AutoConstraintOptions> constraints) {
     super(points, constraints);
   }
 

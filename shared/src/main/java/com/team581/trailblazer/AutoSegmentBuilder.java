@@ -10,10 +10,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class AutoSegmentBuilder {
-  private final List<AutoPoint> points;
+  private final List<AutoPoint<?>> points;
   private Optional<AutoConstraintOptions> constraints = Optional.empty();
 
-  AutoSegmentBuilder(List<AutoPoint> waypoints) {
+  AutoSegmentBuilder(List<AutoPoint<?>> waypoints) {
     this.points = waypoints;
   }
 

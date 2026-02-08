@@ -6,48 +6,57 @@ import edu.wpi.first.math.geometry.Pose2d;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public record AutoPoint(
+public record AutoPoint<T extends Enum<T>>(
     Supplier<Point> poseSupplier,
     Optional<AutoConstraintOptions> constraints,
-    Optional<PoseErrorTolerance> transitionTolerance) {
-  public static AutoPoint of(Point pose) {
-    return new AutoPoint(() -> pose, Optional.empty(), Optional.empty());
+    Optional<PoseErrorTolerance> transitionTolerance,
+    Optional<T> marker) {
+  public static AutoPoint<EmptyMarker> of(Point pose) {
+    return new AutoPoint<EmptyMarker>(
+        () -> pose, Optional.empty(), Optional.empty(), Optional.empty());
   }
 
-  public static AutoPoint of(Supplier<Point> poseSupplier) {
-    return new AutoPoint(poseSupplier, Optional.empty(), Optional.empty());
+  public static AutoPoint<EmptyMarker> of(Supplier<Point> poseSupplier) {
+    return new AutoPoint<EmptyMarker>(
+        poseSupplier, Optional.empty(), Optional.empty(), Optional.empty());
   }
 
-  public static AutoPoint ofBlue(Pose2d pose) {
+  public static AutoPoint<EmptyMarker> ofBlue(Pose2d pose) {
     return of(Point.ofBlue(pose));
   }
 
-  public static AutoPoint ofRed(Pose2d pose) {
+  public static AutoPoint<EmptyMarker> ofRed(Pose2d pose) {
     return of(Point.ofRed(pose));
   }
 
-  public AutoPoint withLinearConstraints(double maxVelocity, double maxAcceleration) {
-    return new AutoPoint(
+  public AutoPoint<T> withLinearConstraints(double maxVelocity, double maxAcceleration) {
+    return new AutoPoint<T>(
         poseSupplier,
         Optional.of(
             constraints
                 .orElseGet(AutoConstraintOptions::new)
                 .withLinearConstraints(maxVelocity, maxAcceleration)),
-        transitionTolerance);
+        transitionTolerance,
+        marker);
   }
 
-  public AutoPoint withAngularConstraints(
+  public AutoPoint<T> withAngularConstraints(
       double maxAngularVelocity, double maxAngularAcceleration) {
-    return new AutoPoint(
+    return new AutoPoint<T>(
         poseSupplier,
         Optional.of(
             constraints
                 .orElseGet(AutoConstraintOptions::new)
                 .withAngularConstraints(maxAngularVelocity, maxAngularAcceleration)),
-        transitionTolerance);
+        transitionTolerance,
+        marker);
   }
 
-  public AutoPoint withTransitionTolerance(PoseErrorTolerance transitionTolerance) {
-    return new AutoPoint(poseSupplier, constraints, Optional.of(transitionTolerance));
+  public AutoPoint<T> withTransitionTolerance(PoseErrorTolerance transitionTolerance) {
+    return new AutoPoint<T>(poseSupplier, constraints, Optional.of(transitionTolerance), marker);
+  }
+
+  public <E extends Enum<E>> AutoPoint<E> withMarker(E marker) {
+    return new AutoPoint<E>(poseSupplier, constraints, transitionTolerance, Optional.of(marker));
   }
 }

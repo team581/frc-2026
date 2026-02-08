@@ -26,7 +26,8 @@ import org.jspecify.annotations.Nullable;
  * </ol>
  */
 public class Trailblazer {
-  public static AutoSegmentBuilder segment(AutoPoint... waypoints) {
+  @SafeVarargs
+  public static AutoSegmentBuilder segment(AutoPoint<?>... waypoints) {
     return new AutoSegmentBuilder(List.of(waypoints));
   }
 
@@ -93,6 +94,22 @@ public class Trailblazer {
         segment.points.get(currentIndex),
         segment,
         currentIndex);
+  }
+
+  /**
+   * Check if the robot has passed or reached the point with the given marker in the current
+   * segment.
+   *
+   * @param marker The marker to check.
+   * @return Whether the robot has passed the marker. Returns false if no segment is active or if
+   *     the marker enum type doesn't match the current segment's marker type.
+   */
+  public boolean passedMarker(Enum<?> marker) {
+    if (currentSegment.isEmpty()) {
+      return false;
+    }
+
+    return currentSegment.orElseThrow().passedMarker(currentIndex, marker);
   }
 
   public void setActiveSegment(AutoSegment segment) {

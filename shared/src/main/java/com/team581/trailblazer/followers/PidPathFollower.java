@@ -31,7 +31,7 @@ public class PidPathFollower implements PathFollower {
       ChassisSpeeds currentSpeeds,
       Pose2d currentPose,
       Pose2d targetPose,
-      AutoPoint currentPoint,
+      AutoPoint<?> currentPoint,
       AutoSegment segment,
       int currentPointIndex) {
     // Get constraints for the current point

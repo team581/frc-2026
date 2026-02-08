@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class AutoSegmentLastPointEnd extends AutoSegment {
   public AutoSegmentLastPointEnd(
-      List<AutoPoint> points, Optional<AutoConstraintOptions> constraints) {
+      List<AutoPoint<?>> points, Optional<AutoConstraintOptions> constraints) {
     super(points, constraints);
   }
 

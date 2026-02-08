@@ -24,7 +24,7 @@ public interface PathFollower {
       ChassisSpeeds currentSpeeds,
       Pose2d currentPose,
       Pose2d targetPose,
-      AutoPoint currentPoint,
+      AutoPoint<?> currentPoint,
       AutoSegment segment,
       int currentPointIndex);
 

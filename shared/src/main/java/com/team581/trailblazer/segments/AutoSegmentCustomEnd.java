@@ -12,7 +12,7 @@ public class AutoSegmentCustomEnd extends AutoSegment {
   private final PoseErrorTolerance finishedTolerance;
 
   public AutoSegmentCustomEnd(
-      List<AutoPoint> points,
+      List<AutoPoint<?>> points,
       Optional<AutoConstraintOptions> constraints,
       PoseErrorTolerance finishedTolerance) {
     super(points, constraints);
