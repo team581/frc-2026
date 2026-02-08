@@ -9,7 +9,7 @@ public class FeatureFlags {
 
   public static final BooleanSupplier BUMP_ASSIST = FeatureFlag.of("BumpAssist", true);
   public static final BooleanSupplier TRENCH_ASSIST = FeatureFlag.of("TrenchAssist", true);
-  public static final BooleanSupplier HOPPER_SHUFFLING = FeatureFlag.of("HopperShuffling", false);
+  public static final BooleanSupplier HOPPER_SHUFFLING = FeatureFlag.of("HopperShuffling", true);
   public static final BooleanSupplier INTAKE_DIRECTIONAL_SNAPS =
       FeatureFlag.of("IntakeDirectionalSnaps", false);
 

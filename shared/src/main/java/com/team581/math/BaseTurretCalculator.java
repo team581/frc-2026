@@ -14,7 +14,9 @@ public class BaseTurretCalculator {
       double rotorCalibratedOffset,
       double motorToTurretRatio,
       double encoderToTurretRatio,
-      double motorRotationResolution) {
+      double motorRotationResolution,
+      double minTurretAngle,
+      double maxTurretAngle) {
     double rotor_position = (turretMotorPosition - rotorCalibratedOffset) % 1;
     double rotorRotationsRelativeToTurret = rotor_position / motorToTurretRatio;
     double roughAbsolutePosition = turretEncoderPosition * encoderToTurretRatio;
@@ -45,7 +47,7 @@ public class BaseTurretCalculator {
       turretPos = potentialMotorPosB;
     }
 
-    return turretPos;
+    return MathUtil.inputModulus(turretPos, minTurretAngle, maxTurretAngle);
   }
 
   public static double calculateSwerveTurretCompensationAngle(

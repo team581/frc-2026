@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import java.util.Optional;
 
 public class FmsUtil {
-
   // Match period shift times in seconds
   private static final double TRANSITION_SHIFT_TIME_STAMP = 20.0;
   private static final double SHIFT1TIME_STAMP = 30.0;
@@ -16,7 +15,13 @@ public class FmsUtil {
   private static final double END_GAME_TIME_STAMP = 130.0;
 
   public static boolean isHubActive(double timeSinceMatchStart) {
-    return isHubActive(timeSinceMatchStart, isAutoWinner());
+    var maybeIsAutoWinner = isAutoWinner();
+
+    if (maybeIsAutoWinner.isEmpty()) {
+      return true;
+    }
+
+    return isHubActive(timeSinceMatchStart, maybeIsAutoWinner.orElseThrow());
   }
 
   public static boolean isRedAlliance() {
@@ -41,24 +46,21 @@ public class FmsUtil {
     };
   }
 
-  static boolean isHubActive(double timeSinceMatchStart, Optional<Boolean> isAutoWinner) {
-    if (isAutoWinner.isEmpty()) {
-      return true;
-    }
+  static boolean isHubActive(double timeSinceMatchStart, boolean isAutoWinner) {
     if (timeSinceMatchStart >= END_GAME_TIME_STAMP) {
       return true;
     }
     if (timeSinceMatchStart >= SHIFT4TIME_STAMP) {
-      return isAutoWinner.orElseThrow();
+      return isAutoWinner;
     }
     if (timeSinceMatchStart >= SHIFT3TIME_STAMP) {
-      return !isAutoWinner.orElseThrow();
+      return !isAutoWinner;
     }
     if (timeSinceMatchStart >= SHIFT2TIME_STAMP) {
-      return isAutoWinner.orElseThrow();
+      return isAutoWinner;
     }
     if (timeSinceMatchStart >= SHIFT1TIME_STAMP) {
-      return !isAutoWinner.orElseThrow();
+      return !isAutoWinner;
     }
     if (timeSinceMatchStart >= TRANSITION_SHIFT_TIME_STAMP) {
       return true;

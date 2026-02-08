@@ -192,6 +192,10 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     return fieldRelativeSpeeds;
   }
 
+  public void climbAssistDriveRequest() {
+    setStateFromRequest(SwerveState.CLIMB_ASSIST);
+  }
+
   @Override
   protected void collectInputs() {
     drivetrainState = drivetrain.getState();

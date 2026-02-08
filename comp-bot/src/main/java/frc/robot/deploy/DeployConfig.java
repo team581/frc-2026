@@ -3,6 +3,7 @@ package frc.robot.deploy;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -21,18 +22,33 @@ public class DeployConfig {
 
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIG =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(1))
+          .withFeedback(
+              new FeedbackConfigs()
+                  .withSensorToMechanismRatio((40.0 * 8.0) * (Math.PI * (2 * 0.5))))
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Brake)
                   .withInverted(InvertedValue.Clockwise_Positive))
           .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(1))
+          .withMotionMagic(
+              new MotionMagicConfigs()
+                  .withMotionMagicCruiseVelocity(10.0)
+                  .withMotionMagicAcceleration(10.0))
           .withSlot0(new Slot0Configs().withKP(0).withKV(0).withKG(0));
   public static final TalonFXConfiguration RIGHT_MOTOR_CONFIG =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(1))
-          .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
+          .withFeedback(
+              new FeedbackConfigs()
+                  .withSensorToMechanismRatio((40.0 * 8.0) * (Math.PI * (2 * 0.5))))
+          .withMotorOutput(
+              new MotorOutputConfigs()
+                  .withNeutralMode(NeutralModeValue.Brake)
+                  .withInverted(InvertedValue.CounterClockwise_Positive))
           .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(1))
+          .withMotionMagic(
+              new MotionMagicConfigs()
+                  .withMotionMagicCruiseVelocity(10.0)
+                  .withMotionMagicAcceleration(10.0))
           .withSlot0(new Slot0Configs().withKP(0).withKV(0).withKG(0));
   // TODO: Discuss/set CANrange config during bringup
   public static final CANrangeConfiguration CAN_RANGE_CONFIG = new CANrangeConfiguration();

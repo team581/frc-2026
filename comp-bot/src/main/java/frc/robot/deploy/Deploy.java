@@ -1,6 +1,6 @@
 package frc.robot.deploy;
 
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
@@ -12,6 +12,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -19,8 +20,8 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
   private final CANrange hopperCANRange;
-  private final PositionVoltage positionVoltageRequest =
-      new PositionVoltage(0).withEnableFOC(false);
+  private final MotionMagicVoltage positionVoltageRequest =
+      new MotionMagicVoltage(0).withEnableFOC(false);
   private DeployState storedState = DeployState.UNHOMED;
   private double leftMotorPosition = 0.0;
   private double rightMotorPosition = 0.0;
@@ -190,7 +191,11 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     leftMotorPosition = leftMotor.getPosition().getValueAsDouble();
     rightMotorPosition = rightMotor.getPosition().getValueAsDouble();
     hopperCANRangeDistance = Units.metersToInches(hopperCANRange.getDistance().getValueAsDouble());
-    ableToHopperShuffle = hopperCANRangeDistance < DeployConfig.CAPACITY_DISTANCE_THRESHOLD;
+    if (RobotBase.isSimulation()) {
+      ableToHopperShuffle = true;
+    } else {
+      ableToHopperShuffle = hopperCANRangeDistance < DeployConfig.CAPACITY_DISTANCE_THRESHOLD;
+    }
   }
 
   @Override

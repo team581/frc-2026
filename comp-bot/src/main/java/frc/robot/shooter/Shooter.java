@@ -2,6 +2,7 @@ package frc.robot.shooter;
 
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
@@ -129,7 +130,9 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
         SimKit.velocityMechanism(
             "shooter",
             (mechanism) ->
-                mechanism.addMotor(leftMotor).addMotor(rightMotor).withMinVelocity(1000));
+                mechanism
+                    .addMotor(leftMotor, ChassisReference.CounterClockwise_Positive)
+                    .addMotor(rightMotor, ChassisReference.Clockwise_Positive));
 
     shooterSimulation.update();
   }

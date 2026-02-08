@@ -2,8 +2,8 @@ package frc.robot.dye_rotor;
 
 public enum DyeRotorState {
   IDLE(0.0, 0.0, 0.0),
-  WARMUP(0.0, 0.0, 0.0),
-  SHOOTING(0.0, 0.0, 0.0),
+  WARMUP(60.0, 0.0, 2.0),
+  SHOOTING(150.0, 150.0, 4.0),
   UNJAM(0.0, 0.0, 0.0);
 
   public final double rotorRPM;

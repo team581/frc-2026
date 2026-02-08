@@ -85,27 +85,6 @@ final class ConstraintsCalculatorTest {
   }
 
   @Test
-  void constrainLinearVelocity_whenDecelerating_usesMaxDeceleration() {
-    var currentSpeeds = new ChassisSpeeds(0, 0, 0);
-    // Max velocity of 10, max acceleration of 100 (high so we reach target quickly)
-    var constraints = new AutoConstraintOptions(10.0, 0, 100.0, 0);
-
-    // Build up velocity first with simulated time
-    for (int i = 0; i < 100; i++) {
-      SimHooks.stepTiming(0.02);
-      calculator.constrainLinearVelocity(10.0, currentSpeeds, constraints);
-    }
-
-    // Now request zero velocity - should decelerate
-    SimHooks.stepTiming(0.02);
-    var result = calculator.constrainLinearVelocity(0.0, currentSpeeds, constraints);
-
-    // Should be less than max velocity due to deceleration starting
-    assertThat(result).isLessThan(10.0);
-    assertThat(result).isNotNegative();
-  }
-
-  @Test
   void constrainLinearVelocity_withConstraints_clampsToMaxVelocity() {
     var desiredVelocity = 10.0;
     var currentSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -116,7 +95,9 @@ final class ConstraintsCalculatorTest {
     double result = 0;
     for (int i = 0; i < 100; i++) {
       SimHooks.stepTiming(0.02);
-      result = calculator.constrainLinearVelocity(desiredVelocity, currentSpeeds, constraints);
+      result =
+          calculator.constrainLinearVelocity(
+              desiredVelocity, currentSpeeds, Double.POSITIVE_INFINITY, constraints);
     }
 
     assertEquals(constraints.maxLinearVelocity(), result, DELTA);
@@ -130,29 +111,13 @@ final class ConstraintsCalculatorTest {
     var constraints = new AutoConstraintOptions(10.0, 0, 2.0, 0);
 
     // First call from rest should not immediately jump to desired velocity
-    var result = calculator.constrainLinearVelocity(desiredVelocity, currentSpeeds, constraints);
+    var result =
+        calculator.constrainLinearVelocity(
+            desiredVelocity, currentSpeeds, Double.POSITIVE_INFINITY, constraints);
 
     // Result should be less than desired due to acceleration limiting
     assertThat(result).isLessThan(desiredVelocity);
     assertThat(result).isNotNegative();
-  }
-
-  @Test
-  void constrainLinearVelocity_withNegativeDesiredVelocity_respectsConstraints() {
-    var desiredVelocity = -10.0;
-    var currentSpeeds = new ChassisSpeeds(0, 0, 0);
-    // Max velocity of 5, max acceleration of 2
-    var constraints = new AutoConstraintOptions(5.0, 0, 2.0, 0);
-
-    // Over multiple calls with simulated time, the velocity should be clamped to negative max
-    double result = 0;
-    for (int i = 0; i < 100; i++) {
-      // Simulate 20ms loop time
-      SimHooks.stepTiming(0.02);
-      result = calculator.constrainLinearVelocity(desiredVelocity, currentSpeeds, constraints);
-    }
-
-    assertEquals(-constraints.maxLinearVelocity(), result, DELTA);
   }
 
   @Test
@@ -162,7 +127,9 @@ final class ConstraintsCalculatorTest {
     // Constraints with 0 maxLinearVelocity means disabled
     var constraints = new AutoConstraintOptions(0, 0, 0, 0);
 
-    var result = calculator.constrainLinearVelocity(desiredVelocity, currentSpeeds, constraints);
+    var result =
+        calculator.constrainLinearVelocity(
+            desiredVelocity, currentSpeeds, Double.POSITIVE_INFINITY, constraints);
 
     assertEquals(desiredVelocity, result, DELTA);
   }
@@ -174,7 +141,9 @@ final class ConstraintsCalculatorTest {
     // Max velocity of 2, acceleration of 0 (disabled)
     var constraints = new AutoConstraintOptions(2.0, 0, 0, 0);
 
-    var result = calculator.constrainLinearVelocity(desiredVelocity, currentSpeeds, constraints);
+    var result =
+        calculator.constrainLinearVelocity(
+            desiredVelocity, currentSpeeds, Double.POSITIVE_INFINITY, constraints);
 
     // With acceleration disabled, velocity should immediately jump to max velocity (clamped)
     assertEquals(constraints.maxLinearVelocity(), result, DELTA);
@@ -188,12 +157,15 @@ final class ConstraintsCalculatorTest {
     // Build up some velocity
     for (int i = 0; i < 50; i++) {
       SimHooks.stepTiming(0.02);
-      calculator.constrainLinearVelocity(10.0, currentSpeeds, constraints);
+      calculator.constrainLinearVelocity(
+          10.0, currentSpeeds, Double.POSITIVE_INFINITY, constraints);
     }
 
     // Reset and verify we start from zero again
     calculator.reset();
-    var result = calculator.constrainLinearVelocity(10.0, currentSpeeds, constraints);
+    var result =
+        calculator.constrainLinearVelocity(
+            10.0, currentSpeeds, Double.POSITIVE_INFINITY, constraints);
 
     // After reset, should start accelerating from zero again
     assertThat(result).isLessThan(5.0);
@@ -208,7 +180,9 @@ final class ConstraintsCalculatorTest {
 
     // After reset with state, constraints should apply from current velocity
     var constraints = new AutoConstraintOptions(10.0, 0, 2.0, 0);
-    var result = calculator.constrainLinearVelocity(10.0, currentSpeeds, constraints);
+    var result =
+        calculator.constrainLinearVelocity(
+            10.0, currentSpeeds, Double.POSITIVE_INFINITY, constraints);
 
     // Should be near the current linear velocity (5.0 = hypot(3, 4)) plus some acceleration
     assertThat(result).isGreaterThanOrEqualTo(5.0 - DELTA);

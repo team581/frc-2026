@@ -74,10 +74,12 @@ public final class VelocityMechanism {
             accelerationLimit,
             -accelerationLimit);
 
-    previousTimestamp = MathSharedStore.getTimestamp();
+    var now = MathSharedStore.getTimestamp();
+    var dt = now - previousTimestamp;
+    previousTimestamp = now;
 
     for (var motor : devices) {
-      motor.applyVelocity(newVelocity);
+      motor.applyVelocity(newVelocity, dt);
     }
   }
 

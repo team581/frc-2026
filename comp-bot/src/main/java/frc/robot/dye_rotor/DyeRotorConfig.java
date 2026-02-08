@@ -23,11 +23,13 @@ public class DyeRotorConfig {
 
   public static final TalonFXConfiguration ROTOR_MOTOR_CONFIG =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(1))
+          .withFeedback(
+              new FeedbackConfigs()
+                  .withSensorToMechanismRatio((40.0 * 36.0 * 84.0) / (8.0 * 18.0 * 18.0)))
           .withMotionMagic(
               new MotionMagicConfigs()
-                  .withMotionMagicCruiseVelocity(0.0)
-                  .withMotionMagicAcceleration(0.0))
+                  .withMotionMagicCruiseVelocity(10.0)
+                  .withMotionMagicAcceleration(10.0))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withSupplyCurrentLimitEnable(true)
@@ -42,7 +44,7 @@ public class DyeRotorConfig {
 
   public static final TalonFXConfiguration VERTICAL_MOTOR_CONFIG =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(2))
+          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(12.0 / 18.0))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withSupplyCurrentLimitEnable(true)
@@ -56,7 +58,7 @@ public class DyeRotorConfig {
 
   public static final TalonFXConfiguration HORIZONTAL_MOTOR_CONFIG =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(1))
+          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(15.0 / 15.0))
           .withMotionMagic(
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(0.0)

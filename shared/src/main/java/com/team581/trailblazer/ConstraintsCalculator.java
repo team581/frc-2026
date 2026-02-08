@@ -1,9 +1,8 @@
 package com.team581.trailblazer;
 
 import com.team581.math.MathHelpers;
-import com.team581.math.SlewRateLimiterStateless;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathSharedStore;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,13 +15,12 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * constraints (using a profiled PID controller).
  */
 public class ConstraintsCalculator {
-  // Assume we can decelerate at 5m/s/s to allow stopping quickly
-  private static final double MAX_DECELERATION = -5;
 
   private final ProfiledPIDController profiledAngularController;
 
-  private double lastLinearVelocity = 0;
-  private double lastLinearVelocityTimestamp = MathSharedStore.getTimestamp();
+  private double lastTimestamp = MathSharedStore.getTimestamp();
+  private double lastVelocity = 0.0;
+  private double lastCommandedVelocity = 0.0;
 
   /**
    * Creates a new ConstraintsCalculator.
@@ -58,6 +56,7 @@ public class ConstraintsCalculator {
       ChassisSpeeds currentSpeeds,
       AutoConstraintOptions constraints) {
     if (constraints.maxAngularVelocity() > 0) {
+      DogLog.timestamp("Constrainer/RunConstraint");
       return profiledAngularController.calculate(
           currentAngleRadians,
           new TrapezoidProfile.State(targetAngleRadians, 0),
@@ -79,46 +78,57 @@ public class ConstraintsCalculator {
    * @return The constrained linear velocity in m/s
    */
   public double constrainLinearVelocity(
-      double desiredVelocity, ChassisSpeeds currentSpeeds, AutoConstraintOptions constraints) {
-    double constrainedVelocity;
+      double desiredVelocity,
+      ChassisSpeeds currentSpeeds,
+      double distanceToEnd,
+      AutoConstraintOptions constraints) {
 
-    if (constraints.maxLinearVelocity() > 0) {
-      // First, ensure that the requested velocity goal is within the max velocity
-      var clampedVelocity =
-          MathUtil.clamp(
-              desiredVelocity, -constraints.maxLinearVelocity(), constraints.maxLinearVelocity());
-
-      // Apply acceleration constraints only if acceleration limiting is enabled
-      if (constraints.maxLinearAcceleration() > 0) {
-        // Slew rate limiter to apply acceleration constraints
-        constrainedVelocity =
-            SlewRateLimiterStateless.calculate(
-                clampedVelocity,
-                lastLinearVelocity,
-                lastLinearVelocityTimestamp,
-                constraints.maxLinearAcceleration(),
-                MAX_DECELERATION);
-      } else {
-        // No acceleration limiting, use clamped velocity directly
-        constrainedVelocity = clampedVelocity;
-      }
-
-      lastLinearVelocity = constrainedVelocity;
-    } else {
-      // Reset the state when constraints are not active
-      lastLinearVelocity = MathHelpers.getLinearVelocity(currentSpeeds);
-      constrainedVelocity = desiredVelocity;
+    if (constraints.maxLinearVelocity() <= 0) {
+      return desiredVelocity;
     }
 
-    lastLinearVelocityTimestamp = MathSharedStore.getTimestamp();
+    if (constraints.maxLinearAcceleration() <= 0) {
+      return Math.min(constraints.maxLinearVelocity(), desiredVelocity);
+    }
 
-    return constrainedVelocity;
+    var originalSign = Math.signum(desiredVelocity);
+    desiredVelocity = Math.abs(desiredVelocity);
+    var currentVelocity =
+        Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+    DogLog.log("Trailblazer/Follower/CurrentVelocity", currentVelocity);
+
+    // Calculate how much we can accelerate this loop
+    // New Velocity = Old Velocity + (Acceleration * dt)
+    var currentTimestamp = MathSharedStore.getTimestamp();
+    var kDt = Math.min(currentTimestamp - lastTimestamp, 0.04);
+    var currentAccel = (currentVelocity - lastVelocity) / kDt;
+    DogLog.log("Trailblazer/Follower/CurrentAccel", currentAccel);
+
+    lastTimestamp = currentTimestamp;
+
+    var maxReachableVelocity =
+        Math.max((lastCommandedVelocity + (constraints.maxLinearAcceleration() * kDt)), 0.5);
+
+    // Calculate velocity needed to stop in time
+    var maxStoppingVelocity = Math.sqrt(2 * constraints.maxLinearAcceleration() * distanceToEnd);
+
+    // Apply constraints
+    var maxVelocityLimitedWantedVelocity =
+        Math.min(desiredVelocity, constraints.maxLinearVelocity());
+
+    var linearVelocity = Math.min(maxVelocityLimitedWantedVelocity, maxReachableVelocity);
+    linearVelocity = Math.min(linearVelocity, maxStoppingVelocity);
+
+    lastVelocity = currentVelocity;
+    lastCommandedVelocity = linearVelocity;
+    return Math.copySign(linearVelocity, originalSign);
   }
 
   /** Resets the internal state of the constrainer. */
   public void reset() {
-    lastLinearVelocity = 0;
-    lastLinearVelocityTimestamp = MathSharedStore.getTimestamp();
+    lastCommandedVelocity = 0.0;
+    lastVelocity = 0.0;
+    lastTimestamp = MathSharedStore.getTimestamp();
     profiledAngularController.reset(0, 0);
   }
 
@@ -129,8 +139,9 @@ public class ConstraintsCalculator {
    * @param currentAngleRadians The current heading in radians
    */
   public void reset(ChassisSpeeds currentSpeeds, double currentAngleRadians) {
-    lastLinearVelocity = MathHelpers.getLinearVelocity(currentSpeeds);
-    lastLinearVelocityTimestamp = MathSharedStore.getTimestamp();
+    lastCommandedVelocity = MathHelpers.getLinearVelocity(currentSpeeds);
+    lastVelocity = lastCommandedVelocity;
+    lastTimestamp = MathSharedStore.getTimestamp();
     profiledAngularController.reset(currentAngleRadians, currentSpeeds.omegaRadiansPerSecond);
   }
 }

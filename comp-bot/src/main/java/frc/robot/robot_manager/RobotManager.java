@@ -2,6 +2,7 @@ package frc.robot.robot_manager;
 
 import com.team581.math.MathHelpers;
 import com.team581.swerve.SwerveAssist;
+import com.team581.trailblazer.Trailblazer;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
@@ -9,6 +10,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.climber.ClimbLocation;
 import frc.robot.climber.Climber;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
@@ -41,6 +43,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private final Lights lights;
   public final XboxController driverController;
   private final HealthManager health;
+  private final Trailblazer trailblazer;
   private final Climber climber;
 
   private Pose2d robotPose = Pose2d.kZero;
@@ -66,6 +69,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       Lights lights,
       XboxController driverController,
       HealthManager health,
+      Trailblazer trailblazer,
       Climber climber) {
     super(SubsystemPriority.ROBOT_MANAGER, RobotState.IDLE);
     this.shooterHood = shooterHood;
@@ -80,6 +84,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     this.lights = lights;
     this.driverController = driverController;
     this.health = health;
+    this.trailblazer = trailblazer;
     this.climber = climber;
   }
 
@@ -180,7 +185,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
               ? currentState
               : RobotState.PREPARE_FEED;
       case AUTOMATIC_CLIMB_1_LINEUP_L1 -> {
-        if (climber.atGoal()) {
+        if (climber.atGoal() && trailblazer.atGoal(robotPose)) {
           yield RobotState.AUTOMATIC_CLIMB_2_RAISING_L1;
         }
         yield currentState;
@@ -457,7 +462,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         // Set turret behavior separate climbing
         deploy.stowRequest();
         intake.idleRequest();
-        swerve.normalDriveRequest();
+        trailblazer.setActiveSegment(
+            ClimbAssist.getClimbAssistSegment(robotPose, ClimbLocation.CLOSEST));
+        swerve.climbAssistDriveRequest();
         lights.setState(LightsState.CLIMB_1);
         climber.l1LineupRequest();
       }
@@ -625,8 +632,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         // TODO: get turret feed angle
         turret.feedRequest(0);
       }
-      case AUTOMATIC_CLIMB_1_LINEUP_L1,
-          AUTOMATIC_CLIMB_2_RAISING_L1,
+      case AUTOMATIC_CLIMB_1_LINEUP_L1 -> {
+        turret.climbRequest(robotPose);
+        swerve.climbAssistDriveRequest();
+      }
+      case AUTOMATIC_CLIMB_2_RAISING_L1,
           AUTOMATIC_CLIMB_3_HANGING_L1,
           AUTOMATIC_CLIMB_4_RAISING_L2,
           AUTOMATIC_CLIMB_5_HANGING_L2,

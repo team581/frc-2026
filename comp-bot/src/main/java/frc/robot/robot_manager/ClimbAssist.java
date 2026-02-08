@@ -16,21 +16,16 @@ public class ClimbAssist {
   private static final PoseErrorTolerance APPROACH_TOLERANCE =
       new PoseErrorTolerance(Units.inchesToMeters(5.0), Rotation2d.fromDegrees(5));
 
-  private static final double APPROACH_MAX_LINEAR_VELOCITY = 2.0;
-  private static final double FINAL_LINEUP_MAX_VELOCITY = 1.0;
-
-  private static final double MAX_LINEAR_ACCELERATION = 2.0;
+  private static final double MAX_LINEAR_VELOCITY = 2.0;
+  private static final double MAX_LINEAR_ACCELERATION = 1.0;
 
   public static AutoSegment getClimbAssistSegment(Pose2d robot, ClimbLocation location) {
     var goalPoint = location.getEndGoalPoint(robot);
-    var approachPoint = goalPoint.transformBy(APPROACH_TRANSFORM);
+    var approachPoint =
+        goalPoint.transformBy(APPROACH_TRANSFORM).withTransitionTolerance(APPROACH_TOLERANCE);
 
-    return Trailblazer.segment(
-            AutoPoint.of(approachPoint)
-                .withLinearConstraints(APPROACH_MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCELERATION)
-                .withTransitionTolerance(APPROACH_TOLERANCE),
-            AutoPoint.of(goalPoint)
-                .withLinearConstraints(FINAL_LINEUP_MAX_VELOCITY, MAX_LINEAR_ACCELERATION))
-        .untilFinished();
+    return Trailblazer.segment(approachPoint, AutoPoint.of(goalPoint))
+        .withLinearConstraints(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCELERATION)
+        .forever();
   }
 }

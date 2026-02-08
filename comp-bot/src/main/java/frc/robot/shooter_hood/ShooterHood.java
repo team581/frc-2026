@@ -2,6 +2,7 @@ package frc.robot.shooter_hood;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
@@ -96,8 +97,8 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
   protected void collectInputs() {
     measuredAngle = Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
     statorCurrent = motor.getStatorCurrent().getValueAsDouble();
-    scoreAngle = distanceToScoringAngle(scoreDistance);
-    feedAngle = distanceToFeedingAngle(feedDistance);
+    scoreAngle = clamp(distanceToScoringAngle(scoreDistance));
+    feedAngle = clamp(distanceToFeedingAngle(feedDistance));
 
     DogLog.log("ShooterHood/MeasuredAngle", measuredAngle);
     DogLog.log("ShooterHood/ScoreAngle", scoreAngle);
@@ -164,6 +165,8 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
 
       default -> {}
     }
+
+    DogLog.log("ShooterHood/AtGoal", atGoal());
   }
 
   @Override
@@ -173,7 +176,7 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
             "ShooterHood",
             (mechanism) ->
                 mechanism
-                    .addMotor(motor)
+                    .addMotor(motor, ChassisReference.CounterClockwise_Positive)
                     .withMaxPosition(Units.degreesToRotations(ShooterHoodConfig.MAX_ANGLE))
                     .withMinPosition(Units.degreesToRotations(ShooterHoodConfig.MIN_ANGLE)));
 

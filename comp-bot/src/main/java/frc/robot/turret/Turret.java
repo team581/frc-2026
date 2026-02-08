@@ -34,6 +34,9 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     super(SubsystemPriority.TURRET, TurretState.UNHOMED);
     this.vision = vision;
 
+    motor.getConfigurator().apply(TurretConfig.MOTOR_CONFIG);
+    encoder.getConfigurator().apply(TurretConfig.ENCODER_CONFIG);
+
     TunablePid.register("Turret", motor, TurretConfig.MOTOR_CONFIG);
 
     this.motor = motor;
@@ -99,6 +102,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
       }
       default -> {}
     }
+
+    DogLog.log("Turret/AtGoal", atGoal());
   }
 
   public void setState(TurretState newState) {
