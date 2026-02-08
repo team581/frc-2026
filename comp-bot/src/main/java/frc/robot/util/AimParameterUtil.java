@@ -3,6 +3,8 @@ package frc.robot.util;
 import com.team581.math.ShootOnTheMove;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
+
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.shooter.ShooterConfig;
@@ -42,7 +44,13 @@ public class AimParameterUtil {
 
   public static AimingParameters getScoringParameters(
       Pose2d robot, ChassisSpeeds fieldRelativeSpeeds, double currentTimeofFlight) {
-    var hubTranslation =
+    var hubTranslationTangential =
+        SCORING_SOTM.getVelocityCompensatedGoal(
+            robot.getTranslation(),
+            FieldUtil.HUB_POSE.getPose().getTranslation(),
+            fieldRelativeSpeeds);
+
+    var hubTranslationRadial =
         SCORING_SOTM.getVelocityCompensatedGoal(
             robot.getTranslation(),
             FieldUtil.HUB_POSE.getPose().getTranslation(),
@@ -50,8 +58,17 @@ public class AimParameterUtil {
 
     var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
     double turretAngle =
-        TurretCalculator.calculateTurretAimingAngle(robotPoseInAllianceZone, hubTranslation);
-    double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
+        TurretCalculator.calculateTurretAimingAngle(
+            robotPoseInAllianceZone, hubTranslationTangential);
+    double distanceToGoal =
+        robotPoseInAllianceZone.getTranslation().getDistance(hubTranslationRadial);
+
+        DogLog.log("AimParameterUtil/RadialHubTranslation", new Pose2d(hubTranslationRadial.getX(), hubTranslationRadial.getY(), hubTranslationRadial.getAngle()));
+        DogLog.log("AimParameterUtil/TangentialHubTranslation", new Pose2d(hubTranslationTangential.getX(), hubTranslationTangential.getY(), hubTranslationTangential.getAngle()));
+        DogLog.log("AimParameterUtil/DistanceToGoal", distanceToGoal);
+        DogLog.log("AimParameterUtil/TurretAngle", turretAngle);
+
+
 
     return new AimingParameters(turretAngle, distanceToGoal);
   }
