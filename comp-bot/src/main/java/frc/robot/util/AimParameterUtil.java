@@ -3,7 +3,6 @@ package frc.robot.util;
 import com.team581.math.ShootOnTheMove;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -63,12 +62,20 @@ public class AimParameterUtil {
     double distanceToGoal =
         robotPoseInAllianceZone.getTranslation().getDistance(hubTranslationRadial);
 
-        DogLog.log("AimParameterUtil/RadialHubTranslation", new Pose2d(hubTranslationRadial.getX(), hubTranslationRadial.getY(), hubTranslationRadial.getAngle()));
-        DogLog.log("AimParameterUtil/TangentialHubTranslation", new Pose2d(hubTranslationTangential.getX(), hubTranslationTangential.getY(), hubTranslationTangential.getAngle()));
-        DogLog.log("AimParameterUtil/DistanceToGoal", distanceToGoal);
-        DogLog.log("AimParameterUtil/TurretAngle", turretAngle);
-
-
+    DogLog.log(
+        "AimParameterUtil/RadialHubTranslation",
+        new Pose2d(
+            hubTranslationRadial.getX(),
+            hubTranslationRadial.getY(),
+            hubTranslationRadial.getAngle()));
+    DogLog.log(
+        "AimParameterUtil/TangentialHubTranslation",
+        new Pose2d(
+            hubTranslationTangential.getX(),
+            hubTranslationTangential.getY(),
+            hubTranslationTangential.getAngle()));
+    DogLog.log("AimParameterUtil/DistanceToGoal", distanceToGoal);
+    DogLog.log("AimParameterUtil/TurretAngle", turretAngle);
 
     return new AimingParameters(turretAngle, distanceToGoal);
   }
