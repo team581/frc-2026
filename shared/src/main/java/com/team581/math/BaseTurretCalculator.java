@@ -22,7 +22,7 @@ public class BaseTurretCalculator {
     double roughAbsolutePosition = turretEncoderPosition * encoderToTurretRatio;
 
     int potentialMotorWrapA =
-        (int) (roughAbsolutePosition / (1 / motorRotationResolution)); // motor_rotation_resolution;
+        (int) (roughAbsolutePosition / motorRotationResolution); // motor_rotation_resolution;
     double potentialMotorWrapB = potentialMotorWrapA - 1;
     double potentialMotorWrapC = potentialMotorWrapA + 1;
 

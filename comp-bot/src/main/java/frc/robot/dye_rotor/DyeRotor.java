@@ -42,7 +42,6 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     TunablePid.register("DyeRotor/Rotor", rotorMotor, DyeRotorConfig.ROTOR_MOTOR_CONFIG);
     TunablePid.register(
         "DyeRotor/Horizontal", horizontalMotor, DyeRotorConfig.HORIZONTAL_MOTOR_CONFIG);
-    TunablePid.register("DyeRotor/Vertical", verticalMotor, DyeRotorConfig.VERTICAL_MOTOR_CONFIG);
 
     this.rotorMotor = rotorMotor;
     this.horizontalMotor = horizontalMotor;
@@ -74,7 +73,7 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     DogLog.log("DyeRotor/Horizontal/RPM", horizontalMotorRpm);
     DogLog.log("DyeRotor/Horizontal/GoalRPM", state.horizontalRPM);
     DogLog.log("DyeRotor/Horizontal/Voltage", horizontalMotor.getMotorVoltage().getValueAsDouble());
-    DogLog.log("DyeRotor/Vertical/GoalVoltage", state.verticalVoltage);
+    DogLog.log("DyeRotor/Vertical/GoalVoltage", state.getVerticalVoltage());
     DogLog.log("DyeRotor/Vertical/Voltage", verticalMotor.getMotorVoltage().getValueAsDouble());
     DogLog.log("DyeRotor/AtGoal", atGoal());
   }
@@ -84,7 +83,7 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     rotorMotor.setControl(rotorVelocityRequest.withVelocity(newState.rotorRPM / 60.0));
     horizontalMotor.setControl(
         horizontalVelocityRequest.withVelocity(newState.horizontalRPM / 60.0));
-    verticalMotor.setVoltage(newState.verticalVoltage);
+    verticalMotor.setVoltage(newState.getVerticalVoltage());
   }
 
   @Override

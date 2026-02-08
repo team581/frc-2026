@@ -15,6 +15,9 @@ public class FeatureFlags {
 
   public static final BooleanSupplier INTAKE_WALL_SNAPS = FeatureFlag.of("IntakeWallSnaps", false);
 
+  public static final BooleanSupplier LOOKAHEAD_SCORING =
+      FeatureFlag.of("TimeOfFlightInHubActivity", false);
+
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
 
   private FeatureFlags() {}

@@ -44,10 +44,10 @@ public class Robot extends Base581Robot {
           new CameraConfig(
               LimelightModel.FOUR,
               false,
+              Units.inchesToMeters(20.432677),
               Units.inchesToMeters(0.0),
               Units.inchesToMeters(0.0),
-              Units.inchesToMeters(0.0),
-              0.0,
+              30.0,
               0.0,
               0.0));
   private final Limelight backLimelight =

@@ -2,6 +2,7 @@ package frc.robot.intake;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team581.util.state_machines.StateMachineSubsystem;
+import dev.doglog.DogLog;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class Intake extends StateMachineSubsystem<IntakeState> {
@@ -29,9 +30,24 @@ public class Intake extends StateMachineSubsystem<IntakeState> {
   @Override
   protected void afterTransition(IntakeState newState) {
     switch (newState) {
-      case IDLE -> motor.disable();
-      case INTAKING -> motor.setVoltage(12);
-      case SHOOTING -> motor.setVoltage(12);
+      case IDLE -> {
+        motor.disable();
+        DogLog.log("Intake/Voltage", 0.0);
+      }
+      case INTAKING -> {
+        motor.setVoltage(12);
+        DogLog.log("Intake/Voltage", 12.0);
+      }
+      case SHOOTING -> {
+        motor.setVoltage(12);
+        DogLog.log("Intake/Voltage", 12.0);
+      }
     }
+  }
+
+  @Override
+  protected void collectInputs() {
+    DogLog.log("Intake/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    DogLog.log("Intake/VelocityRPM", motor.getVelocity().getValueAsDouble() * 60.0);
   }
 }

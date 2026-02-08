@@ -14,6 +14,8 @@ public class FmsUtil {
   private static final double SHIFT4TIME_STAMP = 105.0;
   private static final double END_GAME_TIME_STAMP = 130.0;
 
+  public static final double MATCH_TIME_AT_TELEOP_START = 23.0;
+
   public static boolean isHubActive(double timeSinceMatchStart) {
     var maybeIsAutoWinner = isAutoWinner();
 

@@ -15,15 +15,8 @@ public class AimParameterUtil {
   private static final ShootOnTheMove SCORING_SOTM =
       new ShootOnTheMove(ShooterConfig.DISTANCE_TO_SCORE_TOF);
 
-  public static double getFeedingDistance(FeedLocation feedLocation, Pose2d robot) {
-    return robot.getTranslation().getDistance(feedLocation.getTranslation(robot));
-  }
-
   public static AimingParameters getFeedingParameters(
-      FeedLocation feedLocation,
-      Pose2d robot,
-      ChassisSpeeds fieldRelativeSpeeds,
-      double currentTimeofFlight) {
+      FeedLocation feedLocation, Pose2d robot, ChassisSpeeds fieldRelativeSpeeds) {
     var feedTranslation =
         FEEDING_SOTM.getVelocityCompensatedGoal(
             robot.getTranslation(), feedLocation.getTranslation(robot), fieldRelativeSpeeds);
@@ -32,13 +25,6 @@ public class AimParameterUtil {
     var distanceToGoal = robot.getTranslation().getDistance(feedTranslation);
 
     return new AimingParameters(turretAngle, distanceToGoal);
-  }
-
-  public static double getScoringDistance(Pose2d robot) {
-    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
-    return robotPoseInAllianceZone
-        .getTranslation()
-        .getDistance(FieldUtil.HUB_POSE.getPose().getTranslation());
   }
 
   public static AimingParameters getScoringParameters(

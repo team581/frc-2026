@@ -24,31 +24,31 @@ public class DeployConfig {
       new TalonFXConfiguration()
           .withFeedback(
               new FeedbackConfigs()
-                  .withSensorToMechanismRatio((40.0 * 8.0) * (Math.PI * (2 * 0.5))))
+                  .withSensorToMechanismRatio((40.0 / 8.0) * (Math.PI * (2 * 0.5))))
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Brake)
                   .withInverted(InvertedValue.Clockwise_Positive))
-          .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(1))
+          .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(30))
           .withMotionMagic(
               new MotionMagicConfigs()
-                  .withMotionMagicCruiseVelocity(10.0)
-                  .withMotionMagicAcceleration(10.0))
+                  .withMotionMagicCruiseVelocity(0.0)
+                  .withMotionMagicAcceleration(0.0))
           .withSlot0(new Slot0Configs().withKP(0).withKV(0).withKG(0));
   public static final TalonFXConfiguration RIGHT_MOTOR_CONFIG =
       new TalonFXConfiguration()
           .withFeedback(
               new FeedbackConfigs()
-                  .withSensorToMechanismRatio((40.0 * 8.0) * (Math.PI * (2 * 0.5))))
+                  .withSensorToMechanismRatio((40.0 / 8.0) * (Math.PI * (2 * 0.5))))
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Brake)
                   .withInverted(InvertedValue.CounterClockwise_Positive))
-          .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(1))
+          .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(30))
           .withMotionMagic(
               new MotionMagicConfigs()
-                  .withMotionMagicCruiseVelocity(10.0)
-                  .withMotionMagicAcceleration(10.0))
+                  .withMotionMagicCruiseVelocity(0.0)
+                  .withMotionMagicAcceleration(0.0))
           .withSlot0(new Slot0Configs().withKP(0).withKV(0).withKG(0));
   // TODO: Discuss/set CANrange config during bringup
   public static final CANrangeConfiguration CAN_RANGE_CONFIG = new CANrangeConfiguration();

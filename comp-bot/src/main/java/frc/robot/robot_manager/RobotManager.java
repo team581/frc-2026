@@ -5,13 +5,18 @@ import com.team581.swerve.SwerveAssist;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
+import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.climber.ClimbLocation;
 import frc.robot.climber.Climber;
+import frc.robot.config.DSOptions;
+import frc.robot.config.FeatureFlags;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.health.HealthManager;
@@ -54,6 +59,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private static final double PRESET_FEED_DISTANCE = 0.0;
   private boolean isMoving = false;
 
+  private double timeSinceMatchStart = 0.0;
+  private boolean isHubActive = true;
+  private final DoubleSubscriber tunableHubStateOffset =
+      DogLog.tunable("RobotManager/MatchTimeOffset", 0.0);
+  private final Timer teleopTimer = new Timer();
+
   private FeedLocation feedLocation = FeedLocation.CLOSEST;
 
   public RobotManager(
@@ -86,6 +97,13 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     this.health = health;
     this.trailblazer = trailblazer;
     this.climber = climber;
+    teleopTimer.start();
+  }
+
+  @Override
+  public void teleopInit() {
+    teleopTimer.reset();
+    timeSinceMatchStart = FmsUtil.MATCH_TIME_AT_TELEOP_START;
   }
 
   @Override
@@ -109,7 +127,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             && FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
             && dyeRotor.atGoal()
             && turret.atGoal()
-            && shooterHood.atGoal()) {
+            && shooterHood.atGoal()
+            && isHubActive) {
           yield RobotState.SCORE;
         }
         yield currentState;
@@ -154,7 +173,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             && localization.isTrustworthy()
             && dyeRotor.atGoal()
             && turret.atGoal()
-            && shooterHood.atGoal()) {
+            && shooterHood.atGoal()
+            && isHubActive) {
           yield currentState;
         }
 
@@ -661,6 +681,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/FeedParameters", feedingParameters);
     DogLog.log("RobotManager/ScoringParameters", scoringParameters);
 
+    DogLog.log("RobotManager/IsHubActive", isHubActive);
+    DogLog.log("RobotManager/TimeSinceMatchStart", timeSinceMatchStart);
+    DogLog.log("RobotManager/TimeSinceTeleopEnable", teleopTimer.get());
+
     if (!getState().isClimbing()) {
       if (intake.getState() == IntakeState.INTAKING) {
         swerve.intakeDriveRequest();
@@ -856,23 +880,37 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     nearTrench =
         FieldUtil.inTrench(robotPose.getTranslation())
             || SwerveAssist.ableToTrenchAssist(robotPose, swerve.getFieldRelativeSpeeds());
-    var scoringDistance = AimParameterUtil.getScoringDistance(robotPose);
-    var feedingDistance = AimParameterUtil.getFeedingDistance(feedLocation, robotPose);
 
     scoringParameters =
         AimParameterUtil.getScoringParameters(
-            // TODO: This should require you to pass in the distance to get the ToF
             health.isLocalizationHealthy()
                 ? robotPose
                 : new Pose2d(
                     FieldUtil.getFallbackScorePoint().getTranslation(), robotPose.getRotation()),
-            swerve.getFieldRelativeSpeeds(),
-            shooter.getScoreTimeOfFlight(scoringDistance));
+            swerve.getFieldRelativeSpeeds());
+
+    shooter.getScoreTimeOfFlight(scoringParameters.distance());
     feedingParameters =
         AimParameterUtil.getFeedingParameters(
-            feedLocation,
-            robotPose,
-            swerve.getFieldRelativeSpeeds(),
-            shooter.getFeedTimeOfFlight(feedingDistance));
+            feedLocation, robotPose, swerve.getFieldRelativeSpeeds());
+
+    timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
+
+    isHubActive = getIsHubActive();
+  }
+
+  private boolean getIsHubActive() {
+    if (DSOptions.bypassHubStateTracking.get() || DriverStation.isAutonomousEnabled()) {
+      return true;
+    }
+
+    if (FeatureFlags.LOOKAHEAD_SCORING.getAsBoolean()) {
+      return FmsUtil.isHubActive(
+          timeSinceMatchStart
+              + shooter.getScoreTimeOfFlight(scoringParameters.distance())
+              + tunableHubStateOffset.get());
+    }
+
+    return FmsUtil.isHubActive(timeSinceMatchStart + tunableHubStateOffset.get());
   }
 }

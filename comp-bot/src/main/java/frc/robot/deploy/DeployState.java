@@ -4,9 +4,9 @@ import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum DeployState {
-  INTAKE(10),
+  INTAKE(0.0),
   STOWED(0),
-  SHOOTING(7),
+  SHOOTING(0.0),
   HOMING(0),
   UNHOMED(0),
   CATCHUP_TO_LEFT(0),

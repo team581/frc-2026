@@ -67,4 +67,24 @@ public enum RobotState {
       default -> false;
     };
   }
+
+  public boolean isFeeding() {
+    return switch (this) {
+      case PREPARE_PRESET_FEED -> true;
+      case PRESET_FEED -> true;
+      case PREPARE_FEED -> true;
+      case FEED -> true;
+      default -> false;
+    };
+  }
+
+  public boolean isScoring() {
+    return switch (this) {
+      case PREPARE_PRESET_SCORE -> true;
+      case PRESET_SCORE -> true;
+      case PREPARE_SCORE -> true;
+      case SCORE -> true;
+      default -> false;
+    };
+  }
 }
