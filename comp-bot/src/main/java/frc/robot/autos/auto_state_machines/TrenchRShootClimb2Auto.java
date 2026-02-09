@@ -33,8 +33,7 @@ public class TrenchRShootClimb2Auto extends BaseImperativeAuto<TrenchRShootClimb
           .untilFinished(new PoseErrorTolerance(0.1, 3));
 
   private final AutoSegment driveBack =
-      Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg)))
+      Trailblazer.segment(AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg)))
           .withLinearConstraints(4.5, 10)
           .untilFinished(new PoseErrorTolerance(0.5, 3));
 
@@ -129,9 +128,9 @@ public class TrenchRShootClimb2Auto extends BaseImperativeAuto<TrenchRShootClimb
       case DRIVE_BACK_2 -> {}
       case SHOOT_2 -> {}
       case DRIVE_TO_CLIMB -> {
-      trailblazer.setActiveSegment(
-        ClimbAssist.getClimbAssistSegment(
-            robotManager.localization.getPose(), ClimbLocation.CLOSEST));
+        trailblazer.setActiveSegment(
+            ClimbAssist.getClimbAssistSegment(
+                robotManager.localization.getPose(), ClimbLocation.CLOSEST));
       }
       case CLIMB -> {}
       case DONE -> {}
