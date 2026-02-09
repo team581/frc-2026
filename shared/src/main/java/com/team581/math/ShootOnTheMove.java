@@ -66,6 +66,27 @@ public class ShootOnTheMove {
     return result;
   }
 
+  // TODO: Make this one function that can return a tangential and radial goal
+  // public void getVelocityGoalCompensation(
+  //     Translation2d robot, Translation2d target, ChassisSpeeds robotVelocity) {
+  //   var timeOfFlight = 0.0;
+  //   var compensatedTarget = target;
+
+  //   for (int i = 0; i < MAX_ITERATIONS; i++) {
+  //     timeOfFlight = distanceToTimeOfFlight.get(robot.getDistance(compensatedTarget));
+  //     var robotToTargetTranslation = new Translation2d(compensatedTarget.getX() - robot.getX(), compensatedTarget.getY() - robot.getY());
+  //     var velocityToTarget = new Translation2d(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond).rotateBy(robotToTargetTranslation.getAngle());
+  //     var tangetialVelocity = velocityToTarget.getY();
+  //     // Compensated goal = real goal - (robot velocity * time of flight of ball)
+  //     compensatedTarget =
+  //     new Translation2d(
+  //       target.getX() - (tangetialVelocity / robot.getDistance(compensatedTarget) * timeOfFlight),
+  //       target.getY() - (tangetialVelocity / robot.getDistance(compensatedTarget) * timeOfFlight));
+  //     }
+
+  //   return ;
+  // }
+
   public Translation2d getVelocityCompensatedGoal(
       Translation2d robot, Translation2d target, ChassisSpeeds robotVelocity) {
     var timeOfFlight = 0.0;
