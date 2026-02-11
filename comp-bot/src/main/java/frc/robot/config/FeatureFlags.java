@@ -13,6 +13,9 @@ public class FeatureFlags {
   public static final BooleanSupplier INTAKE_DIRECTIONAL_SNAPS =
       FeatureFlag.of("IntakeDirectionalSnaps", false);
 
+  public static final BooleanSupplier INTEGRATION_TEST =
+      FeatureFlag.of("IntegrationTest", false);
+
   public static final BooleanSupplier INTAKE_WALL_SNAPS = FeatureFlag.of("IntakeWallSnaps", false);
 
   public static final BooleanSupplier LOOKAHEAD_SCORING =

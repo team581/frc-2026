@@ -98,7 +98,8 @@ public class Robot extends Base581Robot {
           hardware.driverController,
           health,
           trailblazer,
-          climber);
+          climber,
+          hardware);
 
   @SuppressWarnings("unused") // Registers itself as a subsystem
   private final Autos autos = new Autos(robotManager, trailblazer);

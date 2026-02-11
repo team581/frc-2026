@@ -13,6 +13,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.Hardware;
 import frc.robot.climber.ClimbLocation;
 import frc.robot.climber.Climber;
 import frc.robot.config.DSOptions;
@@ -38,6 +39,7 @@ import frc.robot.vision.VisionState;
 public class RobotManager extends StateMachineSubsystem<RobotState> {
   public final Localization localization;
   public final Swerve swerve;
+  public final Hardware hardware;
   private final ShooterHood shooterHood;
   private final Shooter shooter;
   private final DyeRotor dyeRotor;
@@ -81,7 +83,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       XboxController driverController,
       HealthManager health,
       Trailblazer trailblazer,
-      Climber climber) {
+      Climber climber,
+      Hardware hardware) {
     super(SubsystemPriority.ROBOT_MANAGER, RobotState.IDLE);
     this.shooterHood = shooterHood;
     this.localization = localization;
@@ -97,6 +100,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     this.health = health;
     this.trailblazer = trailblazer;
     this.climber = climber;
+    this.hardware = hardware;
     teleopTimer.start();
   }
 
