@@ -63,8 +63,10 @@ public class AimParameterUtil {
     DogLog.log("AimParameterUtil/DistanceToGoal", distanceToGoal);
     DogLog.log("AimParameterUtil/TurretAngle", turretAngle);
 
-    SCORING_SOTM.getVelocityGoalCompensation(robot.getTranslation(), FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
-    SCORING_SOTM.getVelocityCompensatedGoal(robot.getTranslation(), FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
+    SCORING_SOTM.getVelocityGoalCompensation(
+        robot.getTranslation(), FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
+    SCORING_SOTM.getVelocityCompensatedGoal(
+        robot.getTranslation(), FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
 
     return new AimingParameters(turretAngle, distanceToGoal);
   }

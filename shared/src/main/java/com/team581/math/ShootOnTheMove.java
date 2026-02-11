@@ -62,44 +62,6 @@ public class ShootOnTheMove {
     return result;
   }
 
-  // TODO: Make this function able to return a tangential and radial goal
-  public void getVelocityGoalCompensation(
-      Translation2d robot, Translation2d target, ChassisSpeeds robotVelocity) {
-      var radialCompensatedGoal = target;
-      var tangentialCompensatedGoal = target;
-
-      var robotToTargetTranslation = new Translation2d(target.getX() - robot.getX(), target.getY() - robot.getY());
-      // Rotate robot velocity vector toward the target, placing the radial velocity on x axis and the tangential velocity on y axis
-      var velocityToTarget = new Translation2d(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond).rotateBy(robotToTargetTranslation.getAngle());
-      // Take only the radial/tangential velocity in the velocity to target vector, then convert it to field relative by rotating it back
-      var radialVelocity = new Translation2d(velocityToTarget.getX(), 0.0).rotateBy(robotToTargetTranslation.getAngle().times(-1.0));
-      var tangentialVelocity = new Translation2d(0.0, velocityToTarget.getY()).rotateBy(robotToTargetTranslation.getAngle().times(-1.0));
-
-      var radialTOF = 0.0;
-      var tangentialTOF = 0.0;
-
-      for (int i = 0; i < MAX_ITERATIONS; i++) {
-        radialTOF = distanceToTimeOfFlight.get(robot.getDistance(radialCompensatedGoal));
-        tangentialTOF = distanceToTimeOfFlight.get(robot.getDistance(tangentialCompensatedGoal));
-
-        // Compensated goal = real goal - (robot velocity * time of flight of ball)
-        radialCompensatedGoal =
-        new Translation2d(
-          radialCompensatedGoal.getX() - (radialVelocity.getX() * radialTOF),
-          radialCompensatedGoal.getY() - (radialVelocity.getY() * radialTOF));
-
-          tangentialCompensatedGoal =
-          new Translation2d(
-            tangentialCompensatedGoal.getX() - (tangentialVelocity.getX() * tangentialTOF),
-            tangentialCompensatedGoal.getY() - (tangentialVelocity.getY() * tangentialTOF));
-      }
-
-      DogLog.log("ShootOnTheMove/RadialCompensatedGoal", new Pose2d(radialCompensatedGoal, Rotation2d.kZero));
-      DogLog.log("ShootOnTheMove/TangentialCompensatedGoal", new Pose2d(tangentialCompensatedGoal, Rotation2d.kZero));
-
-    // return ;
-  }
-
   public Translation2d getVelocityCompensatedGoal(
       Translation2d robot, Translation2d target, ChassisSpeeds robotVelocity) {
     var timeOfFlight = 0.0;
@@ -117,5 +79,56 @@ public class ShootOnTheMove {
     DogLog.log("ShootOnTheMove/CompensatedGoal", new Pose2d(result, Rotation2d.kZero));
 
     return result;
+  }
+
+  // TODO: Make this function able to return a tangential and radial goal
+  public void getVelocityGoalCompensation(
+      Translation2d robot, Translation2d target, ChassisSpeeds robotVelocity) {
+    var radialCompensatedGoal = target;
+    var tangentialCompensatedGoal = target;
+
+    var robotToTargetTranslation =
+        new Translation2d(target.getX() - robot.getX(), target.getY() - robot.getY());
+    // Rotate robot velocity vector toward the target, placing the radial velocity on x axis and the
+    // tangential velocity on y axis
+    var velocityToTarget =
+        new Translation2d(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond)
+            .rotateBy(robotToTargetTranslation.getAngle());
+    // Take only the radial/tangential velocity in the velocity to target vector, then convert it to
+    // field relative by rotating it back
+    var radialVelocity =
+        new Translation2d(velocityToTarget.getX(), 0.0)
+            .rotateBy(robotToTargetTranslation.getAngle().times(-1.0));
+    var tangentialVelocity =
+        new Translation2d(0.0, velocityToTarget.getY())
+            .rotateBy(robotToTargetTranslation.getAngle().times(-1.0));
+
+    var radialTOF = 0.0;
+    var tangentialTOF = 0.0;
+
+    for (int i = 0; i < MAX_ITERATIONS; i++) {
+      radialTOF = distanceToTimeOfFlight.get(robot.getDistance(radialCompensatedGoal));
+      tangentialTOF = distanceToTimeOfFlight.get(robot.getDistance(tangentialCompensatedGoal));
+
+      // Compensated goal = real goal - (robot velocity * time of flight of ball)
+      radialCompensatedGoal =
+          new Translation2d(
+              radialCompensatedGoal.getX() - (radialVelocity.getX() * radialTOF),
+              radialCompensatedGoal.getY() - (radialVelocity.getY() * radialTOF));
+
+      tangentialCompensatedGoal =
+          new Translation2d(
+              tangentialCompensatedGoal.getX() - (tangentialVelocity.getX() * tangentialTOF),
+              tangentialCompensatedGoal.getY() - (tangentialVelocity.getY() * tangentialTOF));
+    }
+
+    DogLog.log(
+        "ShootOnTheMove/RadialCompensatedGoal",
+        new Pose2d(radialCompensatedGoal, Rotation2d.kZero));
+    DogLog.log(
+        "ShootOnTheMove/TangentialCompensatedGoal",
+        new Pose2d(tangentialCompensatedGoal, Rotation2d.kZero));
+
+    // return ;
   }
 }
