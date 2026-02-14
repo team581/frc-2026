@@ -8,9 +8,7 @@ public enum DeployState {
   STOW(1.0),
   HOPPER_SHUFFLING(DeployConfig.MAX_LENGTH - 3.0),
   HOME(0),
-  UNHOMED(0),
-  CATCHUP_TO_LEFT(0),
-  CATCHUP_TO_RIGHT(0);
+  UNHOMED(0);
 
   private final DoubleSubscriber tunableLength;
 

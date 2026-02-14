@@ -1,16 +1,21 @@
 package frc.robot.deploy;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class DeployConfig {
+  private static final CANBus canivore = new CANBus("581CANivore");
   public static final double MAX_LENGTH = 12.75;
   public static final double MIN_LENGTH = 0;
   public static final double HOMING_END_POSITION = 0;
@@ -18,6 +23,20 @@ public class DeployConfig {
   public static final double HOMING_CURRENT = 30.0;
   public static final double CAPACITY_DISTANCE_THRESHOLD = 0.0;
   public static final double POSITION_TOLERANCE = 0.25;
+
+  //TODO: Tune PID for differential mechanism
+  private static final Slot0Configs averageGains =
+      new Slot0Configs()
+          .withKP(10)
+          .withKI(0)
+          .withKD(0.1)
+          .withKG(0.2)
+          .withKS(0.1)
+          .withKV(0.36)
+          .withKA(0);
+  // Difference axis gains typically go in Slot 1
+  private static final Slot1Configs differenceGains =
+      new Slot1Configs().withKP(10).withKI(0).withKD(0.1).withKS(0.1).withKV(0.72);
 
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIG =
       new TalonFXConfiguration()
@@ -34,7 +53,8 @@ public class DeployConfig {
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(200.0)
                   .withMotionMagicAcceleration(300.0))
-          .withSlot0(new Slot0Configs().withKP(5).withKV(0).withKG(0));
+          .withSlot0(averageGains)
+          .withSlot1(differenceGains);
   public static final TalonFXConfiguration RIGHT_MOTOR_CONFIG =
       new TalonFXConfiguration()
           .withFeedback(
@@ -50,9 +70,20 @@ public class DeployConfig {
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(200.0)
                   .withMotionMagicAcceleration(300.0))
-          .withSlot0(new Slot0Configs().withKP(5).withKV(0).withKG(0));
+          .withSlot0(averageGains)
+          .withSlot1(differenceGains);
   // TODO: Discuss/set CANrange config during bringup
   public static final CANrangeConfiguration CAN_RANGE_CONFIG = new CANrangeConfiguration();
+
+  public static final DifferentialMotorConstants<TalonFXConfiguration> differentialConstants =
+      new DifferentialMotorConstants<TalonFXConfiguration>()
+          .withCANBusName(canivore.getName())
+          .withLeaderId(22)
+          .withFollowerId(23)
+          .withAlignment(MotorAlignmentValue.Opposed)
+          .withLeaderInitialConfigs(LEFT_MOTOR_CONFIG)
+          .withFollowerInitialConfigs(RIGHT_MOTOR_CONFIG)
+          .withFollowerUsesCommonLeaderConfigs(true);
 
   public static final double HIGH_CAPACITY_THRESHOLD = 10;
   public static final double MEDIUM_CAPACITY_THRESHOLD = 5;
