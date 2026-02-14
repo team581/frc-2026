@@ -28,7 +28,8 @@ public class AimParameterUtil {
         new Pose2d(separatedVelocityCompensatedGoal.radiallyCompensatedGoal(), Rotation2d.kZero));
     DogLog.log(
         "ShootOnTheMove/Feeding/TangentialCompensatedGoal",
-        new Pose2d(separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
+        new Pose2d(
+            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
 
     var turretAngle =
         TurretCalculator.calculateTurretAimingAngle(
@@ -53,7 +54,8 @@ public class AimParameterUtil {
         new Pose2d(separatedVelocityCompensatedGoal.radiallyCompensatedGoal(), Rotation2d.kZero));
     DogLog.log(
         "ShootOnTheMove/Scoring/TangentialCompensatedGoal",
-        new Pose2d(separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
+        new Pose2d(
+            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
 
     var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robotPose);
     var turretAngle =
