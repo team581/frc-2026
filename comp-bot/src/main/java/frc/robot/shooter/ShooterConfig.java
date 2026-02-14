@@ -38,15 +38,19 @@ public class ShooterConfig {
   public static final PolynomialRegression FEEDING_REGRESSION_MODEL =
       PolynomialRegression.quadratic("Shooter/FeedingRegression", DISTANCE_TO_FEEDING_RPM);
 
+  // TODO: Needs tuning, placeholder for SOTM sim
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToScoreToF",
           Map.entry(Units.inchesToMeters(36.0), 0.2),
           Map.entry(Units.inchesToMeters(96.0), 0.5));
 
+  // TODO: Needs tuning, placeholder for SOTM sim
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
-          "Shooter/DistanceToFeedToF", Map.entry(Units.inchesToMeters(57.0), 0.0));
+          "Shooter/DistanceToFeedToF",
+          Map.entry(Units.inchesToMeters(36.0), 0.2),
+          Map.entry(Units.inchesToMeters(96.0), 0.5));
 
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIGS =
       new TalonFXConfiguration()

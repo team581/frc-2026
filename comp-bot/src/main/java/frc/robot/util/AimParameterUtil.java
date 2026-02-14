@@ -5,6 +5,7 @@ import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.shooter.ShooterConfig;
 import frc.robot.turret.TurretCalculator;
@@ -16,57 +17,56 @@ public class AimParameterUtil {
       new ShootOnTheMove(ShooterConfig.DISTANCE_TO_SCORE_TOF);
 
   public static AimingParameters getFeedingParameters(
-      FeedLocation feedLocation, Pose2d robot, ChassisSpeeds fieldRelativeSpeeds) {
-    var feedTranslation =
-        FEEDING_SOTM.getVelocityCompensatedGoal(
-            robot.getTranslation(), feedLocation.getTranslation(robot), fieldRelativeSpeeds);
+      FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+    var robotTranslation = robotPose.getTranslation();
+    var separatedVelocityCompensatedGoal =
+        FEEDING_SOTM.getSeparatedVelocityCompensatedGoal(
+            robotTranslation, feedLocation.getTranslation(robotPose), fieldRelativeSpeeds);
 
-    var turretAngle = TurretCalculator.calculateTurretAimingAngle(robot, feedTranslation);
-    var distanceToGoal = robot.getTranslation().getDistance(feedTranslation);
+    DogLog.log(
+        "ShootOnTheMove/Feeding/RadialCompensatedGoal",
+        new Pose2d(separatedVelocityCompensatedGoal.radiallyCompensatedGoal(), Rotation2d.kZero));
+    DogLog.log(
+        "ShootOnTheMove/Feeding/TangentialCompensatedGoal",
+        new Pose2d(separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
+
+    var turretAngle =
+        TurretCalculator.calculateTurretAimingAngle(
+            robotPose, separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
+    var distanceToGoal =
+        robotPose
+            .getTranslation()
+            .getDistance(separatedVelocityCompensatedGoal.radiallyCompensatedGoal());
 
     return new AimingParameters(turretAngle, distanceToGoal);
   }
 
   public static AimingParameters getScoringParameters(
-      Pose2d robot, ChassisSpeeds fieldRelativeSpeeds) {
-    var hubTranslationTangential =
-        SCORING_SOTM.getTangentialVelocityCompensatedGoal(
-            robot.getTranslation(),
-            FieldUtil.HUB_POSE.getPose().getTranslation(),
-            fieldRelativeSpeeds);
+      Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+    var robotTranslation = robotPose.getTranslation();
+    var separatedVelocityCompensatedGoal =
+        SCORING_SOTM.getSeparatedVelocityCompensatedGoal(
+            robotTranslation, FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
 
-    var hubTranslationRadial =
-        SCORING_SOTM.getRadialVelocityCompensatedGoal(
-            robot.getTranslation(),
-            FieldUtil.HUB_POSE.getPose().getTranslation(),
-            fieldRelativeSpeeds);
+    DogLog.log(
+        "ShootOnTheMove/Scoring/RadialCompensatedGoal",
+        new Pose2d(separatedVelocityCompensatedGoal.radiallyCompensatedGoal(), Rotation2d.kZero));
+    DogLog.log(
+        "ShootOnTheMove/Scoring/TangentialCompensatedGoal",
+        new Pose2d(separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
 
-    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
-    double turretAngle =
+    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robotPose);
+    var turretAngle =
         TurretCalculator.calculateTurretAimingAngle(
-            robotPoseInAllianceZone, hubTranslationTangential);
-    double distanceToGoal =
-        robotPoseInAllianceZone.getTranslation().getDistance(hubTranslationRadial);
+            robotPoseInAllianceZone,
+            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
+    var distanceToGoal =
+        robotPoseInAllianceZone
+            .getTranslation()
+            .getDistance(separatedVelocityCompensatedGoal.radiallyCompensatedGoal());
 
-    DogLog.log(
-        "AimParameterUtil/RadialHubTranslation",
-        new Pose2d(
-            hubTranslationRadial.getX(),
-            hubTranslationRadial.getY(),
-            hubTranslationRadial.getAngle()));
-    DogLog.log(
-        "AimParameterUtil/TangentialHubTranslation",
-        new Pose2d(
-            hubTranslationTangential.getX(),
-            hubTranslationTangential.getY(),
-            hubTranslationTangential.getAngle()));
     DogLog.log("AimParameterUtil/DistanceToGoal", distanceToGoal);
     DogLog.log("AimParameterUtil/TurretAngle", turretAngle);
-
-    SCORING_SOTM.getVelocityGoalCompensation(
-        robot.getTranslation(), FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
-    SCORING_SOTM.getVelocityCompensatedGoal(
-        robot.getTranslation(), FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
 
     return new AimingParameters(turretAngle, distanceToGoal);
   }
