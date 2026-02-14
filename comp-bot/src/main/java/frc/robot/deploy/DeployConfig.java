@@ -15,7 +15,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class DeployConfig {
-  private static final CANBus canivore = new CANBus("581CANivore");
+  private static final CANBus CANIVORE = new CANBus("581CANivore");
   public static final double MAX_LENGTH = 12.75;
   public static final double MIN_LENGTH = 0;
   public static final double HOMING_END_POSITION = 0;
@@ -24,8 +24,8 @@ public class DeployConfig {
   public static final double CAPACITY_DISTANCE_THRESHOLD = 0.0;
   public static final double POSITION_TOLERANCE = 0.25;
 
-  //TODO: Tune PID for differential mechanism
-  private static final Slot0Configs averageGains =
+  // TODO: Tune PID for differential mechanism
+  private static final Slot0Configs AVERAGE_GAINS =
       new Slot0Configs()
           .withKP(10)
           .withKI(0)
@@ -35,7 +35,7 @@ public class DeployConfig {
           .withKV(0.36)
           .withKA(0);
   // Difference axis gains typically go in Slot 1
-  private static final Slot1Configs differenceGains =
+  private static final Slot1Configs DIFFERENCE_GAINS =
       new Slot1Configs().withKP(10).withKI(0).withKD(0.1).withKS(0.1).withKV(0.72);
 
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIG =
@@ -53,8 +53,8 @@ public class DeployConfig {
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(200.0)
                   .withMotionMagicAcceleration(300.0))
-          .withSlot0(averageGains)
-          .withSlot1(differenceGains);
+          .withSlot0(AVERAGE_GAINS)
+          .withSlot1(DIFFERENCE_GAINS);
   public static final TalonFXConfiguration RIGHT_MOTOR_CONFIG =
       new TalonFXConfiguration()
           .withFeedback(
@@ -70,14 +70,14 @@ public class DeployConfig {
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(200.0)
                   .withMotionMagicAcceleration(300.0))
-          .withSlot0(averageGains)
-          .withSlot1(differenceGains);
+          .withSlot0(AVERAGE_GAINS)
+          .withSlot1(DIFFERENCE_GAINS);
   // TODO: Discuss/set CANrange config during bringup
   public static final CANrangeConfiguration CAN_RANGE_CONFIG = new CANrangeConfiguration();
 
   public static final DifferentialMotorConstants<TalonFXConfiguration> differentialConstants =
       new DifferentialMotorConstants<TalonFXConfiguration>()
-          .withCANBusName(canivore.getName())
+          .withCANBusName(CANIVORE.getName())
           .withLeaderId(22)
           .withFollowerId(23)
           .withAlignment(MotorAlignmentValue.Opposed)
