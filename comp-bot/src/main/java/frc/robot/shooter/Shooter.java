@@ -9,7 +9,7 @@ import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import  edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.filter.LinearFilter;
 import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -78,7 +78,7 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
     setStateFromRequest(ShooterState.IDLE);
   }
 
-  public double getRealkV(){
+  public double getRealkV() {
     double leftMotorRps = leftMotorRpm * 60.0;
     double rightMotorRps = rightMotorRpm * 60.0;
 
@@ -122,7 +122,7 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
 
         double suggestedVoltage = usedkV * velocitySetpoint;
 
-        if (kvBufferSize >= requiredkVBufferSize){
+        if (kvBufferSize >= requiredkVBufferSize) {
           leftMotor.setControl(voltageRequest.withOutput(suggestedVoltage));
           rightMotor.setControl(voltageRequest.withOutput(suggestedVoltage));
         } else {
