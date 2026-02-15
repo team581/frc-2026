@@ -5,7 +5,6 @@ import com.team581.trailblazer.AutoPoint;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.segments.AutoSegment;
 import com.team581.util.FmsUtil;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -25,9 +24,17 @@ public class ClimbAssist {
   private static final double MAX_LINEAR_VELOCITY = 2.0;
   private static final double MAX_LINEAR_ACCELERATION = 1.0;
 
-  /**
-   * Gets climb location based off driver station number
-   */
+  public static AutoSegment getClimbAssistSegment(Pose2d robot, ClimbLocation location) {
+    var goalPoint = location.getEndGoalPoint(robot);
+    var approachPoint =
+        goalPoint.transformBy(APPROACH_TRANSFORM).withTransitionTolerance(APPROACH_TOLERANCE);
+
+    return Trailblazer.segment(approachPoint, AutoPoint.of(goalPoint))
+        .withLinearConstraints(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCELERATION)
+        .untilFinished(FINISHED_TOLERANCE);
+  }
+
+  /** Gets climb location based off driver station number */
   public static ClimbLocation getClimbLocation() {
     var location = DriverStation.getLocation().orElse(1);
 
@@ -44,15 +51,5 @@ public class ClimbAssist {
     }
 
     return ClimbLocation.RIGHT;
-  }
-
-  public static AutoSegment getClimbAssistSegment(Pose2d robot, ClimbLocation location) {
-    var goalPoint = location.getEndGoalPoint(robot);
-    var approachPoint =
-        goalPoint.transformBy(APPROACH_TRANSFORM).withTransitionTolerance(APPROACH_TOLERANCE);
-
-    return Trailblazer.segment(approachPoint, AutoPoint.of(goalPoint))
-        .withLinearConstraints(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCELERATION)
-        .untilFinished(FINISHED_TOLERANCE);
   }
 }
