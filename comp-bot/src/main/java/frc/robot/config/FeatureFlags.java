@@ -20,6 +20,9 @@ public class FeatureFlags {
   public static final BooleanSupplier LOOKAHEAD_SCORING =
       FeatureFlag.of("TimeOfFlightInHubActivity", false);
 
+  public static final BooleanSupplier RATE_LIMITED_DRIVING =
+      FeatureFlag.of("RateLimitedDriving", true);
+
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
 
   private FeatureFlags() {}
