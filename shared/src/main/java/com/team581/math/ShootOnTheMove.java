@@ -35,23 +35,25 @@ public class ShootOnTheMove {
     var tangentialVelocity =
         new Translation2d(0.0, velocityTowardGoal.getY()).rotateBy(robotToGoalAngle);
 
+    // Get time of flight of virtual goal using iterations
     for (int i = 0; i < MAX_ITERATIONS; i++) {
       timeOfFlight = distanceToTimeOfFlight.get(robot.getDistance(compensatedGoal));
       // Compensated goal = real goal - (robot velocity * time of flight of ball)
-
       compensatedGoal =
           new Translation2d(
               goal.getX() - (robotVelocity.vxMetersPerSecond * timeOfFlight),
               goal.getY() - (robotVelocity.vyMetersPerSecond * timeOfFlight));
-      radiallyCompensatedGoal =
-          new Translation2d(
-              goal.getX() - (radialVelocity.getX() * timeOfFlight),
-              goal.getY() - (radialVelocity.getY() * timeOfFlight));
-      tangentiallyCompensatedGoal =
-          new Translation2d(
-              goal.getX() - (tangentialVelocity.getX() * timeOfFlight),
-              goal.getY() - (tangentialVelocity.getY() * timeOfFlight));
     }
+
+    // Apply time of flight to get radially and tangentially compensated goals
+    radiallyCompensatedGoal =
+        new Translation2d(
+            goal.getX() - (radialVelocity.getX() * timeOfFlight),
+            goal.getY() - (radialVelocity.getY() * timeOfFlight));
+    tangentiallyCompensatedGoal =
+        new Translation2d(
+            goal.getX() - (tangentialVelocity.getX() * timeOfFlight),
+            goal.getY() - (tangentialVelocity.getY() * timeOfFlight));
 
     DogLog.log("ShootOnTheMove/CompensatedGoal", new Pose2d(compensatedGoal, Rotation2d.kZero));
 
