@@ -1,6 +1,5 @@
 package com.team581.math;
 
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,6 +14,9 @@ public class ShootOnTheMove {
   public ShootOnTheMove(InterpolatingDoubleTreeMap distanceToTimeOfFlight) {
     this.distanceToTimeOfFlight = distanceToTimeOfFlight;
   }
+
+  public record SeparatedVelocityCompensatedGoal(
+      Translation2d radiallyCompensatedGoal, Translation2d tangentiallyCompensatedGoal) {}
 
   public SeparatedVelocityCompensatedGoal getSeparatedVelocityCompensatedGoal(
       Translation2d robot, Translation2d goal, ChassisSpeeds robotVelocity) {
@@ -84,7 +86,4 @@ public class ShootOnTheMove {
 
     return result;
   }
-
-  public record SeparatedVelocityCompensatedGoal(
-      Translation2d radiallyCompensatedGoal, Translation2d tangentiallyCompensatedGoal) {}
 }
