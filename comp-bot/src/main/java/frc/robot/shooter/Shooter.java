@@ -1,6 +1,7 @@
 package frc.robot.shooter;
 
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.simkit.SimKit;
@@ -8,6 +9,7 @@ import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import  edu.wpi.first.math.filter.LinearFilter;
 import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -27,8 +29,9 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
 
-  private final VelocityVoltage voltageRequest =
+  private final VelocityVoltage velocityVoltageRequest =
       new VelocityVoltage(0).withLimitReverseMotion(true).withEnableFOC(true);
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
 
   private double scoreDistance = 0;
   private double feedDistance = 0;
@@ -37,6 +40,15 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
   private double feedingRpm = 0;
   private double leftMotorRpm = 0;
   private double rightMotorRpm = 0;
+
+  private double leftAppliedVoltage = 0;
+  private double rightAppliedVoltage = 0;
+
+  private double realKV = 0;
+
+  private final int requiredkVBufferSize = 15;
+  private LinearFilter kvBuffer = LinearFilter.movingAverage(20);
+  private int kvBufferSize = 0;
 
   public Shooter(TalonFX leftMotor, TalonFX rightMotor) {
     super(SubsystemPriority.SHOOTER, ShooterState.IDLE);
@@ -66,6 +78,26 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
     setStateFromRequest(ShooterState.IDLE);
   }
 
+  public double getRealkV(){
+    double leftMotorRps = leftMotorRpm * 60.0;
+    double rightMotorRps = rightMotorRpm * 60.0;
+
+    double averageRps = (leftMotor + rightMotorRps) / 2.0;
+    double averageVoltage = (leftAppliedVoltage + rightAppliedVoltage) / 2.0;
+
+    return averageVoltage / averageRps;
+  }
+
+  @Override
+  protected void afterTransition(ShooterState newState) {
+    switch (newState) {
+      case SCORE, FEEDING -> {
+        kvBuffer.reset();
+        kvBufferSize = 0;
+      }
+    }
+  }
+
   @Override
   protected void whileInState(ShooterState state) {
     DogLog.log("Shooter/Left/RPM", leftMotorRpm);
@@ -82,19 +114,25 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
     DogLog.log("Shooter/Right/SupplyCurrent", rightMotor.getSupplyCurrent().getValueAsDouble());
 
     switch (state) {
-      case SCORE -> {
-        var setpoint = shootingRpm / 60.0;
-        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
-        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
+      case SCORE, FEEDING -> {
+        double velocitySetpoint = shootingRpm / 60.0;
+
+        double usedkV = kvBuffer.calculate(realKV);
+        kvBufferSize++;
+
+        double suggestedVoltage = usedkV * velocitySetpoint;
+
+        if (kvBufferSize >= requiredkVBufferSize){
+          leftMotor.setControl(voltageRequest.withOutput(suggestedVoltage));
+          rightMotor.setControl(voltageRequest.withOutput(suggestedVoltage));
+        } else {
+          leftMotor.setControl(velocityVoltageRequest.withVelocity(velocitySetpoint));
+          rightMotor.setControl(velocityVoltageRequest.withVelocity(velocitySetpoint));
+        }
 
         DogLog.log("Shooter/RpmSetpoint", shootingRpm);
-      }
-      case FEEDING -> {
-        var setpoint = feedingRpm / 60.0;
-        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
-        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
-
-        DogLog.log("Shooter/RpmSetpoint", feedingRpm);
+        DogLog.log("Shooter/CalculatedkV", usedkV);
+        DogLog.log("Shooter/SuggestedVoltage", suggestedVoltage);
       }
       case IDLE -> {
         leftMotor.disable();
@@ -112,6 +150,11 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
 
     leftMotorRpm = leftMotor.getVelocity().getValueAsDouble() * 60.0;
     rightMotorRpm = rightMotor.getVelocity().getValueAsDouble() * 60.0;
+
+    leftAppliedVoltage = leftMotor.getMotorVoltage().getValueAsDouble();
+    rightAppliedVoltage = rightMotor.getMotorVoltage().getValueAsDouble();
+
+    realKV = getRealkV();
   }
 
   public boolean atGoal() {
