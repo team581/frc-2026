@@ -4,10 +4,12 @@ import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.AutoPoint;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.segments.AutoSegment;
+import com.team581.util.FmsUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.climber.ClimbLocation;
 
 public class ClimbAssist {
@@ -30,5 +32,24 @@ public class ClimbAssist {
     return Trailblazer.segment(approachPoint, AutoPoint.of(goalPoint))
         .withLinearConstraints(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCELERATION)
         .untilFinished(FINISHED_TOLERANCE);
+  }
+
+  /** Gets climb location based off driver station number */
+  public static ClimbLocation getClimbLocation() {
+    var location = DriverStation.getLocation().orElse(1);
+
+    if (FmsUtil.isRedAlliance()) {
+      if (location == 1) {
+        return ClimbLocation.LEFT;
+      }
+
+      return ClimbLocation.RIGHT;
+    }
+
+    if (location == 3) {
+      return ClimbLocation.LEFT;
+    }
+
+    return ClimbLocation.RIGHT;
   }
 }

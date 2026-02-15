@@ -1,7 +1,5 @@
 package frc.robot.swerve;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -32,7 +30,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.FeatureFlags;
-import frc.robot.generated.RobotTunerConstants.TunerSwerveDrivetrain;
+import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.jspecify.annotations.Nullable;
@@ -144,7 +142,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private ChassisSpeeds fieldRelativeSpeeds = new ChassisSpeeds();
   private ChassisSpeeds rateLimitedSpeeds = new ChassisSpeeds();
 
-  private Rotation2d hubAimAngle = Rotation2d.kZero;
   private boolean ableToBumpAssist = false;
   private boolean ableToTrenchAssist = false;
   private boolean ableToWallSnap = false;
@@ -243,11 +240,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       filteredLastDriveDirection =
           Rotation2d.fromDegrees(
               lastDriveDirectionFilter.calculate(
-                  new Translation2d(
-                          fieldRelativeSpeeds.vxMetersPerSecond,
-                          fieldRelativeSpeeds.vyMetersPerSecond)
-                      .getAngle()
-                      .getDegrees()));
+                  MathHelpers.getDriveDirection(fieldRelativeSpeeds).getDegrees()));
 
       ableToWallSnap =
           FeatureFlags.INTAKE_WALL_SNAPS.getAsBoolean()
@@ -302,7 +295,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
         var speeds = driveSource.getRequestedSpeeds();
         if (ableToTrenchAssist) {
 
-          DogLog.timestamp("TrenchAssistActive");
+          DogLog.timestamp("Swerve/TrenchAssistActive");
           var trenchAssistSpeeds =
               SwerveAssist.getTrenchAssistSpeeds(drivetrainState.Pose.getTranslation(), speeds);
           drivetrain.setControl(
@@ -377,7 +370,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       case INTAKE -> {
         var speeds = driveSource.getRequestedSpeeds();
         if (ableToTrenchAssist) {
-          DogLog.timestamp("TrenchAssistActive");
+          DogLog.timestamp("Swerve/TrenchAssistActive");
           var trenchAssistSpeeds =
               SwerveAssist.getTrenchAssistSpeeds(drivetrainState.Pose.getTranslation(), speeds);
           drivetrain.setControl(
@@ -528,7 +521,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       }
     }
 
-    DogLog.log("Swerve/HubAimAngle", hubAimAngle.getDegrees(), Degrees);
     DogLog.log("Swerve/ModuleStates", drivetrainState.ModuleStates);
     DogLog.log("Swerve/ModuleTargets", drivetrainState.ModuleTargets);
     DogLog.log("Swerve/RobotRelativeSpeeds", drivetrainState.Speeds);

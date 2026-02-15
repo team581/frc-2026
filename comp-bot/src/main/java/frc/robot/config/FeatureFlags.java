@@ -1,5 +1,6 @@
 package frc.robot.config;
 
+import com.team581.autos.Point;
 import com.team581.config.FeatureFlag;
 import java.util.function.BooleanSupplier;
 
@@ -24,6 +25,11 @@ public class FeatureFlags {
       FeatureFlag.of("RateLimitedDriving", true);
 
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
+
+  public static final BooleanSupplier STOP_SHOOTING_STATE =
+      FeatureFlag.of("UseStopShootingState", false);
+
+  public static final BooleanSupplier CLAMPED_AUTO_POINTS = Point.CLAMPED_POINTS_FEATURE_FLAG;
 
   private FeatureFlags() {}
 }

@@ -19,8 +19,8 @@ public enum LightsState {
   LIMELIGHTS_DEAD(Color.kRed, 0.08),
 
   WAITING_TO_SHOOT(Color.kYellow, 0.25),
-  SHOOTING(Color.kGreen, 0.08),
-  DONE_SCORING(Color.kWhite, 0.08),
+  SHOOT(Color.kGreen, 0.08),
+  SHOT_DONE(Color.kWhite, 0.08),
 
   IDLE_INTAKE_NOT_FULL(Color.kYellow, 0.25),
   IDLE_INTAKE_FULL(Color.kWhite, 0.08),

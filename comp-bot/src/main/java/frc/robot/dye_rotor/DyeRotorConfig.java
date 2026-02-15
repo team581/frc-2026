@@ -13,10 +13,9 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.networktables.DoubleSubscriber;
 
 public class DyeRotorConfig {
-  public static final Debouncer debouncer = new Debouncer(1.0);
-  public static final int RPM_TOLERANCE_HORIZONTAL = 100;
+  public static final Debouncer IS_SHOOTING_DEBOUNCER = new Debouncer(1.0);
 
-  // TODO:Get this number
+  // TODO: Measure this number
   public static final double RPM_TOLERANCE_SHOOTING = 10;
   public static final DoubleSubscriber JAM_CURRENT_THRESHOLD =
       DogLog.tunable("DyeRotor/Horizontal/JamCurrentThreshold", 75.0);
@@ -40,7 +39,7 @@ public class DyeRotorConfig {
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.Clockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0).withKS(0.0).withKA(0.0));
+          .withSlot0(new Slot0Configs().withKP(10.0).withKV(4.65).withKS(0.0));
 
   public static final TalonFXConfiguration VERTICAL_MOTOR_CONFIG =
       new TalonFXConfiguration()
@@ -54,7 +53,7 @@ public class DyeRotorConfig {
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
-                  .withInverted(InvertedValue.CounterClockwise_Positive));
+                  .withInverted(InvertedValue.Clockwise_Positive));
 
   public static final TalonFXConfiguration HORIZONTAL_MOTOR_CONFIG =
       new TalonFXConfiguration()
@@ -74,6 +73,7 @@ public class DyeRotorConfig {
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.CounterClockwise_Positive))
           .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0).withKS(0.0));
+  public static boolean ROTOR_STOP;
 
   private DyeRotorConfig() {}
 }

@@ -37,7 +37,7 @@ public class Climber extends StateMachineSubsystem<ClimberState> {
   }
 
   public void l1HangingRequest() {
-    setStateFromRequest(ClimberState.L1_HANGING);
+    setStateFromRequest(ClimberState.L1_HANG);
   }
 
   public void l1LineupRequest() {
@@ -45,7 +45,7 @@ public class Climber extends StateMachineSubsystem<ClimberState> {
   }
 
   public void l2HangingRequest() {
-    setStateFromRequest(ClimberState.L2_HANGING);
+    setStateFromRequest(ClimberState.L2_HANG);
   }
 
   public void l2LineupRequest() {
@@ -53,7 +53,7 @@ public class Climber extends StateMachineSubsystem<ClimberState> {
   }
 
   public void l3HangingRequest() {
-    setStateFromRequest(ClimberState.L3_HANGING);
+    setStateFromRequest(ClimberState.L3_HANG);
   }
 
   public void l3LineupRequest() {

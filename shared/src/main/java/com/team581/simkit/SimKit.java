@@ -7,7 +7,7 @@ import com.team581.simkit.internal.VelocityMechanismBuilder;
 import edu.wpi.first.wpilibj.RobotBase;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import org.jspecify.annotations.Nullable;
 
 /** Entry point for creating simple mechanism simulations. */
@@ -16,7 +16,7 @@ public final class SimKit {
   private static final Map<String, VelocityMechanism> VELOCITY_MECHANISMS = new HashMap<>();
 
   public static @Nullable PositionMechanism positionMechanism(
-      String name, Function<PositionMechanismBuilder, PositionMechanismBuilder> factory) {
+      String name, UnaryOperator<PositionMechanismBuilder> factory) {
     if (RobotBase.isSimulation()) {
       return POSITION_MECHANISMS.computeIfAbsent(
           name, k -> factory.apply(new PositionMechanismBuilder()).build());
@@ -26,7 +26,7 @@ public final class SimKit {
   }
 
   public static @Nullable VelocityMechanism velocityMechanism(
-      String name, Function<VelocityMechanismBuilder, VelocityMechanismBuilder> factory) {
+      String name, UnaryOperator<VelocityMechanismBuilder> factory) {
     if (RobotBase.isSimulation()) {
       return VELOCITY_MECHANISMS.computeIfAbsent(
           name, k -> factory.apply(new VelocityMechanismBuilder()).build());

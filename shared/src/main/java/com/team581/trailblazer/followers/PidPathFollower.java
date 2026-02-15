@@ -10,10 +10,12 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.DoubleSubscriber;
 
 public class PidPathFollower implements PathFollower {
   // 0-1 scalar
-  private static final double AGGRESSIVENESS_FACTOR = 0.5;
+  private static final DoubleSubscriber AGGRESSIVENESS_FACTOR =
+      DogLog.tunable("Trailblazer/AgressivenessFactor", 0.5);
   private final PIDController translationController;
   private final PIDController rotationController;
   private final ConstraintsCalculator velocityConstrainer;
@@ -82,7 +84,7 @@ public class PidPathFollower implements PathFollower {
 
     if (MathHelpers.getLinearVelocity(currentSpeeds) > 0.2 && distanceToEnd > 0.1) {
       var currentDirection = MathHelpers.getDriveDirection(currentSpeeds);
-      driveDirection = currentDirection.interpolate(driveDirection, AGGRESSIVENESS_FACTOR);
+      driveDirection = currentDirection.interpolate(driveDirection, AGGRESSIVENESS_FACTOR.get());
     }
 
     return new PolarChassisSpeeds(linearVelocity, driveDirection, angularVelocity);

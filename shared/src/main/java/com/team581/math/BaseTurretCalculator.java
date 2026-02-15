@@ -1,10 +1,12 @@
 package com.team581.math;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 
 public class BaseTurretCalculator {
 
@@ -14,14 +16,18 @@ public class BaseTurretCalculator {
       double motorToTurretRatio,
       double encoderToTurretRatio,
       double motorRotationResolution,
-      double minTurretAngle,
-      double maxTurretAngle) {
+      double minTurretAngleRotations,
+      double maxTurretAngleRotations) {
     double rotor_position = turretMotorPosition % 1;
+    DogLog.log("Turret/Calculator/motor_mod", rotor_position);
     double rotorRotationsRelativeToTurret = rotor_position / motorToTurretRatio;
-    double roughAbsolutePosition = turretEncoderPosition * encoderToTurretRatio;
+    double roughAbsolutePosition = turretEncoderPosition / encoderToTurretRatio;
+    DogLog.log("Turret/Calculator/rough_abs_pos", roughAbsolutePosition);
 
     int potentialMotorWrapA =
         (int) (roughAbsolutePosition / motorRotationResolution); // motor_rotation_resolution;
+    DogLog.log("Turret/Calculator/potentialA", potentialMotorWrapA);
+
     double potentialMotorWrapB = potentialMotorWrapA - 1;
     double potentialMotorWrapC = potentialMotorWrapA + 1;
 
@@ -45,8 +51,10 @@ public class BaseTurretCalculator {
         && potentialMotorPositionErrB < potentialMotorPosErrC) {
       turretPos = potentialMotorPosB;
     }
+    DogLog.log("Turret/Calculator/turretPos", turretPos);
+    DogLog.log("Turret/Calculator/turretPosDegrees", Units.rotationsToDegrees(turretPos));
 
-    return MathUtil.inputModulus(turretPos, minTurretAngle, maxTurretAngle);
+    return MathUtil.inputModulus(turretPos, minTurretAngleRotations, maxTurretAngleRotations);
   }
 
   public static double calculateSwerveTurretCompensationAngle(

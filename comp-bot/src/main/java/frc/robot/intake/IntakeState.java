@@ -4,9 +4,9 @@ import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum IntakeState {
-  INTAKING(0),
+  INTAKE(6),
   IDLE(0),
-  SHOOTING(0);
+  SHOOT(3);
 
   public final double voltage;
   public final DoubleSubscriber intakeTunableVoltage;

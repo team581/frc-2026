@@ -1,15 +1,28 @@
 package com.team581.autos;
 
+import com.team581.config.FeatureFlag;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.AutoPoint;
 import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import java.util.function.BooleanSupplier;
 
 public record Point(Pose2d redPose, Pose2d bluePose) {
+  public static final BooleanSupplier CLAMPED_POINTS_FEATURE_FLAG =
+      FeatureFlag.of("ClampedAutoPoints", true);
+
+  private static final Rectangle2d CLAMPED_AREA =
+      new Rectangle2d(new Translation2d(16.54, 8.069), new Translation2d(8.25, 1.649));
+
+  private static Pose2d clamp(Pose2d input) {
+    return new Pose2d(CLAMPED_AREA.nearest(input.getTranslation()), input.getRotation());
+  }
+
   public static Point ofRed(Pose2d redPose) {
     return new Point(redPose, FieldUtil.pathflip(redPose));
   }
@@ -19,7 +32,13 @@ public record Point(Pose2d redPose, Pose2d bluePose) {
   }
 
   public Pose2d getPose() {
-    return FmsUtil.isRedAlliance() ? redPose : bluePose;
+    var result = FmsUtil.isRedAlliance() ? redPose : bluePose;
+
+    if (CLAMPED_POINTS_FEATURE_FLAG.getAsBoolean()) {
+      return clamp(result);
+    }
+
+    return result;
   }
 
   public Translation2d getTranslation() {

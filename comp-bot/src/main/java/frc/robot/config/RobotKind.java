@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.RobotController;
 
 public enum RobotKind {
   COMP_BOT("placeholder1"),
-  PRACTICE_BOT("placeholder2");
+  PRACTICE_BOT("0322443D");
 
   public static final boolean IS_COMP_BOT = fromSerialNumber() == COMP_BOT;
 

@@ -86,14 +86,17 @@ public final class PositionMechanism {
       constraints = getMechanismConstraints(devices);
     }
 
-    if (DriverStation.isDisabled()) {
-      return;
-    }
-
     var currentState = currentMechanismState(devices);
+
     var wantedState = desiredMechanismState(devices);
     var predictedState =
         new TrapezoidProfile(constraints).calculate(updateTimer.get(), currentState, wantedState);
+
+    // When disabled, overwrite predicted position to be current position and force 0 velocity
+    if (DriverStation.isDisabled()) {
+      predictedState = new TrapezoidProfile.State(currentState.position, 0.0);
+    }
+
     var boundedState = applyBounds(predictedState);
 
     for (var motor : devices) {

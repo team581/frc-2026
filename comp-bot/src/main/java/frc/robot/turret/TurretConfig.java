@@ -16,8 +16,9 @@ import edu.wpi.first.math.util.Units;
 public class TurretConfig {
   public static final double MIN_ANGLE_HOMING = -270;
   public static final double MAX_ANGLE_HOMING = 270;
-  public static final double MIN_ANGLE = -135;
-  public static final double MAX_ANGLE = 135;
+  // TODO: adjust after bringup
+  public static final double MIN_ANGLE = -110;
+  public static final double MAX_ANGLE = 85;
   public static final double OUT_OF_BOUNDS_THRESHOLD = 1.0;
   public static final double HOMING_END_POSITION = MIN_ANGLE;
   public static final double TOLERANCE = 1.0;
@@ -37,9 +38,10 @@ public class TurretConfig {
   public static final TalonFXConfiguration MOTOR_CONFIG =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(MOTOR_TO_TURRET))
+          // TODO: Switch back to brake mode once bringup concluded
           .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
           .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(30))
-          .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0).withKG(0.0));
+          .withSlot0(new Slot0Configs().withKP(200.0).withKV(0.0).withKG(0.0).withKD(1.7));
   public static final CANcoderConfiguration ENCODER_CONFIG =
       new CANcoderConfiguration()
           .withMagnetSensor(
@@ -49,7 +51,7 @@ public class TurretConfig {
                   // TODO: Fix
                   .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
                   // TODO: Fix
-                  .withAbsoluteSensorDiscontinuityPoint(1.0));
+                  .withAbsoluteSensorDiscontinuityPoint(0.5));
 
   private TurretConfig() {}
 }

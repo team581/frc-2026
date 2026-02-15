@@ -15,12 +15,12 @@ public class Intake extends StateMachineSubsystem<IntakeState> {
     this.motor = motor;
   }
 
-  public void shootingRequest() {
-    setStateFromRequest(IntakeState.SHOOTING);
+  public void shootRequest() {
+    setStateFromRequest(IntakeState.SHOOT);
   }
 
   public void intakeRequest() {
-    setStateFromRequest(IntakeState.INTAKING);
+    setStateFromRequest(IntakeState.INTAKE);
   }
 
   public void idleRequest() {
@@ -33,10 +33,10 @@ public class Intake extends StateMachineSubsystem<IntakeState> {
       case IDLE -> {
         motor.disable();
       }
-      case INTAKING -> {
+      case INTAKE -> {
         motor.setVoltage(newState.getIntakeVoltage());
       }
-      case SHOOTING -> {
+      case SHOOT -> {
         motor.setVoltage(newState.getIntakeVoltage());
       }
     }
