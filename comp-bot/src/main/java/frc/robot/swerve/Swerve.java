@@ -266,8 +266,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     }
 
     var requestedSpeeds = driveSource.getRequestedSpeeds();
-    if (FeatureFlags.RATE_LIMITED_DRIVING.getAsBoolean() && (getState() == SwerveState.INTAKE_SCORING
-        || getState() == SwerveState.MANUAL_SCORING)) {
+    if (FeatureFlags.RATE_LIMITED_DRIVING.getAsBoolean()
+        && (getState() == SwerveState.INTAKE_SCORING || getState() == SwerveState.MANUAL_SCORING)) {
 
       if (driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP) {
         var rateLimitedXVelocity =
