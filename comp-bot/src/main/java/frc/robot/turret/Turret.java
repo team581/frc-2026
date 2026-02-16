@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 import com.team581.math.MathHelpers;
 import com.team581.simkit.SimKit;
 import com.team581.util.AprilTags;
@@ -11,6 +12,7 @@ import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -26,6 +28,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private double goalAngle = 0.0;
   private double velocity = 0.0;
   private double robotRotationFeedForward = 0.0;
+  private final SlewRateLimiter velocityReducer = new SlewRateLimiter(TurretConfig.TAG_SEARCH_ANGLE_VELOCITY);
 
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withEnableFOC(false);
 
@@ -46,7 +49,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
   @Override
   protected TurretState getNextState(TurretState currentState) {
-    switch (currentState) {
+     return switch (currentState) {
       case UNHOMED -> {
         if (motor.isAlive() && motor.isConnected() && encoder.isConnected() && RobotBase.isReal()) {
           double motorPosition = motor.getRotorPosition().getValueAsDouble();
@@ -55,15 +58,14 @@ public class Turret extends StateMachineSubsystem<TurretState> {
               TurretCalculator.calculateHomedPositionFromMotorAndEncoder(
                   motorPosition, encoderPosition);
           motor.setPosition(turretPos);
-          return TurretState.SCORE;
+          yield TurretState.SCORE;
         } else {
-          return currentState;
+          yield currentState;
         }
       }
-      default -> {
-        return currentState;
-      }
-    }
+      case TAG_SEARCH -> timeout(10.0) ? TurretState.IDLE_SCORE : currentState;
+      default -> currentState;
+    };
   }
 
   @Override
@@ -92,6 +94,17 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     switch (currentState) {
       case UNHOMED -> {
         motor.disable();
+      }
+      case TAG_SEARCH -> {
+        if (atGoal()) {
+          goalAngle = MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
+        }
+        motor.setControl(
+            positionRequest
+                .withPosition(
+                    Units.degreesToRotations(
+                        clamp(TurretCalculator.getOptimalAngle(velocityReducer.calculate(goalAngle), currentAngle))))
+                .withVelocity(Units.degreesToRotations(TurretConfig.TAG_SEARCH_ANGLE_VELOCITY)));
       }
       case SCORE, FEED, CLIMB -> {
         motor.setControl(
@@ -133,6 +146,16 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   public boolean goalOutOfBounds() {
     return goalAngle > (TurretConfig.MAX_ANGLE - TurretConfig.OUT_OF_BOUNDS_THRESHOLD)
         || goalAngle < (TurretConfig.MIN_ANGLE + TurretConfig.OUT_OF_BOUNDS_THRESHOLD);
+  }
+
+  @Override
+  protected void afterTransition(TurretState newState) {
+    switch (newState) {
+      case TAG_SEARCH -> {
+        velocityReducer.reset(currentAngle);
+      }
+      default -> {}
+    }
   }
 
   @Override
@@ -182,6 +205,19 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   public void idleFeedRequest(double goalAngle) {
     this.goalAngle = goalAngle;
     setState(TurretState.IDLE_FEED);
+  }
+
+  public void tagSearchRequest() {
+    if (getState() != TurretState.TAG_SEARCH) {
+      goalAngle = MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
+    }
+    setState(TurretState.TAG_SEARCH);
+  }
+
+  public void cancelTagSearch() {
+    if (getState() == TurretState.TAG_SEARCH) {
+      setState(TurretState.IDLE_SCORE);
+    }
   }
 
   public void setRobotRotationRate(double rateDegrees) {

@@ -22,6 +22,8 @@ public class TurretConfig {
   public static final double OUT_OF_BOUNDS_THRESHOLD = 1.0;
   public static final double HOMING_END_POSITION = MIN_ANGLE;
   public static final double TOLERANCE = 1.0;
+  // degrees per second
+  public static final double TAG_SEARCH_ANGLE_VELOCITY = 60.0;
 
   public static final double MOTOR_TO_TURRET = ((30.0 * 220.0) / (12.0 * 8.0));
 

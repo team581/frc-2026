@@ -858,9 +858,20 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   private void smartTurretHoodIdleRequest() {
-    // -First, if cameras are offline or we are near a trench, always be idle
+    // -First, if we are enabled in teleop and cameras are online, decide whether or not to search for tags
+    // -Next, if cameras are offline or we are near a trench, always be idle
     // -Otherwise if we are in our alliance zone, point towards hub
     // -And if we are not in alliance zone, point towards feed pose
+    if (DriverStation.isTeleopEnabled()) {
+      if (vision.hasSeenTag() || !health.isLocalizationHealthy()) {
+        turret.cancelTagSearch();
+      } else {
+        shooterHood.idleRequest();
+        turret.tagSearchRequest();
+        DogLog.log("RobotManager/SmartIdle/Status", "TagSearch");
+        return;
+      }
+    }
     if (!health.isLocalizationHealthy() || !localization.isTrustworthy() || nearTrench) {
       shooterHood.idleRequest();
       turret.idleScoreRequest(scoringParameters.turretAngle());
