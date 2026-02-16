@@ -118,8 +118,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       default -> {
         // Multiply average position by 2 because averaging halves our position
         differentialMechanism.setControl(
-            differentialPositionVoltageRequest.withAveragePosition(
-                2.0 * clamp(newState.getLength())));
+            differentialPositionVoltageRequest
+                .withAveragePosition(2.0 * clamp(newState.getLength()))
+                .withDifferentialPosition(0));
       }
     }
   }
@@ -132,13 +133,15 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       if (atGoal(DeployState.HOPPER_SHUFFLING.getLength())) {
         // Multiply average position by 2 because averaging halves our position
         differentialMechanism.setControl(
-            differentialPositionVoltageRequest.withAveragePosition(
-                2 * clamp(DeployState.INTAKE.getLength())));
+            differentialPositionVoltageRequest
+                .withAveragePosition(2.0 * clamp(DeployState.INTAKE.getLength()))
+                .withDifferentialPosition(0));
       } else if (atGoal(DeployState.INTAKE.getLength())) {
         // Multiply average position by 2 because averaging halves our position
         differentialMechanism.setControl(
-            differentialPositionVoltageRequest.withAveragePosition(
-                2 * clamp(DeployState.HOPPER_SHUFFLING.getLength())));
+            differentialPositionVoltageRequest
+                .withAveragePosition(2.0 * clamp(DeployState.HOPPER_SHUFFLING.getLength()))
+                .withDifferentialPosition(0));
       }
     }
 

@@ -27,16 +27,16 @@ public class DeployConfig {
   // TODO: Tune PID for differential mechanism
   private static final Slot0Configs AVERAGE_GAINS =
       new Slot0Configs()
-          .withKP(10)
+          .withKP(0.1)
           .withKI(0)
-          .withKD(0.1)
-          .withKG(0.2)
-          .withKS(0.1)
-          .withKV(0.36)
+          .withKD(0.0)
+          .withKG(0.0)
+          .withKS(0.0)
+          .withKV(0.0)
           .withKA(0);
   // Difference axis gains typically go in Slot 1
   private static final Slot1Configs DIFFERENCE_GAINS =
-      new Slot1Configs().withKP(10).withKI(0).withKD(0.1).withKS(0.1).withKV(0.72);
+      new Slot1Configs().withKP(0.1).withKI(0).withKD(0.0).withKS(0.0).withKV(0.0);
 
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIG =
       new TalonFXConfiguration()
