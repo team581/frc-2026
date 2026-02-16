@@ -24,9 +24,10 @@ public class TurretConfig {
   public static final double MAX_ANGLE = 85;
   public static final double OUT_OF_BOUNDS_THRESHOLD = 1.0;
   public static final double HOMING_END_POSITION = MIN_ANGLE;
-  // degrees per second
-  public static final double TAG_SEARCH_ANGLE_VELOCITY = 60.0;
   public static final DoubleSubscriber TOLERANCE = DogLog.tunable("Turret/Tolerance", 1.0);
+  // degrees per second
+  public static final double TAG_SEARCH_MAX_ANGLE_VELOCITY = 60.0;
+  public static final double TAG_SEARCH_MAX_ANGLE_ACCELERATION = 20.0;
 
   public static final double MOTOR_TO_TURRET = ((30.0 * 220.0) / (12.0 * 8.0));
 

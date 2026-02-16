@@ -1,6 +1,7 @@
 package frc.robot.turret;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -11,12 +12,12 @@ import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.config.DSOptions;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.Vision;
 
@@ -29,10 +30,14 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private double voltage = 0.0;
   private double statorCurrent = 0.0;
   private double robotRotationFeedForward = 0.0;
-  private final SlewRateLimiter velocityReducer =
-      new SlewRateLimiter(TurretConfig.TAG_SEARCH_ANGLE_VELOCITY);
 
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withEnableFOC(false);
+  private final DynamicMotionMagicVoltage slowPositionRequest =
+      new DynamicMotionMagicVoltage(
+              0.0,
+              TurretConfig.TAG_SEARCH_MAX_ANGLE_VELOCITY,
+              TurretConfig.TAG_SEARCH_MAX_ANGLE_ACCELERATION)
+          .withEnableFOC(false);
 
   private final Vision vision;
 
@@ -65,7 +70,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
           yield currentState;
         }
       }
-      case TAG_SEARCH -> timeout(10.0) ? TurretState.IDLE_SCORE : currentState;
+      case TAG_SEARCH -> DSOptions.DO_TAG_SEARCH.get() ? currentState : TurretState.IDLE_SCORE;
       default -> currentState;
     };
   }
@@ -105,13 +110,9 @@ public class Turret extends StateMachineSubsystem<TurretState> {
               MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
         }
         motor.setControl(
-            positionRequest
-                .withPosition(
-                    Units.degreesToRotations(
-                        clamp(
-                            TurretCalculator.getOptimalAngle(
-                                velocityReducer.calculate(goalAngle), currentAngle))))
-                .withVelocity(Units.degreesToRotations(TurretConfig.TAG_SEARCH_ANGLE_VELOCITY)));
+            slowPositionRequest.withPosition(
+                Units.degreesToRotations(
+                    clamp(TurretCalculator.getOptimalAngle(goalAngle, currentAngle)))));
       }
       case SCORE, FEED, CLIMB -> {
         motor.setControl(
@@ -144,6 +145,14 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   }
 
   public void setState(TurretState newState) {
+    switch (newState) {
+      case TAG_SEARCH ->{
+        if (!DSOptions.DO_TAG_SEARCH.get()) {
+          return;
+        }
+      }
+      default -> {}
+    }
     switch (getState()) {
       case UNHOMED -> {}
       default -> {
@@ -155,16 +164,6 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   public boolean goalOutOfBounds() {
     return goalAngle > (TurretConfig.MAX_ANGLE - TurretConfig.OUT_OF_BOUNDS_THRESHOLD)
         || goalAngle < (TurretConfig.MIN_ANGLE + TurretConfig.OUT_OF_BOUNDS_THRESHOLD);
-  }
-
-  @Override
-  protected void afterTransition(TurretState newState) {
-    switch (newState) {
-      case TAG_SEARCH -> {
-        velocityReducer.reset(currentAngle);
-      }
-      default -> {}
-    }
   }
 
   @Override

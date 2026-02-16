@@ -8,6 +8,8 @@ public final class DSOptions {
   public static final BooleanSubscriber USE_HUB_STATE = DSOption.of("UseHubState", false);
   // TODO: This should be true when the CANrange is actually physically on the robot
   public static final BooleanSubscriber USE_CANRANGE = DSOption.of("UseCANRange", false);
+  // TODO: turn false during pit work probably
+  public static final BooleanSubscriber DO_TAG_SEARCH = DSOption.of("DoTagSearch", true);
 
   private DSOptions() {}
 }
