@@ -1,9 +1,11 @@
 package frc.robot.vision;
 
 import com.team581.math.MathHelpers;
+import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.vision.results.OptionalTagResult;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -189,5 +191,14 @@ public class Vision extends StateMachineSubsystem<VisionState> {
 
     DogLog.log("Vision/SeeingTag", seeingTag);
     DogLog.log("Vision/SeeingTagLast5Seconds", seenTagRecentlyForReset);
+    DogLog.log("Vision/HasSeenTag", hasSeenTag);
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    if (MathUtil.isNear(robotHeading, FmsUtil.isRedAlliance() ? 180.0 : 0.0, (TurretConfig.MAX_ANGLE-TurretConfig.MIN_ANGLE)/2)
+        && Math.abs(robotAngularVelocity) <= TurretConfig.TAG_SEARCH_ANGLE_VELOCITY) {
+      hasSeenTag = timeout(10.0);
+    }
   }
 }
