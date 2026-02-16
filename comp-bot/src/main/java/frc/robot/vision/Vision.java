@@ -196,7 +196,10 @@ public class Vision extends StateMachineSubsystem<VisionState> {
 
   @Override
   public void simulationPeriodic() {
-    if (MathUtil.isNear(robotHeading, FmsUtil.isRedAlliance() ? 180.0 : 0.0, (TurretConfig.MAX_ANGLE-TurretConfig.MIN_ANGLE)/2)
+    if (MathUtil.isNear(
+            robotHeading,
+            FmsUtil.isRedAlliance() ? 180.0 : 0.0,
+            (TurretConfig.MAX_ANGLE - TurretConfig.MIN_ANGLE) / 2)
         && Math.abs(robotAngularVelocity) <= TurretConfig.TAG_SEARCH_ANGLE_VELOCITY) {
       hasSeenTag = timeout(10.0);
     }
