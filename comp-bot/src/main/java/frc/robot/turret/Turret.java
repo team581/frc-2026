@@ -146,7 +146,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
   public void setState(TurretState newState) {
     switch (newState) {
-      case TAG_SEARCH ->{
+      case TAG_SEARCH -> {
         if (!DSOptions.DO_TAG_SEARCH.get()) {
           return;
         }
