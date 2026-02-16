@@ -75,16 +75,6 @@ public class DeployConfig {
   // TODO: Discuss/set CANrange config during bringup
   public static final CANrangeConfiguration CAN_RANGE_CONFIG = new CANrangeConfiguration();
 
-  public static final DifferentialMotorConstants<TalonFXConfiguration> differentialConstants =
-      new DifferentialMotorConstants<TalonFXConfiguration>()
-          .withCANBusName(CANIVORE.getName())
-          .withLeaderId(22)
-          .withFollowerId(23)
-          .withAlignment(MotorAlignmentValue.Opposed)
-          .withLeaderInitialConfigs(LEFT_MOTOR_CONFIG)
-          .withFollowerInitialConfigs(RIGHT_MOTOR_CONFIG)
-          .withFollowerUsesCommonLeaderConfigs(true);
-
   public static final double HIGH_CAPACITY_THRESHOLD = 10;
   public static final double MEDIUM_CAPACITY_THRESHOLD = 5;
 }
