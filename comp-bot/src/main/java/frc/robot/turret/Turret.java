@@ -4,7 +4,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 import com.team581.math.MathHelpers;
 import com.team581.simkit.SimKit;
 import com.team581.util.AprilTags;
@@ -28,7 +27,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private double goalAngle = 0.0;
   private double velocity = 0.0;
   private double robotRotationFeedForward = 0.0;
-  private final SlewRateLimiter velocityReducer = new SlewRateLimiter(TurretConfig.TAG_SEARCH_ANGLE_VELOCITY);
+  private final SlewRateLimiter velocityReducer =
+      new SlewRateLimiter(TurretConfig.TAG_SEARCH_ANGLE_VELOCITY);
 
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withEnableFOC(false);
 
@@ -49,7 +49,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
   @Override
   protected TurretState getNextState(TurretState currentState) {
-     return switch (currentState) {
+    return switch (currentState) {
       case UNHOMED -> {
         if (motor.isAlive() && motor.isConnected() && encoder.isConnected() && RobotBase.isReal()) {
           double motorPosition = motor.getRotorPosition().getValueAsDouble();
@@ -97,13 +97,16 @@ public class Turret extends StateMachineSubsystem<TurretState> {
       }
       case TAG_SEARCH -> {
         if (atGoal()) {
-          goalAngle = MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
+          goalAngle =
+              MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
         }
         motor.setControl(
             positionRequest
                 .withPosition(
                     Units.degreesToRotations(
-                        clamp(TurretCalculator.getOptimalAngle(velocityReducer.calculate(goalAngle), currentAngle))))
+                        clamp(
+                            TurretCalculator.getOptimalAngle(
+                                velocityReducer.calculate(goalAngle), currentAngle))))
                 .withVelocity(Units.degreesToRotations(TurretConfig.TAG_SEARCH_ANGLE_VELOCITY)));
       }
       case SCORE, FEED, CLIMB -> {
@@ -209,7 +212,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
   public void tagSearchRequest() {
     if (getState() != TurretState.TAG_SEARCH) {
-      goalAngle = MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
+      goalAngle =
+          MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
     }
     setState(TurretState.TAG_SEARCH);
   }

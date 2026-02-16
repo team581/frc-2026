@@ -177,18 +177,18 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       rightMotor.setControl(coastRequest);
     } else {
       switch (state) {
-      case HOME -> {
-        leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE);
-        rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE);        
-      }
-       case CATCHUP_TO_LEFT -> {
-        leftMotor.disable();
-        rightMotor.setControl(positionVoltageRequest.withPosition(leftMotorPosition));
-      }
-      case CATCHUP_TO_RIGHT -> {
-        leftMotor.setControl(positionVoltageRequest.withPosition(rightMotorPosition));
-        rightMotor.disable();
-      }
+        case HOME -> {
+          leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE);
+          rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE);
+        }
+        case CATCHUP_TO_LEFT -> {
+          leftMotor.disable();
+          rightMotor.setControl(positionVoltageRequest.withPosition(leftMotorPosition));
+        }
+        case CATCHUP_TO_RIGHT -> {
+          leftMotor.setControl(positionVoltageRequest.withPosition(rightMotorPosition));
+          rightMotor.disable();
+        }
       }
       if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()
           && state == DeployState.HOPPER_SHUFFLING

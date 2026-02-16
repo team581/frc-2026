@@ -858,7 +858,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   private void smartTurretHoodIdleRequest() {
-    // -First, if we are enabled in teleop and cameras are online, decide whether or not to search for tags
+    // -First, if we are enabled in teleop and cameras are online, decide whether or not to search
+    // for tags
     // -Next, if cameras are offline or we are near a trench, always be idle
     // -Otherwise if we are in our alliance zone, point towards hub
     // -And if we are not in alliance zone, point towards feed pose
