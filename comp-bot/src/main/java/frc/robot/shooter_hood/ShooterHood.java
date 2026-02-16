@@ -32,8 +32,9 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
   private double scoreDistance = 0;
   private double feedDistance = 0;
   private double currentAngle = 0;
-  private double statorCurrent = 0;
+  private double statorCurrent = 0.0;
   private double climbScoreAngle = 0;
+  private double voltage = 0.0;
 
   public ShooterHood(TalonFX motor) {
     super(SubsystemPriority.SHOOTER_HOOD, ShooterHoodState.UNHOMED);
@@ -98,6 +99,7 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
   protected void collectInputs() {
     currentAngle = Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
     statorCurrent = motor.getStatorCurrent().getValueAsDouble();
+    voltage = motor.getMotorVoltage().getValueAsDouble();
   }
 
   private double getGoalAngle() {
@@ -164,6 +166,7 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
     DogLog.log("ShooterHood/Angle", currentAngle);
     DogLog.log("ShooterHood/GoalAngle", goalAngle);
     DogLog.log("ShooterHood/Motor/StatorCurrent", statorCurrent);
+    DogLog.log("ShooterHood/Motor/Voltage", voltage);
   }
 
   @Override

@@ -20,6 +20,8 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
 
   private final VelocityVoltage rotorVelocityRequest = new VelocityVoltage(0).withEnableFOC(false);
 
+  private double horizontalRawCurrent = 0.0;
+  private double verticalRawCurrent = 0.0;
   private double rotorRawCurrent = 0.0;
   private double rotorFilteredCurrent = 0.0;
 
@@ -66,17 +68,22 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     DogLog.log("DyeRotor/Rotor/GoalRPM", currentState.rotorRPM);
     DogLog.log("DyeRotor/Rotor/Angle", rotorAngle);
     DogLog.log("DyeRotor/Rotor/Voltage", rotorMotor.getMotorVoltage().getValueAsDouble());
+    DogLog.log("DyeRotor/Rotor/StatorCurrent", rotorRawCurrent);
     DogLog.log("DyeRotor/Horizontal/RPM", horizontalMotorRpm);
     DogLog.log("DyeRotor/Horizontal/GoalVoltage", currentState.getHorizontalVoltage());
     DogLog.log("DyeRotor/Horizontal/Voltage", horizontalMotor.getMotorVoltage().getValueAsDouble());
+    DogLog.log("DyeRotor/Horizontal/StatorCurrent", horizontalRawCurrent);
     DogLog.log("DyeRotor/Vertical/GoalVoltage", currentState.getVerticalVoltage());
     DogLog.log("DyeRotor/Vertical/Voltage", verticalMotor.getMotorVoltage().getValueAsDouble());
     DogLog.log("DyeRotor/Vertical/Velocity", verticalMotor.getVelocity().getValueAsDouble());
+    DogLog.log("DyeRotor/Vertical/StatorCurrent", verticalRawCurrent);
     DogLog.log("DyeRotor/AtGoal", atGoal());
   }
 
   @Override
   protected void collectInputs() {
+    verticalRawCurrent = verticalMotor.getStatorCurrent().getValueAsDouble();
+    horizontalRawCurrent = horizontalMotor.getStatorCurrent().getValueAsDouble();
     rotorRawCurrent = rotorMotor.getStatorCurrent().getValueAsDouble();
     rotorFilteredCurrent = currentFilter.calculate(rotorRawCurrent);
 

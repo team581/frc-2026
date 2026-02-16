@@ -26,6 +26,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private double currentAngle = 0.0;
   private double goalAngle = 0.0;
   private double velocity = 0.0;
+  private double voltage = 0.0;
+  private double statorCurrent = 0.0;
   private double robotRotationFeedForward = 0.0;
   private final SlewRateLimiter velocityReducer =
       new SlewRateLimiter(TurretConfig.TAG_SEARCH_ANGLE_VELOCITY);
@@ -72,6 +74,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   protected void collectInputs() {
     currentAngle = Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
     velocity = Units.rotationsToDegrees(motor.getVelocity().getValueAsDouble());
+    voltage = motor.getMotorVoltage().getValueAsDouble();
+    statorCurrent = motor.getStatorCurrent().getValueAsDouble();
 
     // Predict the turret's current angle to account for sensor latency
     double latencyCompensatedAngle =
@@ -135,6 +139,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     }
 
     DogLog.log("Turret/AtGoal", atGoal());
+    DogLog.log("Turret/StatorCurrent", statorCurrent);
+    DogLog.log("Turret/Voltage", voltage);
   }
 
   public void setState(TurretState newState) {
@@ -235,7 +241,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
       // TODO: Reconsider for turret wrapping
       default ->
           MathUtil.isNear(
-              goalAngle, MathHelpers.angleModulus(currentAngle), TurretConfig.TOLERANCE);
+              goalAngle, MathHelpers.angleModulus(currentAngle), TurretConfig.TOLERANCE.get());
     };
   }
 

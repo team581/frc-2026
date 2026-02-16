@@ -1,20 +1,168 @@
 package frc.robot.shooter;
 
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.ChassisReference;
+import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
+import com.team581.util.tuning.TunablePid;
+import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
+import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class Shooter2 extends StateMachineSubsystem<ShooterState> {
+  private static double distanceToScoringRpm(double distance) {
+    return FeatureFlags.REGRESSION_MODEL.getAsBoolean()
+        ? Shooter2Config.SCORING_REGRESSION_MODEL.calculate(distance)
+        : Shooter2Config.DISTANCE_TO_SCORE_RPM.get(distance);
+  }
 
-  public Shooter2(TalonFX leftMotor, TalonFX rightMotor) {
+  private static double distanceToFeedingRpm(double distance) {
+    return FeatureFlags.REGRESSION_MODEL.getAsBoolean()
+        ? Shooter2Config.FEEDING_REGRESSION_MODEL.calculate(distance)
+        : Shooter2Config.DISTANCE_TO_FEEDING_RPM.get(distance);
+  }
+
+  private final TalonFX topMotor;
+  private final TalonFX bottomMotor;
+
+  private final VelocityVoltage voltageRequest =
+      new VelocityVoltage(0).withLimitReverseMotion(true).withEnableFOC(true);
+
+  private double scoreDistance = 0;
+  private double climbScoreRpm = 0;
+  private double feedDistance = 0;
+
+  private double shootingRpm = 0;
+  private double feedingRpm = 0;
+  private double topMotorRpm = 0;
+  private double bottomMotorRpm = 0;
+
+  public Shooter2(TalonFX topMotor, TalonFX bottomMotor) {
     super(SubsystemPriority.SHOOTER, ShooterState.IDLE);
 
-    leftMotor.getConfigurator().apply(ShooterConfig.LEFT_MOTOR_CONFIGS);
-    rightMotor.getConfigurator().apply(ShooterConfig.RIGHT_MOTOR_CONFIG);
+    topMotor.getConfigurator().apply(Shooter2Config.TOP_MOTOR_CONFIGS);
+    bottomMotor.getConfigurator().apply(Shooter2Config.BOTTOM_MOTOR_CONFIG);
+
+    TunablePid.register("Shooter/TopShooter", topMotor, Shooter2Config.TOP_MOTOR_CONFIGS);
+    TunablePid.register("Shooter/BottomShooter", bottomMotor, Shooter2Config.BOTTOM_MOTOR_CONFIG);
+
+    this.topMotor = topMotor;
+    this.bottomMotor = bottomMotor;
   }
 
   public void scoreRequest(double distance) {
-
+    this.scoreDistance = distance;
     setStateFromRequest(ShooterState.SCORE);
+  }
+
+  public void climbScoreRequest(boolean isTop) {
+    climbScoreRpm = 0.0;
+    setStateFromRequest(ShooterState.CLIMB_SCORE);
+  }
+
+  public void feedRequest(double distance) {
+    this.feedDistance = distance;
+    setStateFromRequest(ShooterState.FEEDING);
+  }
+
+  public void idleRequest() {
+    setStateFromRequest(ShooterState.IDLE);
+  }
+
+  @Override
+  protected void whileInState(ShooterState state) {
+    DogLog.log("Shooter/Top/RPM", topMotorRpm);
+    DogLog.log("Shooter/Bottom/RPM", bottomMotorRpm);
+    DogLog.log("Shooter/GoalShootingRPM", shootingRpm);
+    DogLog.log("Shooter/GoalFeedingRPM", feedingRpm);
+    DogLog.log("Shooter/AtGoal", atGoal());
+    DogLog.log("Shooter/Bottom/Voltage", bottomMotor.getMotorVoltage().getValueAsDouble());
+    DogLog.log("Shooter/Top/Voltage", topMotor.getMotorVoltage().getValueAsDouble());
+
+    DogLog.log("Shooter/Top/StatorCurrent", topMotor.getStatorCurrent().getValueAsDouble());
+    DogLog.log("Shooter/Bottom/StatorCurrent", bottomMotor.getStatorCurrent().getValueAsDouble());
+    DogLog.log("Shooter/Top/SupplyCurrent", topMotor.getSupplyCurrent().getValueAsDouble());
+    DogLog.log("Shooter/Bottom/SupplyCurrent", bottomMotor.getSupplyCurrent().getValueAsDouble());
+
+    switch (state) {
+      case SCORE -> {
+        var setpoint = shootingRpm / 60.0;
+        topMotor.setControl(voltageRequest.withVelocity(setpoint));
+        bottomMotor.setControl(voltageRequest.withVelocity(setpoint));
+
+        DogLog.log("Shooter/RpmSetpoint", shootingRpm);
+      }
+      case CLIMB_SCORE -> {
+        var setpoint = climbScoreRpm / 60.0;
+        topMotor.setControl(voltageRequest.withVelocity(setpoint));
+        bottomMotor.setControl(voltageRequest.withVelocity(setpoint));
+
+        DogLog.log("Shooter/RpmSetpoint", climbScoreRpm);
+      }
+      case FEEDING -> {
+        var setpoint = feedingRpm / 60.0;
+        topMotor.setControl(voltageRequest.withVelocity(setpoint));
+        bottomMotor.setControl(voltageRequest.withVelocity(setpoint));
+
+        DogLog.log("Shooter/RpmSetpoint", feedingRpm);
+      }
+      case IDLE -> {
+        topMotor.disable();
+        bottomMotor.disable();
+
+        DogLog.log("Shooter/RpmSetpoint", -1.0);
+      }
+    }
+  }
+
+  @Override
+  protected void collectInputs() {
+    shootingRpm = Math.min(Shooter2Config.MAX_SAFE_RPM, distanceToScoringRpm(scoreDistance));
+    feedingRpm = Math.min(Shooter2Config.MAX_SAFE_RPM, distanceToFeedingRpm(feedDistance));
+
+    topMotorRpm = topMotor.getVelocity().getValueAsDouble() * 60.0;
+    bottomMotorRpm = bottomMotor.getVelocity().getValueAsDouble() * 60.0;
+  }
+
+  public boolean atGoal() {
+    return switch (getState()) {
+      case IDLE -> true;
+      case SCORE ->
+          MathUtil.isNear(topMotorRpm, shootingRpm, Shooter2Config.RPM_TOLERANCE_SHOOTER)
+              && MathUtil.isNear(bottomMotorRpm, shootingRpm, Shooter2Config.RPM_TOLERANCE_SHOOTER);
+      case CLIMB_SCORE ->
+          MathUtil.isNear(topMotorRpm, climbScoreRpm, Shooter2Config.RPM_TOLERANCE_SHOOTER)
+              && MathUtil.isNear(
+                  bottomMotorRpm, climbScoreRpm, Shooter2Config.RPM_TOLERANCE_SHOOTER);
+
+      case FEEDING ->
+          MathUtil.isNear(topMotorRpm, feedingRpm, Shooter2Config.RPM_TOLERANCE_SHOOTER)
+              && MathUtil.isNear(bottomMotorRpm, feedingRpm, Shooter2Config.RPM_TOLERANCE_SHOOTER);
+    };
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    var shooterSimulation =
+        SimKit.velocityMechanism(
+            "shooter",
+            (mechanism) ->
+                mechanism
+                    .addMotor(topMotor, ChassisReference.CounterClockwise_Positive)
+                    .addMotor(bottomMotor, ChassisReference.Clockwise_Positive));
+
+    shooterSimulation.update();
+  }
+
+  public double getScoreTimeOfFlight(double distance) {
+    this.scoreDistance = distance;
+    return Shooter2Config.DISTANCE_TO_SCORE_TOF.get(scoreDistance);
+  }
+
+  public double getFeedTimeOfFlight(double distance) {
+    this.feedDistance = distance;
+    return Shooter2Config.DISTANCE_TO_FEED_TOF.get(feedDistance);
   }
 }

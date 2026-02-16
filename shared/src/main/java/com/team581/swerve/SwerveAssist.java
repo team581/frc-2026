@@ -18,9 +18,11 @@ public class SwerveAssist {
   private static final double TRENCH_ASSIST_VELOCITY_THRESHOLD = 0.75;
   private static final double TRENCH_ASSIST_VELOCITY_ANGLE_TOLERANCE = 30.0;
   private static final double BUMP_ASSIST_VELOCITY_THRESHOLD = 0.5;
-  private static final double BUMP_ASSIST_ROBOT_ANGLE_TOLERANCE = 45.0;
   private static final double BUMP_ASSIST_VELOCITY_ANGLE_TOLERANCE = 22.5;
-  private static final double ROBOT_INTAKE_TO_BUMP_ANGLE = 0.0;
+
+  // Angles to round the snap to when swerve assisting
+  public static final double TRENCH_SNAP_ROUND_ANGLE = 180.0;
+  public static final double BUMP_SNAP_ROUND_ANGLE = 90.0;
 
   private static final DoubleSupplier WALL_SNAPS_VELOCITY_ANGLE_THRESHOLD =
       DogLog.tunable("Swerve/WallSnaps/VelocityAngleThresholdDegrees", 30.0, Degrees);
@@ -48,19 +50,6 @@ public class SwerveAssist {
       return false;
     }
     DogLog.log("SwerveAssist/Bump/VelocityThreshold", true);
-
-    // Check if robot is facing the bump
-    if (!MathUtil.isNear(
-        robotPose.getRotation().getDegrees(),
-        getBumpSnapAngle(fieldRelativeSpeeds.vxMetersPerSecond),
-        BUMP_ASSIST_ROBOT_ANGLE_TOLERANCE,
-        -180.0,
-        180.0)) {
-      DogLog.log("SwerveAssist/Bump/RobotAngleTolerance", false);
-      return false;
-    }
-    ;
-    DogLog.log("SwerveAssist/Bump/RobotAngleTolerance", true);
 
     // Check if velocity angle is toward bump
     var hubSideBumpAssistPoint = FieldUtil.getClosestHubSideBumpPoint(robotTranslation);
@@ -213,11 +202,8 @@ public class SwerveAssist {
     return distanceToWallThreshold && velocityAngleTowardWall && rotationAngleTowardWall;
   }
 
-  public static double getBumpSnapAngle(double vxMetersPerSecond) {
-    // Decides which way to snap based on which direction our velocity is going
-    return vxMetersPerSecond > 0.0
-        ? ROBOT_INTAKE_TO_BUMP_ANGLE
-        : ROBOT_INTAKE_TO_BUMP_ANGLE + 180.0;
+  public static double getRoundedSnapAngle(Rotation2d robotHeading, double roundingAngle) {
+    return Math.round(robotHeading.getDegrees() / roundingAngle) * roundingAngle;
   }
 
   public static PolarChassisSpeeds getTrenchAssistSpeeds(
@@ -241,9 +227,5 @@ public class SwerveAssist {
           polarInputSpeeds.vMetersPerSecond, newDirection, wantedSpeeds.omegaRadiansPerSecond);
     }
     return polarInputSpeeds;
-  }
-
-  public static double getTrenchSnapAngle(Rotation2d robotHeading) {
-    return Math.round(robotHeading.getDegrees() / 90.0) * 90.0;
   }
 }

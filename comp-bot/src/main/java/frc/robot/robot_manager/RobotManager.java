@@ -201,12 +201,13 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           yield RobotState.IDLE;
         }
 
-        if (shooter.atGoal()
-            && localization.isTrustworthy()
-            && dyeRotor.atGoal()
-            && turret.atGoal()
-            && shooterHood.atGoal()
-            && isHubActive) {
+        if (!FeatureFlags.CANCEL_IN_PROGRESS_SHOT.getAsBoolean()
+            || ((!FeatureFlags.STOP_SCORING_RPM_DIP.getAsBoolean() || shooter.atGoal())
+                && localization.isTrustworthy()
+                && dyeRotor.atGoal()
+                && turret.atGoal()
+                && shooterHood.atGoal()
+                && isHubActive)) {
           yield currentState;
         }
 

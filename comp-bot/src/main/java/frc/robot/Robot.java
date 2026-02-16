@@ -64,9 +64,10 @@ public class Robot extends Base581Robot {
               // left
               Units.inchesToMeters(-8.3370),
               Units.inchesToMeters(19.7564),
-              18.52,
+              // TODO: get real number from cad
+              10.00,
               180.0 + 4.5,
-              0.83));
+              -0.83));
 
   // ground when stowed
   // Units.inchesToMeters(12.9742),

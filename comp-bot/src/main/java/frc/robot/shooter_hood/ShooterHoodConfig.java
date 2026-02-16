@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -36,7 +37,8 @@ public class ShooterHoodConfig {
           .withFeedback(
               new FeedbackConfigs().withSensorToMechanismRatio((340.0 * 42.0) / (14.0 * 8.0)))
           .withCurrentLimits(
-              new CurrentLimitsConfigs().withStatorCurrentLimit(20).withSupplyCurrentLimit(20))
+              new CurrentLimitsConfigs().withStatorCurrentLimit(20).withSupplyCurrentLimit(10))
+          .withVoltage(new VoltageConfigs().withPeakForwardVoltage(10).withPeakReverseVoltage(-10))
           .withMotorOutput(
               new MotorOutputConfigs()
                   // TODO: Change to brake after bringup completed
