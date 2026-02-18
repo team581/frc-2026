@@ -149,7 +149,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     DogLog.log("Deploy/LeftMotor/Position", leftMotorPosition);
     DogLog.log("Deploy/RightMotor/Position", rightMotorPosition);
     DogLog.log("Deploy/GoalPosition", getState().getLength());
-    DogLog.log("Deploy/DifferentialPosition", differentialMechanism.getAveragePosition().getValueAsDouble());
+    DogLog.log(
+        "Deploy/DifferentialPosition",
+        differentialMechanism.getAveragePosition().getValueAsDouble());
     DogLog.log("Deploy/AveragePosition", getPosition());
     DogLog.log("Deploy/AbleToHopperShuffle", ableToHopperShuffle);
     DogLog.log("Deploy/StoredState", storedState.name());
