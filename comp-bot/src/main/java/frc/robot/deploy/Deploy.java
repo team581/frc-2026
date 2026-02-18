@@ -120,7 +120,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         // Multiply average position by 2 because averaging halves our position
         differentialMechanism.setControl(
             differentialPositionVoltageRequest
-                .withAveragePosition(2.0 * clamp(newState.getLength()))
+                .withAveragePosition(clamp(newState.getLength()))
                 .withDifferentialPosition(0));
       }
     }
@@ -135,13 +135,13 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         // Multiply average position by 2 because averaging halves our position
         differentialMechanism.setControl(
             differentialPositionVoltageRequest
-                .withAveragePosition(2.0 * clamp(DeployState.INTAKE.getLength()))
+                .withAveragePosition(clamp(DeployState.INTAKE.getLength()))
                 .withDifferentialPosition(0));
       } else if (atGoal(DeployState.INTAKE.getLength())) {
         // Multiply average position by 2 because averaging halves our position
         differentialMechanism.setControl(
             differentialPositionVoltageRequest
-                .withAveragePosition(2.0 * clamp(DeployState.HOPPER_SHUFFLING.getLength()))
+                .withAveragePosition(clamp(DeployState.HOPPER_SHUFFLING.getLength()))
                 .withDifferentialPosition(0));
       }
     }
@@ -149,6 +149,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     DogLog.log("Deploy/LeftMotor/Position", leftMotorPosition);
     DogLog.log("Deploy/RightMotor/Position", rightMotorPosition);
     DogLog.log("Deploy/GoalPosition", getState().getLength());
+    DogLog.log("Deploy/DifferentialPosition", differentialMechanism.getAveragePosition().getValueAsDouble());
     DogLog.log("Deploy/AveragePosition", getPosition());
     DogLog.log("Deploy/AbleToHopperShuffle", ableToHopperShuffle);
     DogLog.log("Deploy/StoredState", storedState.name());
