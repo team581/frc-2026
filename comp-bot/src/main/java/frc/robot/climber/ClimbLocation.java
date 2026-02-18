@@ -9,7 +9,7 @@ public enum ClimbLocation {
   RIGHT,
   CLOSEST;
 
-  private static ClimbLocation getNearest(Pose2d robot) {
+  public static ClimbLocation getNearest(Pose2d robot) {
     var yDistanceToLeft = Math.abs(robot.getY() - ClimberConfig.CLIMB_LEFT_LOCATION.getY());
     var yDistanceToRight = Math.abs(robot.getY() - ClimberConfig.CLIMB_RIGHT_LOCATION.getY());
     var closestClimbLocation = Math.min(yDistanceToLeft, yDistanceToRight);

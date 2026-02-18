@@ -12,6 +12,7 @@
     "fileFormat": "json",
     "matchStrings": ["jsonUrl ? { \"depName\": name, \"currentValue\": version, \"registryUrl\": jsonUrl }"]
   }],
+  "timezone": "America/Los_Angeles",
   "packageRules": [{
     "groupName": "error-prone",
     "matchSourceUrls": ["https://github.com/google/error-prone"]

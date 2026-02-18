@@ -63,12 +63,17 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
     return trustFactor.get();
   }
 
+  public boolean isLost() {
+    return trustFactor.isLost();
+  }
+
   public boolean isTrustworthy() {
     return trustFactor.isTrustworthy();
   }
 
   public void resetPose(Pose2d estimatedPose) {
     drivetrain.resetPose(estimatedPose);
+    trustFactor.seededPose();
   }
 
   @Override
@@ -80,6 +85,7 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
 
   public void zeroGyro() {
     drivetrain.seedFieldCentric();
+    trustFactor.reset();
   }
 
   private void ingestTagResult(TagResult result) {

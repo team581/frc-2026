@@ -3,6 +3,7 @@ package frc.robot.imu;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.team581.mechanisms.imu.BaseImuSubsystem;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -18,6 +19,7 @@ public class Imu extends BaseImuSubsystem {
   private double pigeonYPrevAccel = 0.0;
   private double pigeonGForce = 0.0;
   private double maxGForceDetected = Double.NEGATIVE_INFINITY;
+  private double lastUpdateTime = 0.0;
 
   public Imu(SwerveDrivetrain<?, ?, ?> drivetrain) {
     super(SubsystemPriority.IMU, drivetrain);
@@ -31,9 +33,19 @@ public class Imu extends BaseImuSubsystem {
         pigeonYAccelFilter.calculate(drivetrain.getPigeon2().getAccelerationY().getValueAsDouble());
 
     // Calculates the jerk in the X and Y directions
-    // Divides by .02 because default loop timing is 20ms
-    double pigeonXJerk = (pigeonFilteredXAccel - pigeonXPrevAccel) / 0.02;
-    double pigeonYJerk = (pigeonFilteredYAccel - pigeonYPrevAccel) / 0.02;
+    double currentTime = MathSharedStore.getTimestamp();
+    double dt = lastUpdateTime == 0.0 ? 0.02 : currentTime - lastUpdateTime;
+    lastUpdateTime = currentTime;
+
+    double pigeonXJerk;
+    double pigeonYJerk;
+    if (dt == 0) {
+      pigeonXJerk = 0.0;
+      pigeonYJerk = 0.0;
+    } else {
+      pigeonXJerk = (pigeonFilteredXAccel - pigeonXPrevAccel) / dt;
+      pigeonYJerk = (pigeonFilteredYAccel - pigeonYPrevAccel) / dt;
+    }
 
     pigeonXPrevAccel = pigeonFilteredXAccel;
     pigeonYPrevAccel = pigeonFilteredYAccel;

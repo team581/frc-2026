@@ -1,6 +1,8 @@
 package frc.robot.deploy;
 
 import com.ctre.phoenix6.controls.DifferentialMotionMagicVoltage;
+import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.SimpleDifferentialMechanism;
@@ -15,6 +17,10 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.Hardware;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import frc.robot.config.DSOptions;
 import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -25,22 +31,31 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       new SimpleDifferentialMechanism<TalonFX>(TalonFX::new, Hardware.differentialConstants);
   private final CANrange hopperCANRange;
   private final LinearFilter hopperFilter = LinearFilter.movingAverage(5);
+  private final CoastOut coastRequest = new CoastOut();
   private final DifferentialMotionMagicVoltage differentialPositionVoltageRequest =
       new DifferentialMotionMagicVoltage(0, 0).withEnableFOC(false);
 
-  private HopperCapacity hopperCapacity = HopperCapacity.HIGH;
+  private HopperCapacity hopperCapacity = HopperCapacity.LOW;
   private DeployState storedState = DeployState.UNHOMED;
   private double leftMotorPosition = 0.0;
   private double rightMotorPosition = 0.0;
+  private double leftStatorCurrent = 0.0;
+  private double rightStatorCurrent = 0.0;
+  private double leftSupplyCurrent = 0.0;
+  private double rightSupplyCurrent = 0.0;
   private double hopperCANRangeDistance = 0.0;
+  private double previousCanRangeDistance = 0.0;
   private double filteredHopperCANRangeDistance;
   private boolean ableToHopperShuffle = false;
+
+  private final Timer canRangeUpdateTimer = new Timer();
 
   public Deploy(TalonFX leftMotor, TalonFX rightMotor, CANrange hopperCANRange) {
     super(SubsystemPriority.DEPLOY, DeployState.UNHOMED);
     this.leftMotor = leftMotor;
     this.rightMotor = rightMotor;
     this.hopperCANRange = hopperCANRange;
+    canRangeUpdateTimer.start();
 
     leftMotor.getConfigurator().apply(DeployConfig.LEFT_MOTOR_CONFIG);
     rightMotor.getConfigurator().apply(DeployConfig.RIGHT_MOTOR_CONFIG);
@@ -53,7 +68,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   public void intakeRequest() {
     switch (getState()) {
       case UNHOMED, HOME -> {
-        // Do nothing, we aren't homed or need to catchup
+        // Do nothing, we aren't homed
       }
       default -> setStateFromRequest(DeployState.INTAKE);
     }
@@ -62,7 +77,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   public void stowRequest() {
     switch (getState()) {
       case UNHOMED, HOME -> {
-        // Do nothing, we aren't homed or need to catchup
+        // Do nothing, we aren't homed
       }
       default -> setStateFromRequest(DeployState.STOW);
     }
@@ -71,9 +86,13 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   public void shuffleRequest() {
     switch (getState()) {
       case UNHOMED, HOME -> {
-        // Do nothing, we aren't homed or need to catchup
+        // Do nothing, we aren't homed
       }
-      default -> setStateFromRequest(DeployState.HOPPER_SHUFFLING);
+      default -> {
+        if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()) {
+          setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
+        }
+      }
     }
   }
 
@@ -85,7 +104,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   protected DeployState getNextState(DeployState currentState) {
     return switch (currentState) {
       // Do nothing
-      case UNHOMED -> currentState;
+      case UNHOMED, INTAKE, STOW -> currentState;
 
       case HOME -> {
         if (leftMotor.getStatorCurrent().getValueAsDouble() > DeployConfig.HOMING_CURRENT
@@ -96,8 +115,19 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
           yield DeployState.HOME;
         }
       }
+      case HOPPER_SHUFFLING_OUT -> {
+        if (atGoal() && ableToHopperShuffle) {
+          yield DeployState.HOPPER_SHUFFLING_IN;
+        }
+        yield currentState;
+      }
 
-      default -> currentState;
+      case HOPPER_SHUFFLING_IN -> {
+        if (atGoal() && ableToHopperShuffle) {
+          yield DeployState.HOPPER_SHUFFLING_OUT;
+        }
+        yield currentState;
+      }
     };
   }
 
@@ -117,7 +147,6 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE);
       }
       default -> {
-        // Multiply average position by 2 because averaging halves our position
         differentialMechanism.setControl(
             differentialPositionVoltageRequest
                 .withAveragePosition(clamp(newState.getLength()))
@@ -128,21 +157,15 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   @Override
   protected void whileInState(DeployState state) {
-    if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()
-        && state == DeployState.HOPPER_SHUFFLING
-        && ableToHopperShuffle) {
-      if (atGoal(DeployState.HOPPER_SHUFFLING.getLength())) {
-        // Multiply average position by 2 because averaging halves our position
-        differentialMechanism.setControl(
-            differentialPositionVoltageRequest
-                .withAveragePosition(clamp(DeployState.INTAKE.getLength()))
-                .withDifferentialPosition(0));
-      } else if (atGoal(DeployState.INTAKE.getLength())) {
-        // Multiply average position by 2 because averaging halves our position
-        differentialMechanism.setControl(
-            differentialPositionVoltageRequest
-                .withAveragePosition(clamp(DeployState.HOPPER_SHUFFLING.getLength()))
-                .withDifferentialPosition(0));
+    if (DriverStation.isDisabled()) {
+      leftMotor.setControl(coastRequest);
+      rightMotor.setControl(coastRequest);
+    } else {
+      switch (state) {
+        case HOME -> {
+          leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE);
+          rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE);
+        }
       }
     }
 
@@ -156,26 +179,47 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     DogLog.log("Deploy/Capacity", hopperCapacity);
     DogLog.log("Hopper/RawDistance", hopperCANRangeDistance);
     DogLog.log("Hopper/FilteredDistance", filteredHopperCANRangeDistance);
-    // TODO: We call getStatorCurrent() twice per motor per loop
-    DogLog.log("Deploy/LeftMotor/StatorCurrent", leftMotor.getStatorCurrent().getValueAsDouble());
-    DogLog.log("Deploy/LeftMotor/SupplyCurrent", leftMotor.getSupplyCurrent().getValueAsDouble());
-    DogLog.log("Deploy/RightMotor/StatorCurrent", rightMotor.getStatorCurrent().getValueAsDouble());
-    DogLog.log("Deploy/RightMotor/SupplyCurrent", rightMotor.getSupplyCurrent().getValueAsDouble());
+    DogLog.log("Deploy/LeftMotor/StatorCurrent", leftStatorCurrent);
+    DogLog.log("Deploy/LeftMotor/SupplyCurrent", leftSupplyCurrent);
+    DogLog.log("Deploy/RightMotor/StatorCurrent", rightStatorCurrent);
+    DogLog.log("Deploy/RightMotor/SupplyCurrent", rightSupplyCurrent);
+    // TODO: Remove after bringup
+    afterTransition(state);
   }
 
   public double getPosition() {
     return MathHelpers.average(leftMotorPosition, rightMotorPosition);
   }
 
-  private boolean atGoal(double goalDistance) {
-    return MathUtil.isNear(goalDistance, leftMotorPosition, DeployConfig.POSITION_TOLERANCE)
+  private boolean atGoal() {
+    return switch (getState()) {
+      case UNHOMED, HOME -> false;
+      default ->
+          MathUtil.isNear(
+                  getState().getLength(), leftMotorPosition, DeployConfig.POSITION_TOLERANCE)
+              && MathUtil.isNear(
+                  getState().getLength(), rightMotorPosition, DeployConfig.POSITION_TOLERANCE);
+    };
+  }
+
+  public boolean atGoal(double goalDistance) {
+    return switch (getState()) {
+      case UNHOMED, HOME -> false;
+      default ->
+          MathUtil.isNear(goalDistance, leftMotorPosition, DeployConfig.POSITION_TOLERANCE)
         && MathUtil.isNear(goalDistance, rightMotorPosition, DeployConfig.POSITION_TOLERANCE);
+    };
   }
 
   @Override
   protected void collectInputs() {
     leftMotorPosition = leftMotor.getPosition().getValueAsDouble();
     rightMotorPosition = rightMotor.getPosition().getValueAsDouble();
+    leftStatorCurrent = leftMotor.getStatorCurrent().getValueAsDouble();
+    rightStatorCurrent = rightMotor.getStatorCurrent().getValueAsDouble();
+    leftSupplyCurrent = leftMotor.getSupplyCurrent().getValueAsDouble();
+    rightSupplyCurrent = rightMotor.getSupplyCurrent().getValueAsDouble();
+
     hopperCANRangeDistance = Units.metersToInches(hopperCANRange.getDistance().getValueAsDouble());
     filteredHopperCANRangeDistance = hopperFilter.calculate(hopperCANRangeDistance);
 
@@ -190,7 +234,31 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     if (RobotBase.isSimulation()) {
       ableToHopperShuffle = true;
     } else {
-      ableToHopperShuffle = hopperCapacity != HopperCapacity.LOW;
+      ableToHopperShuffle =
+          !DSOptions.USE_CANRANGE.getAsBoolean() || hopperCapacity != HopperCapacity.HIGH;
+    }
+  }
+
+  @Override
+  public void robotPeriodic() {
+    super.robotPeriodic();
+    if (previousCanRangeDistance != hopperCANRangeDistance) {
+      canRangeUpdateTimer.reset();
+    }
+    previousCanRangeDistance = hopperCANRangeDistance;
+
+    if (canRangeUpdateTimer.hasElapsed(DeployConfig.NOT_UPDATING_TIMEOUT)) {
+      DogLog.logFault("CANrange distance not updating", AlertType.kError);
+    } else {
+      DogLog.clearFault("CANrange distance not updating");
+    }
+  }
+
+  @Override
+  public void disabledPeriodic() {
+    if (DriverStation.isDisabled()) {
+      leftMotor.setControl(new CoastOut());
+      rightMotor.setControl(new CoastOut());
     }
   }
 

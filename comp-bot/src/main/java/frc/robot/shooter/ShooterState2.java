@@ -1,6 +1,6 @@
 package frc.robot.shooter;
 
-public enum ShooterState {
+public enum ShooterState2 {
   IDLE,
   SCORE,
   FEEDING,

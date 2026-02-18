@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -22,11 +23,11 @@ public class ShooterHoodConfig {
 
   // TODO Update safe zone amount
   public static final double MAX_ANGLE = 46.5 - 2;
-  public static final double MIN_ANGLE = ANGLE_FROM_HORIZONTAL + 2;
+  public static final double MIN_ANGLE = ANGLE_FROM_HORIZONTAL + 1;
   public static final double IDLE_ANGLE = ANGLE_FROM_HORIZONTAL + 2;
 
   public static final double HOMING_VOLTAGE = -2;
-  public static final double HOMING_CURRENT_THRESHOLD = 10;
+  public static final double HOMING_CURRENT_THRESHOLD = 20;
   public static final double HOMING_END_POSITION = ANGLE_FROM_HORIZONTAL;
 
   public static final double TOLERANCE = 1;
@@ -36,7 +37,8 @@ public class ShooterHoodConfig {
           .withFeedback(
               new FeedbackConfigs().withSensorToMechanismRatio((340.0 * 42.0) / (14.0 * 8.0)))
           .withCurrentLimits(
-              new CurrentLimitsConfigs().withStatorCurrentLimit(20).withSupplyCurrentLimit(20))
+              new CurrentLimitsConfigs().withStatorCurrentLimit(20).withSupplyCurrentLimit(10))
+          .withVoltage(new VoltageConfigs().withPeakForwardVoltage(10).withPeakReverseVoltage(-10))
           .withMotorOutput(
               new MotorOutputConfigs()
                   // TODO: Change to brake after bringup completed
@@ -51,10 +53,16 @@ public class ShooterHoodConfig {
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE =
       TunableInterpolatingDoubleTreeMap.ofEntries(
-          "ShooterHood/DistanceToScore", Map.entry(0.0, 0.0), Map.entry(10.0, 100.0));
+          "ShooterHood/DistanceToScore",
+          Map.entry(5.5, 44.0),
+          Map.entry(3.57, 40.0),
+          Map.entry(1.25, 23.558525));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED =
       TunableInterpolatingDoubleTreeMap.ofEntries(
-          "ShooterHood/DistanceToFeed", Map.entry(0.0, 0.0), Map.entry(0.0, 100.0));
+          "ShooterHood/DistanceToFeed",
+          Map.entry(5.5, 44.0),
+          Map.entry(3.57, 40.0),
+          Map.entry(1.25, 23.558525));
   public static final PolynomialRegression SCORING_REGRESSION_MODEL =
       PolynomialRegression.quadratic("ShooterHood/ScoringRegression", DISTANCE_TO_SCORE);
   public static final PolynomialRegression FEEDING_REGRESSION_MODEL =

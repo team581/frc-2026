@@ -43,6 +43,7 @@ public class Robot extends Base581Robot {
           new CameraConfig(
               LimelightModel.FOUR,
               false,
+              false,
               0.0,
               0.0,
               TURRET_CAMERA_HEIGHT,
@@ -55,6 +56,7 @@ public class Robot extends Base581Robot {
           LimelightState.TAGS,
           new CameraConfig(
               LimelightModel.THREEG,
+              true,
               true,
               Units.inchesToMeters(-15.5),
               0.0,
@@ -69,6 +71,7 @@ public class Robot extends Base581Robot {
           LimelightState.TAGS,
           new CameraConfig(
               LimelightModel.THREEG,
+              true,
               true,
               Units.inchesToMeters(9.75),
               0.0,

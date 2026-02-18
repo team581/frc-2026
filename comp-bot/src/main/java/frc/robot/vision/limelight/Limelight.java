@@ -93,7 +93,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     var xyDev = 0.01 * Math.pow(distance, 1.2);
     var thetaDev = Double.POSITIVE_INFINITY;
 
-    if (config.useMt1AndMt2Hybrid()) {
+    if (config.useMt2()) {
       PoseEstimate mT2Estimate =
           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightTableName);
 
@@ -103,7 +103,8 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
 
       mTEstimateTimestamp = mT2Estimate.timestampSeconds;
       mTPose = mT2Estimate.pose;
-      if (distance < Units.inchesToMeters(USE_MT1_ROTATION_THRESHOLD_INCHES)) {
+      if (config.useMt1RotationCloseUp()
+          && distance < Units.inchesToMeters(USE_MT1_ROTATION_THRESHOLD_INCHES)) {
         mTPose = new Pose2d(mTPose.getTranslation(), mT1Estimate.pose.getRotation());
         thetaDev = 0.03 * Math.pow(distance, 1.2);
       }
@@ -150,15 +151,18 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     }
     DogLog.log("Vision/" + name + "/State", getState());
 
-    var lastTagTimestamp =
-        lastGoodTagResult.isPresent()
-            ? lastGoodTagResult.orElseThrow().timestamp()
-            : Double.MIN_VALUE;
+    if (getState() == LimelightState.TAGS || getState() == LimelightState.HUB_TAGS) {
+      var lastTagTimestamp =
+          lastGoodTagResult.isPresent()
+              ? lastGoodTagResult.orElseThrow().timestamp()
+              : Double.MIN_VALUE;
 
-    if (Timer.getTimestamp() - lastTagTimestamp > 30) {
-      DogLog.logFault(
-          limelightTableName + " has not seen a tag in the last 30 seconds", AlertType.kWarning);
+      if (Timer.getTimestamp() - lastTagTimestamp > 30) {
+        DogLog.logFault(
+            limelightTableName + " has not seen a tag in the last 30 seconds", AlertType.kWarning);
+      }
     } else {
+
       DogLog.clearFault(limelightTableName + " has not seen a tag in the last 30 seconds");
     }
 

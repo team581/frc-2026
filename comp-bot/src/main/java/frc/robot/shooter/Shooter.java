@@ -1,6 +1,6 @@
 package frc.robot.shooter;
 
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.simkit.SimKit;
@@ -27,10 +27,11 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
 
-  private final VelocityTorqueCurrentFOC voltageRequest =
-      new VelocityTorqueCurrentFOC(0).withLimitReverseMotion(true);
+  private final VelocityVoltage voltageRequest =
+      new VelocityVoltage(0).withLimitReverseMotion(true).withEnableFOC(false);
 
   private double scoreDistance = 0;
+  private double climbScoreRpm = 0;
   private double feedDistance = 0;
 
   private double shootingRpm = 0;
@@ -53,8 +54,12 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
 
   public void scoreRequest(double distance) {
     this.scoreDistance = distance;
-
     setStateFromRequest(ShooterState.SCORE);
+  }
+
+  public void climbScoreRequest(boolean isLeft) {
+    climbScoreRpm = 0.0;
+    setStateFromRequest(ShooterState.CLIMB_SCORE);
   }
 
   public void feedRequest(double distance) {
@@ -89,6 +94,13 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
 
         DogLog.log("Shooter/RpmSetpoint", shootingRpm);
       }
+      case CLIMB_SCORE -> {
+        var setpoint = climbScoreRpm / 60.0;
+        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
+        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
+
+        DogLog.log("Shooter/RpmSetpoint", climbScoreRpm);
+      }
       case FEEDING -> {
         var setpoint = feedingRpm / 60.0;
         leftMotor.setControl(voltageRequest.withVelocity(setpoint));
@@ -100,7 +112,7 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
         leftMotor.disable();
         rightMotor.disable();
 
-        DogLog.log("Shooter/RpmSetpoint", -1);
+        DogLog.log("Shooter/RpmSetpoint", -1.0);
       }
     }
   }
@@ -120,6 +132,9 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
       case SCORE ->
           MathUtil.isNear(leftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER)
               && MathUtil.isNear(rightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER);
+      case CLIMB_SCORE ->
+          MathUtil.isNear(leftMotorRpm, climbScoreRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER)
+              && MathUtil.isNear(rightMotorRpm, climbScoreRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER);
 
       case FEEDING ->
           MathUtil.isNear(leftMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER)

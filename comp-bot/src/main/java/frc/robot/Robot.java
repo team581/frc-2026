@@ -43,6 +43,7 @@ public class Robot extends Base581Robot {
           LimelightState.TAGS,
           new CameraConfig(
               LimelightModel.FOUR,
+              true,
               false,
               Units.inchesToMeters(0.0),
               Units.inchesToMeters(0.0),
@@ -57,14 +58,16 @@ public class Robot extends Base581Robot {
           new CameraConfig(
               LimelightModel.FOUR,
               true,
+              true,
               // back
               Units.inchesToMeters(-13.389),
               // left
               Units.inchesToMeters(-8.3370),
               Units.inchesToMeters(19.7564),
-              18.52,
+              // TODO: get real number from cad
+              10.00,
               180.0 + 4.5,
-              0.83));
+              -0.83));
 
   // ground when stowed
   // Units.inchesToMeters(12.9742),
@@ -77,7 +80,8 @@ public class Robot extends Base581Robot {
           LimelightState.CLUSTER_MAP,
           new CameraConfig(
               LimelightModel.THREE,
-              true,
+              false,
+              false,
               Units.inchesToMeters(25.671),
               Units.inchesToMeters(0.0),
               Units.inchesToMeters(12.9525),
@@ -143,6 +147,7 @@ public class Robot extends Base581Robot {
   protected void configureBindings() {
     var driverStart = enabledEvent.and(hardware.driverController.start(buttonBindingsLoop));
     driverStart.rising().ifHigh(robotManager::startTeleopAutoClimbSequence);
+    driverStart.falling().ifHigh(robotManager::stopTeleopAutoClimbAlignment);
 
     var driverBack = enabledEvent.and(hardware.driverController.back(buttonBindingsLoop));
     driverBack.rising().ifHigh(localization::zeroGyro);
@@ -175,11 +180,10 @@ public class Robot extends Base581Robot {
     var operatorY = enabledEvent.and(hardware.operatorController.y(buttonBindingsLoop));
     operatorY.rising().ifHigh(robotManager::manualClimbSequenceForward);
 
+    // Use as idle button when not climbing, otherwise does sequence and eventually gets back to
+    // idle
     var operatorA = enabledEvent.and(hardware.operatorController.a(buttonBindingsLoop));
-    operatorA.rising().ifHigh(robotManager::manualClimbSequenceBackward);
-
-    var operatorDpad = enabledEvent.and(hardware.operatorController.pov(90, buttonBindingsLoop));
-    operatorDpad.rising().ifHigh(robotManager::idleRequest);
+    operatorA.rising().ifHigh(robotManager::manualClimbSequenceBackwardOrIdleRequest);
 
     var operatorLeftTrigger =
         enabledEvent.and(hardware.operatorController.leftTrigger(buttonBindingsLoop));

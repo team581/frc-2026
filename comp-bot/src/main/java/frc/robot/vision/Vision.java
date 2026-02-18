@@ -80,7 +80,12 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   public void addTurretObservation(double timestamp, double angle, double turretAngularVelocity) {
     turretBuffer.addSample(timestamp, MathHelpers.angleModulus(angle));
     turretLimelight.sendImuData(
-        robotHeading, turretAngularVelocity + robotAngularVelocity, 0.0, 0.0, 0.0, 0.0);
+        MathHelpers.angleModulus(robotHeading + angle),
+        turretAngularVelocity + robotAngularVelocity,
+        0.0,
+        0.0,
+        0.0,
+        0.0);
   }
 
   private Optional<Double> getAngleAtTimestamp(double timestamp) {

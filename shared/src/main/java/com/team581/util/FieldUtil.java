@@ -48,6 +48,9 @@ public class FieldUtil {
   // Trench/assist zone calculations
   private static final double TRENCH_LENGTH_X = Units.inchesToMeters(47.0);
   private static final double TRENCH_LENGTH_Y = Units.inchesToMeters(48.94);
+
+  private static final double TRENCH_ZONE_LENGTH_X = TRENCH_LENGTH_X + Units.inchesToMeters(27.0);
+  private static final double TRENCH_ZONE_LENGTH_Y = Units.inchesToMeters(68.0);
   private static final double TRENCH_ASSIST_ZONE_LENGTH_X = TRENCH_LENGTH_X * 3;
   private static final double TRENCH_ASSIST_ZONE_LENGTH_Y = Units.inchesToMeters(68.0);
 
@@ -61,13 +64,13 @@ public class FieldUtil {
       new Pose2d(RED_OBSTACLE_X, AprilTags.TAG_22.getY(), Rotation2d.kZero);
 
   private static final Rectangle2d BLUE_OUTPOST_TRENCH_ZONE =
-      new Rectangle2d(BLUE_OUTPOST_TRENCH_CENTER, TRENCH_LENGTH_X, TRENCH_LENGTH_Y);
+      new Rectangle2d(BLUE_OUTPOST_TRENCH_CENTER, TRENCH_ZONE_LENGTH_X, TRENCH_ZONE_LENGTH_Y);
   private static final Rectangle2d BLUE_DEPOT_TRENCH_ZONE =
-      new Rectangle2d(BLUE_DEPOT_TRENCH_CENTER, TRENCH_LENGTH_X, TRENCH_LENGTH_Y);
+      new Rectangle2d(BLUE_DEPOT_TRENCH_CENTER, TRENCH_ZONE_LENGTH_X, TRENCH_ZONE_LENGTH_Y);
   private static final Rectangle2d RED_DEPOT_TRENCH_ZONE =
-      new Rectangle2d(RED_DEPOT_TRENCH_CENTER, TRENCH_LENGTH_X, TRENCH_LENGTH_Y);
+      new Rectangle2d(RED_DEPOT_TRENCH_CENTER, TRENCH_ZONE_LENGTH_X, TRENCH_ZONE_LENGTH_Y);
   private static final Rectangle2d RED_OUTPOST_TRENCH_ZONE =
-      new Rectangle2d(RED_OUTPOST_TRENCH_CENTER, TRENCH_LENGTH_X, TRENCH_LENGTH_Y);
+      new Rectangle2d(RED_OUTPOST_TRENCH_CENTER, TRENCH_ZONE_LENGTH_X, TRENCH_ZONE_LENGTH_Y);
 
   private static final Rectangle2d BLUE_OUTPOST_TRENCH_ASSIST_ZONE =
       new Rectangle2d(

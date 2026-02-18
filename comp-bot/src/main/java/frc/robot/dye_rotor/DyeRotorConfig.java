@@ -71,7 +71,9 @@ public class DyeRotorConfig {
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
-                  .withInverted(InvertedValue.CounterClockwise_Positive));
+                  .withInverted(InvertedValue.CounterClockwise_Positive))
+          .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0).withKS(0.0));
+  public static boolean ROTOR_STOP;
 
   private DyeRotorConfig() {}
 }
