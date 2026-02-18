@@ -37,6 +37,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   private HopperCapacity hopperCapacity = HopperCapacity.LOW;
   private DeployState storedState = DeployState.UNHOMED;
+  private double differentialMechanismPosition = 0.0;
   private double leftMotorPosition = 0.0;
   private double rightMotorPosition = 0.0;
   private double leftStatorCurrent = 0.0;
@@ -158,6 +159,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   @Override
   protected void whileInState(DeployState state) {
     if (DriverStation.isDisabled()) {
+      differentialMechanism.setCoastOut();
       leftMotor.setControl(coastRequest);
       rightMotor.setControl(coastRequest);
     } else {
@@ -172,7 +174,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     DogLog.log("Deploy/LeftMotor/Position", leftMotorPosition);
     DogLog.log("Deploy/RightMotor/Position", rightMotorPosition);
     DogLog.log("Deploy/GoalPosition", getState().getLength());
-    DogLog.log("Deploy/DifferentialPosition", differentialMechanism.getAveragePosition().getValueAsDouble());
+    DogLog.log("Deploy/DifferentialPosition", differentialMechanismPosition);
     DogLog.log("Deploy/AveragePosition", getPosition());
     DogLog.log("Deploy/AbleToHopperShuffle", ableToHopperShuffle);
     DogLog.log("Deploy/StoredState", storedState.name());
@@ -188,7 +190,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   }
 
   public double getPosition() {
-    return MathHelpers.average(leftMotorPosition, rightMotorPosition);
+    return differentialMechanismPosition;
   }
 
   private boolean atGoal() {
@@ -213,6 +215,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   @Override
   protected void collectInputs() {
+    differentialMechanismPosition = differentialMechanism.getAveragePosition().getValueAsDouble();
     leftMotorPosition = leftMotor.getPosition().getValueAsDouble();
     rightMotorPosition = rightMotor.getPosition().getValueAsDouble();
     leftStatorCurrent = leftMotor.getStatorCurrent().getValueAsDouble();
