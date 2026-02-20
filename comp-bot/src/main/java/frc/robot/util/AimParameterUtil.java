@@ -5,6 +5,7 @@ import com.team581.math.ShootOnTheMove;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.shooter.ShooterConfig;
 import frc.robot.turret.TurretCalculator;
@@ -52,7 +53,7 @@ public class AimParameterUtil {
     var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
 
     double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
-    var angle = MathHelpers.getDriveDirection(robot, hubTranslation);
+    var angle = MathHelpers.getDriveDirection(robot, hubTranslation).minus(Rotation2d.fromDegrees(turretAngle));
     return new AimingParameters(angle.getDegrees(), distanceToGoal);
   }
 
