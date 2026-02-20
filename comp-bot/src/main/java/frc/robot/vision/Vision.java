@@ -29,7 +29,7 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   private final TimeInterpolatableBuffer<Double> turretBuffer =
       TimeInterpolatableBuffer.createDoubleBuffer(2.0);
 
-  private static final int STATIC_TURRET_CALIBRATION_FILTER_TAPS = 20;
+  private static final int STATIC_TURRET_CALIBRATION_FILTER_TAPS = 100;
   private final LinearFilter staticTurretCalibrationFilter = LinearFilter.movingAverage(20);
   private int currentStaticTurretCalibrationTap = 0;
   private double filteredTurretCalibration = 0;
@@ -226,25 +226,33 @@ public class Vision extends StateMachineSubsystem<VisionState> {
         DogLog.logFault("CALIBRATING TURRET ANGLE", AlertType.kInfo);
         OptionalDouble maybeLimelightMegatagRotation = turretLimelight.getLimelightRotation();
         if (maybeLimelightMegatagRotation.isPresent()) {
-          for (currentStaticTurretCalibrationTap = 0;
-              currentStaticTurretCalibrationTap <= STATIC_TURRET_CALIBRATION_FILTER_TAPS;
-              currentStaticTurretCalibrationTap++) {
+                DogLog.log("TurretCal/CurrentTap", currentStaticTurretCalibrationTap);
+
             if (currentStaticTurretCalibrationTap == 0) {
               staticTurretCalibrationFilter.reset();
             }
 
+            double limelightRotation = maybeLimelightMegatagRotation.getAsDouble();
+            DogLog.log("TurretCal/FRTurretAngle", limelightRotation);
             var turretAngleRobotRelative =
                 MathHelpers.angleModulus(
-                    maybeLimelightMegatagRotation.getAsDouble() - robotHeading);
+                    limelightRotation - robotHeading);
+
+                                    DogLog.log("TurretCal/RRTurretAngle", turretAngleRobotRelative);
+
             filteredTurretCalibration =
                 staticTurretCalibrationFilter.calculate(turretAngleRobotRelative);
+
+                                DogLog.log("TurretCal/FilteredRRTurretAngle", filteredTurretCalibration);
+
 
             if (currentStaticTurretCalibrationTap == STATIC_TURRET_CALIBRATION_FILTER_TAPS) {
               turretCalibrated = true;
               DogLog.clearFault("CALIBRATING TURRET ANGLE");
               setStateFromRequest(VisionState.TAGS);
             }
-          }
+
+            currentStaticTurretCalibrationTap++;
           DogLog.clearFault("TURRET CALIBRATION CAN'T SEE TAG");
 
         } else {
