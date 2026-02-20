@@ -44,6 +44,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   private double filteredHopperCANRangeDistance;
   private boolean ableToHopperShuffle = false;
 
+  private final Timer hopperShuffleTimer = new Timer();
   private final Timer canRangeUpdateTimer = new Timer();
 
   public Deploy(TalonFX leftMotor, TalonFX rightMotor, CANrange hopperCANRange) {
@@ -51,6 +52,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     this.leftMotor = leftMotor;
     this.rightMotor = rightMotor;
     this.hopperCANRange = hopperCANRange;
+    hopperShuffleTimer.start();
     canRangeUpdateTimer.start();
 
     leftMotor.getConfigurator().apply(DeployConfig.LEFT_MOTOR_CONFIG);
@@ -86,6 +88,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       }
       default -> {
         if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()) {
+          hopperShuffleTimer.reset();
           setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
         }
       }
@@ -103,7 +106,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   protected DeployState getNextState(DeployState currentState) {
     return switch (currentState) {
       // Do nothing
-      case UNHOMED, INTAKE, STOW -> currentState;
+      case UNHOMED, INTAKE, STOW, HOPPER_SHUFFLE_END -> currentState;
 
       case HOME_INWARD -> {
         if (leftMotor.getStatorCurrent().getValueAsDouble() > DeployConfig.HOMING_CURRENT
@@ -124,6 +127,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         }
       }
       case HOPPER_SHUFFLING_OUT -> {
+        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION)) {
+          yield DeployState.HOPPER_SHUFFLE_END;
+        }
         if (atGoal() && ableToHopperShuffle) {
           yield DeployState.HOPPER_SHUFFLING_IN;
         }
@@ -131,6 +137,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       }
 
       case HOPPER_SHUFFLING_IN -> {
+        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION)) {
+          yield DeployState.HOPPER_SHUFFLE_END;
+        }
         if (atGoal() && ableToHopperShuffle) {
           yield DeployState.HOPPER_SHUFFLING_OUT;
         }
