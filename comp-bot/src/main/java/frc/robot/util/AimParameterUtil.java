@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import com.team581.math.MathHelpers;
 import com.team581.math.ShootOnTheMove;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
@@ -38,6 +39,21 @@ public class AimParameterUtil {
     double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
 
     return new AimingParameters(turretAngle, distanceToGoal);
+  }
+
+  public static AimingParameters getTurretStuckScoringParameters(
+      Pose2d robot, double turretAngle, ChassisSpeeds fieldRelativeSpeeds) {
+    var hubTranslation =
+        SCORING_SOTM.getVelocityCompensatedGoal(
+            robot.getTranslation(),
+            FieldUtil.HUB_POSE.getPose().getTranslation(),
+            fieldRelativeSpeeds);
+
+    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
+
+    double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
+    var angle = MathHelpers.getDriveDirection(robot, hubTranslation);
+    return new AimingParameters(angle.getDegrees(), distanceToGoal);
   }
 
   public record AimingParameters(double turretAngle, double distance) {}

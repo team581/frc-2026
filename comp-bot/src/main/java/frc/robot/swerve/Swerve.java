@@ -142,6 +142,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private ChassisSpeeds fieldRelativeSpeeds = new ChassisSpeeds();
   private ChassisSpeeds rateLimitedSpeeds = new ChassisSpeeds();
 
+  private double turretStuckAimingAngle = 0.0;
+
   private boolean ableToBumpAssist = false;
   private boolean ableToTrenchAssist = false;
   private boolean ableToWallSnap = false;
@@ -207,6 +209,11 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   public void intakeRateLimitedDriveRequest() {
     setStateFromRequest(SwerveState.INTAKE_RATE_LIMITED);
+  }
+
+  public void turretStuckAimRequest(double snapAngle) {
+    turretStuckAimingAngle = snapAngle;
+    setStateFromRequest(SwerveState.TURRET_STUCK_SCORE);
   }
 
   @Override
@@ -530,6 +537,18 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                   .withVelocityX(rateLimitedSpeeds.vxMetersPerSecond)
                   .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond)
                   .withRotationalRate(rateLimitedSpeeds.omegaRadiansPerSecond));
+        }
+      }
+      case TURRET_STUCK_SCORE -> {
+        var speeds = driveSource.getRequestedSpeeds();
+
+        if (driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP) {
+          drivetrain.setControl(
+              drivePerspectiveIntakeSnapsOpenLoop
+                  .withVelocityX(speeds.vxMetersPerSecond)
+                  .withVelocityY(speeds.vyMetersPerSecond)
+                  .withTargetDirection(
+                      Rotation2d.fromDegrees(turretStuckAimingAngle).plus(Rotation2d.k180deg)));
         }
       }
       case CLIMB_ASSIST -> {
