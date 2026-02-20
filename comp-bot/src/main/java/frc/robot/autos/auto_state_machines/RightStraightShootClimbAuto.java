@@ -17,6 +17,10 @@ import frc.robot.robot_manager.RobotManager;
 public class RightStraightShootClimbAuto
     extends BaseImperativeAuto<RightStraightShootClimbAutoState> {
 
+    public enum Markers {
+    START_SHOOT_RQ
+  }
+
   private final AutoSegment intakeAcrossMidlineOne =
       Trailblazer.segment(
               AutoPoint.ofRed(new Pose2d(10.489, 7.45, Rotation2d.k180deg))
@@ -37,24 +41,23 @@ public class RightStraightShootClimbAuto
           .withLinearConstraints(3.0, 10)
           .untilFinished(new PoseErrorTolerance(0.1, 3));
 
-  private final AutoSegment driveBack =
-      Trailblazer.segment(AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg)))
-          .withLinearConstraints(3.0, 10)
-          .untilFinished(new PoseErrorTolerance(0.5, 3));
-
-  private final AutoSegment driveToShootOne =
-      Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
+  private final AutoSegment driveBackAndShootOne =
+      Trailblazer.segment(AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg))
+      .withTransitionTolerance(new PoseErrorTolerance(0.5, 3)),
+    AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
+                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
+                  .withMarker(Markers.START_SHOOT_RQ),
               AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.k180deg)),
               AutoPoint.ofRed(new Pose2d(13.0, 7.45, Rotation2d.k180deg))
                   .withLinearConstraints(3.0, 10))
           .untilFinished(new PoseErrorTolerance(0.3, 3));
 
-  private final AutoSegment driveToShootTwo =
-      Trailblazer.segment(
+  private final AutoSegment driveBackAndShootTwo =
+            Trailblazer.segment(AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg))
+      .withTransitionTolerance(new PoseErrorTolerance(0.5, 3)),
               AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
+                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
+                  .withMarker(Markers.START_SHOOT_RQ),
               AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.k180deg)),
               AutoPoint.ofRed(new Pose2d(13.5, 7.45, Rotation2d.k180deg)))
           .withLinearConstraints(3.0, 10)
@@ -72,22 +75,72 @@ public class RightStraightShootClimbAuto
   @Override
   protected RightStraightShootClimbAutoState getNextState(
       RightStraightShootClimbAutoState currentState) {
-    if (trailblazer.atGoal(robotManager.localization.getPose())) {
-      return switch (currentState) {
-        case INTAKE_ACROSS_MIDLINE_1 -> RightStraightShootClimbAutoState.DRIVE_BACK_1;
-        case DRIVE_BACK_1 -> RightStraightShootClimbAutoState.SHOOT_1;
-        case SHOOT_1 ->
-            timeout(7.0) ? RightStraightShootClimbAutoState.INTAKE_ACROSS_MIDLINE_2 : currentState;
-        case INTAKE_ACROSS_MIDLINE_2 -> RightStraightShootClimbAutoState.DRIVE_BACK_2;
-        case DRIVE_BACK_2 -> RightStraightShootClimbAutoState.SHOOT_2;
-        case SHOOT_2 -> RightStraightShootClimbAutoState.DRIVE_TO_CLIMB;
-        case DRIVE_TO_CLIMB -> RightStraightShootClimbAutoState.CLIMB;
-        case CLIMB -> RightStraightShootClimbAutoState.DONE;
-        case DONE -> RightStraightShootClimbAutoState.DONE;
-        default -> currentState;
-      };
-    }
-    return currentState;
+     return switch (currentState) {
+      case INTAKE_ACROSS_MIDLINE_1 -> {
+        if (trailblazer.atGoal(robotManager.localization.getPose())) {
+          yield RightStraightShootClimbAutoState.DRIVE_BACK_1;
+        } else {
+          yield currentState;
+        }
+      }
+      case DRIVE_BACK_1 -> {
+        if (trailblazer.passedMarker(Markers.START_SHOOT_RQ)) {
+          yield RightStraightShootClimbAutoState.SHOOT_1;
+        } else {
+          yield currentState;
+        }
+      }
+      case SHOOT_1 -> {
+        if (trailblazer.atGoal(robotManager.localization.getPose()) && timeout(3.0)) {
+          yield RightStraightShootClimbAutoState.INTAKE_ACROSS_MIDLINE_2;
+        } else {
+          yield currentState;
+        }
+      }
+      case INTAKE_ACROSS_MIDLINE_2 -> {
+        if (trailblazer.atGoal(robotManager.localization.getPose())) {
+          yield RightStraightShootClimbAutoState.DRIVE_BACK_2;
+        } else {
+          yield currentState;
+        }
+      }
+      case DRIVE_BACK_2 -> {
+        if (trailblazer.passedMarker(Markers.START_SHOOT_RQ)) {
+          yield RightStraightShootClimbAutoState.SHOOT_2;
+        } else {
+          yield currentState;
+        }
+      }
+      case SHOOT_2 -> {
+        if (trailblazer.atGoal(robotManager.localization.getPose())) {
+          yield RightStraightShootClimbAutoState.DRIVE_TO_CLIMB;
+        } else {
+          yield currentState;
+        }
+      }
+      case DRIVE_TO_CLIMB -> {
+        if (trailblazer.atGoal(robotManager.localization.getPose())) {
+          yield RightStraightShootClimbAutoState.CLIMB;
+        } else {
+          yield currentState;
+        }
+      }
+      case CLIMB -> {
+        if (trailblazer.atGoal(robotManager.localization.getPose())) {
+          yield RightStraightShootClimbAutoState.DONE;
+        } else {
+          yield currentState;
+        }
+      }
+      case DONE -> {
+        if (trailblazer.atGoal(robotManager.localization.getPose())) {
+          yield RightStraightShootClimbAutoState.DONE;
+        } else {
+          yield currentState;
+        }
+      }
+      default -> currentState;
+    };
   }
 
   @Override
@@ -98,11 +151,10 @@ public class RightStraightShootClimbAuto
         robotManager.intakeRequest();
       }
       case DRIVE_BACK_1 -> {
-        trailblazer.setActiveSegment(driveBack);
+        trailblazer.setActiveSegment(driveBackAndShootOne);
         robotManager.cancelIntakeRequest();
       }
       case SHOOT_1 -> {
-        trailblazer.setActiveSegment(driveToShootOne);
         robotManager.prepareScoreRequest();
       }
       case INTAKE_ACROSS_MIDLINE_2 -> {
@@ -110,11 +162,10 @@ public class RightStraightShootClimbAuto
         robotManager.intakeRequest();
       }
       case DRIVE_BACK_2 -> {
-        trailblazer.setActiveSegment(driveBack);
+        trailblazer.setActiveSegment(driveBackAndShootTwo);
         robotManager.cancelIntakeRequest();
       }
       case SHOOT_2 -> {
-        trailblazer.setActiveSegment(driveToShootTwo);
         robotManager.prepareScoreRequest();
       }
       case DRIVE_TO_CLIMB -> {
