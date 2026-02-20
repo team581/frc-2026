@@ -1204,11 +1204,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       scoringParameters =
-          AimParameterUtil.getScoringParameters(
+          AimParameterUtil.getTurretStuckScoringParameters(
               health.isLocalizationHealthy()
                   ? robotPose
                   : new Pose2d(
                       FieldUtil.getFallbackScorePoint().getTranslation(), robotPose.getRotation()),
+                      turret.getAngle(),
               swerve.getFieldRelativeSpeeds());
     }
 
