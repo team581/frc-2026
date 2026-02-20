@@ -17,7 +17,7 @@ import frc.robot.robot_manager.RobotManager;
 public class RightStraightShootClimbAuto
     extends BaseImperativeAuto<RightStraightShootClimbAutoState> {
 
-    public enum Markers {
+  public enum Markers {
     START_SHOOT_RQ
   }
 
@@ -42,9 +42,10 @@ public class RightStraightShootClimbAuto
           .untilFinished(new PoseErrorTolerance(0.1, 3));
 
   private final AutoSegment driveBackAndShootOne =
-      Trailblazer.segment(AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg))
-      .withTransitionTolerance(new PoseErrorTolerance(0.5, 3)),
-    AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
+      Trailblazer.segment(
+              AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg))
+                  .withTransitionTolerance(new PoseErrorTolerance(0.5, 3)),
+              AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
               AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.k180deg)),
@@ -53,8 +54,9 @@ public class RightStraightShootClimbAuto
           .untilFinished(new PoseErrorTolerance(0.3, 3));
 
   private final AutoSegment driveBackAndShootTwo =
-            Trailblazer.segment(AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg))
-      .withTransitionTolerance(new PoseErrorTolerance(0.5, 3)),
+      Trailblazer.segment(
+              AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg))
+                  .withTransitionTolerance(new PoseErrorTolerance(0.5, 3)),
               AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
@@ -75,7 +77,7 @@ public class RightStraightShootClimbAuto
   @Override
   protected RightStraightShootClimbAutoState getNextState(
       RightStraightShootClimbAutoState currentState) {
-     return switch (currentState) {
+    return switch (currentState) {
       case INTAKE_ACROSS_MIDLINE_1 -> {
         if (trailblazer.atGoal(robotManager.localization.getPose())) {
           yield RightStraightShootClimbAutoState.DRIVE_BACK_1;
