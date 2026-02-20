@@ -30,7 +30,7 @@ public class TurretConfig {
 
   // CAL NUMBER
   public static final double ROTOR_CAL_OFFSET = 0.251220703125;
-  
+
   public static final double MOTOR_ROTATION_RESOLUTION = 1 / MOTOR_TO_TURRET;
   public static final double ENCODER_TO_TURRET =
       (float) 220.0 / 25.0 * 8.0 / 30.0 * 8.0 / 35.0; // Encoder rot to turret rot

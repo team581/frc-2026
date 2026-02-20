@@ -137,13 +137,33 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
     bottomMotorRpm = bottomMotor.getVelocity().getValueAsDouble() * 60.0;
 
     if (getState() == ShooterState2.SELF_TEST_TOP_MOTOR) {
-      DogLog.log("Shooter/SelfTest/TopMotor/VelocityGood", MathUtil.isNear(Shooter2Config.SELF_TEST_TOP_MOTOR_EXPECTED_RPM, topMotorRpm, Shooter2Config.SELF_TEST_TOP_MOTOR_RPM_TOLERANCE));
-      DogLog.log("Shooter/SelfTest/TopMotor/CurrentGood", MathUtil.isNear(Shooter2Config.SELF_TEST_TOP_MOTOR_EXPECTED_CURRENT, topMotor.getStatorCurrent().getValueAsDouble(), Shooter2Config.SELF_TEST_TOP_MOTOR_CURRENT_TOLERANCE));
+      DogLog.log(
+          "Shooter/SelfTest/TopMotor/VelocityGood",
+          MathUtil.isNear(
+              Shooter2Config.SELF_TEST_TOP_MOTOR_EXPECTED_RPM,
+              topMotorRpm,
+              Shooter2Config.SELF_TEST_TOP_MOTOR_RPM_TOLERANCE));
+      DogLog.log(
+          "Shooter/SelfTest/TopMotor/CurrentGood",
+          MathUtil.isNear(
+              Shooter2Config.SELF_TEST_TOP_MOTOR_EXPECTED_CURRENT,
+              topMotor.getStatorCurrent().getValueAsDouble(),
+              Shooter2Config.SELF_TEST_TOP_MOTOR_CURRENT_TOLERANCE));
     }
 
     if (getState() == ShooterState2.SELF_TEST_BOTTOM_MOTOR) {
-       DogLog.log("Shooter/SelfTest/BottomMotor/VelocityGood", MathUtil.isNear(Shooter2Config.SELF_TEST_BOTTOM_MOTOR_EXPECTED_RPM, topMotorRpm, Shooter2Config.SELF_TEST_BOTTOM_MOTOR_RPM_TOLERANCE));
-      DogLog.log("Shooter/SelfTest/BottomMotor/CurrentGood", MathUtil.isNear(Shooter2Config.SELF_TEST_BOTTOM_MOTOR_EXPECTED_CURRENT, bottomMotor.getStatorCurrent().getValueAsDouble(), Shooter2Config.SELF_TEST_BOTTOM_MOTOR_CURRENT_TOLERANCE));
+      DogLog.log(
+          "Shooter/SelfTest/BottomMotor/VelocityGood",
+          MathUtil.isNear(
+              Shooter2Config.SELF_TEST_BOTTOM_MOTOR_EXPECTED_RPM,
+              topMotorRpm,
+              Shooter2Config.SELF_TEST_BOTTOM_MOTOR_RPM_TOLERANCE));
+      DogLog.log(
+          "Shooter/SelfTest/BottomMotor/CurrentGood",
+          MathUtil.isNear(
+              Shooter2Config.SELF_TEST_BOTTOM_MOTOR_EXPECTED_CURRENT,
+              bottomMotor.getStatorCurrent().getValueAsDouble(),
+              Shooter2Config.SELF_TEST_BOTTOM_MOTOR_CURRENT_TOLERANCE));
     }
   }
 
@@ -169,7 +189,8 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
   protected ShooterState2 getNextState(ShooterState2 currentState) {
     return switch (currentState) {
       case SELF_TEST_TOP_MOTOR -> timeout(5) ? ShooterState2.SELF_TEST_STOP_MOTORS : currentState;
-      // TODO: This is currently looping between SELF_TEST_STOP_MOTORS and SELF_TEST_BOTTOM_MOTOR infinitely
+      // TODO: This is currently looping between SELF_TEST_STOP_MOTORS and SELF_TEST_BOTTOM_MOTOR
+      // infinitely
       case SELF_TEST_STOP_MOTORS ->
           timeout(2) ? ShooterState2.SELF_TEST_BOTTOM_MOTOR : currentState;
       case SELF_TEST_BOTTOM_MOTOR ->
