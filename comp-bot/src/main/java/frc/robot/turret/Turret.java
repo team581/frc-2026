@@ -35,8 +35,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private final DynamicMotionMagicVoltage slowPositionRequest =
       new DynamicMotionMagicVoltage(
               0.0,
-              TurretConfig.TAG_SEARCH_MAX_ANGLE_VELOCITY,
-              TurretConfig.TAG_SEARCH_MAX_ANGLE_ACCELERATION)
+              Units.degreesToRotations(TurretConfig.TAG_SEARCH_MAX_ANGLE_VELOCITY),
+              Units.degreesToRotations(TurretConfig.TAG_SEARCH_MAX_ANGLE_ACCELERATION))
           .withEnableFOC(false);
 
   private final Vision vision;
@@ -183,6 +183,17 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     }
   }
 
+  @Override
+  protected void afterTransition(TurretState newState) {
+    switch (newState) {
+      case TAG_SEARCH -> {
+        goalAngle =
+            MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
+      }
+      default -> {}
+    }
+  }
+
   public void scoreRequest(double goalAngle) {
     this.goalAngle = goalAngle;
     setState(TurretState.SCORE);
@@ -216,17 +227,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   }
 
   public void tagSearchRequest() {
-    if (getState() != TurretState.TAG_SEARCH) {
-      goalAngle =
-          MathHelpers.farthest(currentAngle, TurretConfig.MAX_ANGLE, TurretConfig.MIN_ANGLE);
-    }
     setState(TurretState.TAG_SEARCH);
-  }
-
-  public void cancelTagSearch() {
-    if (getState() == TurretState.TAG_SEARCH) {
-      setState(TurretState.IDLE_SCORE);
-    }
   }
 
   public void setRobotRotationRate(double rateDegrees) {

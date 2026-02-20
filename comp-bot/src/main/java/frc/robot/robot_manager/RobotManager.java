@@ -11,7 +11,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Hardware;
@@ -825,15 +824,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   private void smartTurretHoodIdleRequest() {
-    // -First, if we are enabled in teleop and cameras are online, decide whether or not to search
-    // for tags
+    // -First, search for tags any time localization is not trustworthy, if cameras are online
     // -Next, if cameras are offline or we are near a trench, always be idle
     // -Otherwise if we are in our alliance zone, point towards hub
     // -And if we are not in alliance zone, point towards feed pose
     if (DriverStation.isTeleopEnabled() && DSOptions.DO_TAG_SEARCH.get()) {
-      if (localization.isTrustworthy() || (!health.isLocalizationHealthy() && RobotBase.isReal())) {
-        turret.cancelTagSearch();
-      } else {
+      if (!localization.isTrustworthy() && health.isLocalizationHealthy()) {
         shooterHood.idleRequest();
         turret.tagSearchRequest();
         DogLog.log("RobotManager/SmartIdle/Status", "TagSearch");
