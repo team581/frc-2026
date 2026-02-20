@@ -120,6 +120,9 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
   }
 
   public OptionalDouble getLimelightRotation() {
+    if (RobotBase.isSimulation()) {
+      return OptionalDouble.of(90 - Math.random());
+    }
     var maybeResult = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightTableName);
     if (poseEstimateValidator.shouldTrust(maybeResult, angularVelocity)) {
       return OptionalDouble.of(maybeResult.pose.getRotation().getDegrees());
