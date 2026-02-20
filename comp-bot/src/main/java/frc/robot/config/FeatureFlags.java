@@ -29,10 +29,12 @@ public class FeatureFlags {
   public static final BooleanSupplier STOP_SHOOTING_STATE =
       FeatureFlag.of("UseStopShootingState", false);
 
-  public static final BooleanSupplier STOP_SCORING_RPM_DIP =
+  public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT_RPM_DIP =
       FeatureFlag.of("StopScoringRPMDip", true);
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT =
       FeatureFlag.of("CancelInProgressShot", true);
+
+  public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
 
   public static final BooleanSupplier CLAMPED_AUTO_POINTS = Point.CLAMPED_POINTS_FEATURE_FLAG;
 

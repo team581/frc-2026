@@ -1,137 +1,560 @@
 {
   "grid_size": 128,
-  "tabs": [{
-    "name": "Operator",
-    "grid_layout": {
-      "containers": [
-        {
-          "x": 384,
-          "width": 512,
-          "y": 0,
-          "title": "Alerts",
-          "type": "Alerts",
-          "properties": {
-            "period": 0.06,
-            "topic": "/SmartDashboard/Alerts"
-          },
-          "height": 256
-        },
-        {
-          "x": 0,
-          "width": 384,
-          "y": 0,
-          "title": "SelectedAuto",
-          "type": "ComboBox Chooser",
-          "properties": {
-            "period": 0.06,
-            "topic": "/SmartDashboard/Autos/SelectedAuto",
-            "sort_options": false
-          },
-          "height": 128
-        },
-        {
-          "x": 1152,
-          "width": 384,
-          "y": 128,
-          "title": "LocalizationHealthy",
-          "type": "Boolean Box",
-          "properties": {
-            "true_color": 4283215696,
-            "period": 0.06,
-            "false_color": 4294198070,
-            "false_icon": "None",
-            "data_type": "boolean",
-            "topic": "/Robot/Health/LocalizationHealthy",
-            "true_icon": "None"
-          },
-          "height": 128
-        },
-        {
-          "x": 1152,
-          "width": 384,
-          "y": 0,
-          "title": "AllCamerasHealthy",
-          "type": "Boolean Box",
-          "properties": {
-            "true_color": 4283215696,
-            "period": 0.06,
-            "false_color": 4294198070,
-            "false_icon": "None",
-            "data_type": "boolean",
-            "topic": "/Robot/Health/AllCamerasHealthy",
-            "true_icon": "None"
-          },
-          "height": 128
-        },
-        {
-          "x": 1152,
-          "width": 384,
-          "y": 256,
-          "title": "FuelDetectionHealthy",
-          "type": "Boolean Box",
-          "properties": {
-            "true_color": 4283215696,
-            "period": 0.06,
-            "false_color": 4294198070,
-            "false_icon": "None",
-            "data_type": "boolean",
-            "topic": "/Robot/Health/FuelDetectionHealthy",
-            "true_icon": "None"
-          },
-          "height": 128
-        }
-      ],
-      "layouts": [{
-        "children": [
+  "tabs": [
+    {
+      "name": "Operator",
+      "grid_layout": {
+        "containers": [
           {
-            "x": 768,
-            "width": 256,
-            "y": 128,
-            "title": "UseTagLimelights",
-            "type": "Toggle Switch",
+            "x": 384,
+            "width": 512,
+            "y": 0,
+            "title": "Alerts",
+            "type": "Alerts",
             "properties": {
               "period": 0.06,
-              "data_type": "boolean",
-              "topic": "/DSOptions/UseTagLimelights"
+              "topic": "/SmartDashboard/Alerts"
             },
-            "height": 128
+            "height": 384
           },
           {
-            "x": 768,
-            "width": 256,
-            "y": 128,
-            "title": "UseHubState",
-            "type": "Toggle Switch",
+            "x": 0,
+            "width": 384,
+            "y": 0,
+            "title": "SelectedAuto",
+            "type": "ComboBox Chooser",
             "properties": {
               "period": 0.06,
-              "data_type": "boolean",
-              "topic": "/DSOptions/UseHubState"
+              "topic": "/SmartDashboard/Autos/SelectedAuto",
+              "sort_options": false
             },
             "height": 128
           },
           {
             "x": 896,
-            "width": 128,
+            "width": 256,
             "y": 256,
-            "title": "UseCANRange",
-            "type": "Toggle Switch",
+            "title": "LocalizationHealthy",
+            "type": "Boolean Box",
+            "properties": {
+              "true_color": 4283215696,
+              "period": 0.06,
+              "false_color": 4294198070,
+              "false_icon": "None",
+              "data_type": "boolean",
+              "topic": "/Robot/Health/LocalizationHealthy",
+              "true_icon": "None"
+            },
+            "height": 128
+          },
+          {
+            "x": 896,
+            "width": 256,
+            "y": 128,
+            "title": "AllCamerasHealthy",
+            "type": "Boolean Box",
+            "properties": {
+              "true_color": 4283215696,
+              "period": 0.06,
+              "false_color": 4294198070,
+              "false_icon": "None",
+              "data_type": "boolean",
+              "topic": "/Robot/Health/AllCamerasHealthy",
+              "true_icon": "None"
+            },
+            "height": 128
+          },
+          {
+            "x": 896,
+            "width": 256,
+            "y": 0,
+            "title": "FuelDetectionHealthy",
+            "type": "Boolean Box",
+            "properties": {
+              "true_color": 4283215696,
+              "period": 0.06,
+              "false_color": 4294198070,
+              "false_icon": "None",
+              "data_type": "boolean",
+              "topic": "/Robot/Health/FuelDetectionHealthy",
+              "true_icon": "None"
+            },
+            "height": 128
+          },
+          {
+            "x": 0,
+            "width": 384,
+            "y": 128,
+            "title": "State",
+            "type": "Large Text Display",
             "properties": {
               "period": 0.06,
-              "data_type": "boolean",
-              "topic": "/DSOptions/UseCANRange"
+              "data_type": "string",
+              "topic": "/Robot/RobotManager/State"
+            },
+            "height": 256
+          }
+        ],
+        "layouts": [{
+          "children": [
+            {
+              "x": 0,
+              "width": 128,
+              "y": 0,
+              "title": "UseTagLimelights",
+              "type": "Toggle Switch",
+              "properties": {
+                "period": 0.06,
+                "data_type": "boolean",
+                "topic": "/DSOptions/UseTagLimelights"
+              },
+              "height": 128
+            },
+            {
+              "x": 0,
+              "width": 128,
+              "y": 0,
+              "title": "UseHubState",
+              "type": "Toggle Switch",
+              "properties": {
+                "period": 0.06,
+                "data_type": "boolean",
+                "topic": "/DSOptions/UseHubState"
+              },
+              "height": 128
+            },
+            {
+              "x": 0,
+              "width": 128,
+              "y": 0,
+              "title": "UseCANRange",
+              "type": "Toggle Switch",
+              "properties": {
+                "period": 0.06,
+                "data_type": "boolean",
+                "topic": "/DSOptions/UseCANRange"
+              },
+              "height": 128
+            }
+          ],
+          "x": 1152,
+          "width": 256,
+          "y": 0,
+          "title": "Fallback toggles",
+          "type": "List Layout",
+          "properties": {"label_position": "TOP"},
+          "height": 384
+        }]
+      }
+    },
+    {
+      "name": "Software",
+      "grid_layout": {
+        "containers": [
+          {
+            "x": 384,
+            "width": 512,
+            "y": 0,
+            "title": "Alerts",
+            "type": "Alerts",
+            "properties": {
+              "period": 0.06,
+              "topic": "/SmartDashboard/Alerts"
+            },
+            "height": 256
+          },
+          {
+            "x": 0,
+            "width": 384,
+            "y": 0,
+            "title": "SelectedAuto",
+            "type": "ComboBox Chooser",
+            "properties": {
+              "period": 0.06,
+              "topic": "/SmartDashboard/Autos/SelectedAuto",
+              "sort_options": false
+            },
+            "height": 128
+          },
+          {
+            "x": 256,
+            "width": 128,
+            "y": 128,
+            "title": "BPS",
+            "type": "Text Display",
+            "properties": {
+              "period": 0.06,
+              "show_submit_button": false,
+              "data_type": "double",
+              "topic": "/Tunable/DyeRotor/RotorBallsPerSecond/SHOOT"
+            },
+            "height": 128
+          },
+          {
+            "x": 0,
+            "width": 256,
+            "y": 128,
+            "title": "TrustFactor",
+            "type": "Radial Gauge",
+            "properties": {
+              "min_value": 0,
+              "period": 0.06,
+              "start_angle": -140,
+              "show_pointer": true,
+              "show_ticks": true,
+              "data_type": "double",
+              "end_angle": 140,
+              "topic": "/Robot/Localization/TrustFactor",
+              "wrap_value": false,
+              "number_of_labels": 5,
+              "max_value": 10
+            },
+            "height": 256
+          },
+          {
+            "x": 384,
+            "width": 512,
+            "y": 384,
+            "title": "Feeding RPM",
+            "type": "Text Display",
+            "properties": {
+              "period": 0.06,
+              "show_submit_button": false,
+              "data_type": "double[]",
+              "topic": "/Tunable/Shooter/DistanceToFeedingRPM"
+            },
+            "height": 128
+          },
+          {
+            "x": 896,
+            "width": 512,
+            "y": 384,
+            "title": "Feeding Angle",
+            "type": "Text Display",
+            "properties": {
+              "period": 0.06,
+              "show_submit_button": false,
+              "data_type": "double[]",
+              "topic": "/Tunable/ShooterHood/DistanceToFeed"
+            },
+            "height": 128
+          },
+          {
+            "x": 384,
+            "width": 512,
+            "y": 256,
+            "title": "Scoring RPM",
+            "type": "Text Display",
+            "properties": {
+              "period": 0.06,
+              "show_submit_button": false,
+              "data_type": "double[]",
+              "topic": "/Tunable/Shooter/DistanceToScoreRPM"
+            },
+            "height": 128
+          },
+          {
+            "x": 896,
+            "width": 512,
+            "y": 256,
+            "title": "Scoring Angle",
+            "type": "Text Display",
+            "properties": {
+              "period": 0.06,
+              "show_submit_button": false,
+              "data_type": "double[]",
+              "topic": "/Tunable/ShooterHood/DistanceToScore"
+            },
+            "height": 128
+          },
+          {
+            "x": 0,
+            "width": 384,
+            "y": 384,
+            "title": "State",
+            "type": "Large Text Display",
+            "properties": {
+              "period": 0.06,
+              "data_type": "string",
+              "topic": "/Robot/RobotManager/State"
+            },
+            "height": 128
+          },
+          {
+            "x": 256,
+            "width": 128,
+            "y": 256,
+            "title": "Reset BPS",
+            "type": "Text Display",
+            "properties": {
+              "period": 0.06,
+              "show_submit_button": false,
+              "data_type": "double",
+              "topic": "/Tunable/DyeRotor/RotorBallsPerSecond/RESET_TO_IDLE"
             },
             "height": 128
           }
         ],
-        "x": 896,
-        "width": 256,
-        "y": 0,
-        "title": "Fallback toggles",
-        "type": "List Layout",
-        "properties": {"label_position": "TOP"},
-        "height": 384
-      }]
+        "layouts": [
+          {
+            "children": [
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "UseCANRange",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/DSOptions/UseCANRange"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "UseHubState",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/DSOptions/UseHubState"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "UseTagLimelights",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/DSOptions/UseTagLimelights"
+                },
+                "height": 128
+              }
+            ],
+            "x": 896,
+            "width": 256,
+            "y": 0,
+            "title": "DSOptions",
+            "type": "List Layout",
+            "properties": {"label_position": "TOP"},
+            "height": 256
+          },
+          {
+            "children": [
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "BumpAssist",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/BumpAssist"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "CancelInProgressShot",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/CancelInProgressShot"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "ClampedAutoPoints",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/ClampedAutoPoints"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "ClusterMap",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/ClusterMap"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "HopperShuffling",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/HopperShuffling"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "IntakeDirectionalSnaps",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/IntakeDirectionalSnaps"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "IntakeWallSnaps",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/IntakeWallSnaps"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "IntegrationTest",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/IntegrationTest"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "OnlyUseHubTags",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/OnlyUseHubTags"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "RateLimitedDriving",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/RateLimitedDriving"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "RegressionModel",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/RegressionModel"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "StopScoringRPMDip",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/StopScoringRPMDip"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "TimeOfFlightInHubActivity",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/TimeOfFlightInHubActivity"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "TrenchAssist",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/TrenchAssist"
+                },
+                "height": 128
+              },
+              {
+                "x": 0,
+                "width": 128,
+                "y": 0,
+                "title": "UseStopShootingState",
+                "type": "Toggle Switch",
+                "properties": {
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "topic": "/Tunable/FeatureFlags/UseStopShootingState"
+                },
+                "height": 128
+              }
+            ],
+            "x": 1152,
+            "width": 256,
+            "y": 0,
+            "title": "FeatureFlags",
+            "type": "List Layout",
+            "properties": {"label_position": "TOP"},
+            "height": 256
+          }
+        ]
+      }
     }
-  }],
+  ],
   "version": 1
 }

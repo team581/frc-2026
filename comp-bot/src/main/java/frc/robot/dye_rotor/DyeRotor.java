@@ -3,10 +3,12 @@ package frc.robot.dye_rotor;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
+import com.team581.math.MathHelpers;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.util.Units;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -32,7 +34,7 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
   private boolean isShootingDebounced = false;
 
   public DyeRotor(TalonFX rotorMotor, TalonFX horizontalMotor, TalonFX verticalMotor) {
-    super(SubsystemPriority.DYE_ROTOR, DyeRotorState.IDLE);
+    super(SubsystemPriority.DYE_ROTOR, DyeRotorState.UNHOMED);
 
     rotorMotor.getConfigurator().apply(DyeRotorConfig.ROTOR_MOTOR_CONFIG);
     horizontalMotor.getConfigurator().apply(DyeRotorConfig.HORIZONTAL_MOTOR_CONFIG);
@@ -46,19 +48,50 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
   }
 
   public void shootRequest() {
-    setStateFromRequest(DyeRotorState.SHOOT);
+    if (getState() != DyeRotorState.UNHOMED) {
+      setStateFromRequest(DyeRotorState.SHOOT);
+    }
   }
 
   public void unjamRequest() {
-    setStateFromRequest(DyeRotorState.UNJAM);
+    if (getState() != DyeRotorState.UNHOMED) {
+      setStateFromRequest(DyeRotorState.UNJAM);
+    }
   }
 
   public void idleRequest() {
-    setStateFromRequest(DyeRotorState.IDLE);
+    if (getState() != DyeRotorState.UNHOMED) {
+      setStateFromRequest(DyeRotorState.RESET_TO_IDLE);
+    }
+  }
+
+  private boolean nearIdlePosition() {
+    return MathUtil.isNear(DyeRotorState.IDLE.rotorPosition, rotorAngle, 45, -180, 180);
+  }
+
+  @Override
+  protected DyeRotorState getNextState(DyeRotorState currentState) {
+    return switch (currentState) {
+      case UNHOMED -> {
+        if (rotorMotor.isAlive() && rotorMotor.isConnected()) {
+          rotorMotor.setPosition(Units.degreesToRotations(DyeRotorConfig.HOMING_END_POSITION));
+          yield DyeRotorState.RESET_TO_IDLE;
+        }
+        yield currentState;
+      }
+      case RESET_TO_IDLE -> {
+        if (nearIdlePosition()) {
+          yield DyeRotorState.IDLE;
+        }
+        yield currentState;
+      }
+      default -> currentState;
+    };
   }
 
   @Override
   protected void whileInState(DyeRotorState currentState) {
+
     // TODO: Move to afterTransition once we are done tuning
     rotorMotor.setControl(rotorVelocityRequest.withVelocity(currentState.getRotorRPM() / 60.0));
     horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
@@ -88,7 +121,9 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     rotorFilteredCurrent = currentFilter.calculate(rotorRawCurrent);
 
     rotorMotorRpm = rotorMotor.getVelocity().getValueAsDouble() * 60.0;
-    rotorAngle = Units.rotationsToDegrees(rotorMotor.getPosition().getValueAsDouble());
+    rotorAngle =
+        MathHelpers.angleModulus(
+            Units.rotationsToDegrees(rotorMotor.getPosition().getValueAsDouble()));
     horizontalMotorRpm = horizontalMotor.getVelocity().getValueAsDouble() * 60.0;
 
     isShooting = horizontalMotorRpm < DyeRotorConfig.RPM_TOLERANCE_SHOOTING;
@@ -97,7 +132,9 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
 
   public boolean atGoal() {
     return switch (getState()) {
+      case UNHOMED -> false;
       case IDLE -> true;
+      case RESET_TO_IDLE -> false;
       case UNJAM -> timeout(1) || !isJammed();
       case SHOOT -> true;
     };

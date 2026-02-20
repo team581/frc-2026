@@ -17,6 +17,9 @@ public class DyeRotorConfig {
 
   // TODO: Measure this number
   public static final double RPM_TOLERANCE_SHOOTING = 10;
+
+  public static final double HOMING_END_POSITION = 180;
+
   public static final DoubleSubscriber JAM_CURRENT_THRESHOLD =
       DogLog.tunable("DyeRotor/Horizontal/JamCurrentThreshold", 75.0);
 

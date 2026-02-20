@@ -33,9 +33,9 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
 
   private static final double IS_OFFLINE_TIMEOUT = 3;
 
-  private final String limelightTableName;
+  public final String limelightTableName;
+  public final CameraConfig config;
   private final String name;
-  private final CameraConfig config;
   private final PoseEstimateValidator poseEstimateValidator;
 
   private final Timer limelightTimer = new Timer();

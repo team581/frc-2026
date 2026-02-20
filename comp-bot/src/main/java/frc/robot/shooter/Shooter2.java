@@ -145,15 +145,19 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState> {
 
   @Override
   public void simulationPeriodic() {
-    var shooterSimulation =
+    var topshooterSimulation =
         SimKit.velocityMechanism(
-            "shooter",
+            "Shooter/Top",
             (mechanism) ->
-                mechanism
-                    .addMotor(topMotor, ChassisReference.CounterClockwise_Positive)
-                    .addMotor(bottomMotor, ChassisReference.Clockwise_Positive));
+                mechanism.addMotor(topMotor, ChassisReference.CounterClockwise_Positive));
 
-    shooterSimulation.update();
+    var bottomshooterSimulation =
+        SimKit.velocityMechanism(
+            "Shooter/Bottom",
+            (mechanism) -> mechanism.addMotor(bottomMotor, ChassisReference.Clockwise_Positive));
+
+    topshooterSimulation.update();
+    bottomshooterSimulation.update();
   }
 
   public double getScoreTimeOfFlight(double distance) {

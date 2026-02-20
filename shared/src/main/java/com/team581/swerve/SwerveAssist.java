@@ -42,47 +42,15 @@ public class SwerveAssist {
     // Check if in bump assist zone
     if (FieldUtil.getCurrentBumpAssistZone(robotPose.getTranslation()).isEmpty()) {
       return false;
+    } else {
+      return ableToSwerveAssist(
+          robotPose,
+          fieldRelativeSpeeds,
+          BUMP_ASSIST_VELOCITY_THRESHOLD,
+          FieldUtil.getClosestHubSideBumpPoint(robotTranslation),
+          FieldUtil.getClosestTrenchSideBumpPoint(robotTranslation),
+          BUMP_ASSIST_VELOCITY_ANGLE_TOLERANCE);
     }
-
-    // Check if velocity meets threshold
-    if (MathHelpers.getLinearVelocity(fieldRelativeSpeeds) <= BUMP_ASSIST_VELOCITY_THRESHOLD) {
-      DogLog.log("SwerveAssist/Bump/VelocityThreshold", false);
-      return false;
-    }
-    DogLog.log("SwerveAssist/Bump/VelocityThreshold", true);
-
-    // Check if velocity angle is toward bump
-    var hubSideBumpAssistPoint = FieldUtil.getClosestHubSideBumpPoint(robotTranslation);
-    var trenchSideBumpAssistPoint = FieldUtil.getClosestTrenchSideBumpPoint(robotTranslation);
-    DogLog.log(
-        "SwerveAssist/Bump/ClosestHubSideBumpPoint",
-        new Pose2d(hubSideBumpAssistPoint, Rotation2d.kZero));
-    DogLog.log(
-        "SwerveAssist/Bump/ClosestTremchSideBumpPoint",
-        new Pose2d(trenchSideBumpAssistPoint, Rotation2d.kZero));
-
-    var velocityAngle = MathHelpers.getDriveDirection(fieldRelativeSpeeds);
-    var angleToHubSideBumpPoint = MathHelpers.getDriveDirection(robotPose, hubSideBumpAssistPoint);
-    var angleToTrenchSideBumpPoint =
-        MathHelpers.getDriveDirection(robotPose, trenchSideBumpAssistPoint);
-
-    if (MathUtil.isNear(
-            velocityAngle.getDegrees(),
-            angleToHubSideBumpPoint.getDegrees(),
-            BUMP_ASSIST_VELOCITY_ANGLE_TOLERANCE,
-            -180.0,
-            180.0)
-        || MathUtil.isNear(
-            velocityAngle.getDegrees(),
-            angleToTrenchSideBumpPoint.getDegrees(),
-            BUMP_ASSIST_VELOCITY_ANGLE_TOLERANCE,
-            -180.0,
-            180.0)) {
-      DogLog.log("SwerveAssist/Bump/VelocityAngleTolerance", true);
-      return true;
-    }
-    DogLog.log("SwerveAssist/Bump/VelocityAngleTolerance", false);
-    return false;
   }
 
   public static boolean ableToDirectionSnap(ChassisSpeeds fieldRelativeSpeeds) {
@@ -92,51 +60,19 @@ public class SwerveAssist {
 
   public static boolean ableToTrenchAssist(Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var robotTranslation = robotPose.getTranslation();
+
     // Check if in trench assist zone
     if (FieldUtil.getCurrentTrenchAssistZone(robotTranslation).isEmpty()) {
       return false;
+    } else {
+      return ableToSwerveAssist(
+          robotPose,
+          fieldRelativeSpeeds,
+          TRENCH_ASSIST_VELOCITY_THRESHOLD,
+          FieldUtil.getClosestAllianceZoneTrenchMidpoint(robotTranslation),
+          FieldUtil.getClosestNeutralZoneTrenchMidpoint(robotTranslation),
+          TRENCH_ASSIST_VELOCITY_ANGLE_TOLERANCE);
     }
-
-    // Check if velocity meets threshold
-    if (MathHelpers.getLinearVelocity(fieldRelativeSpeeds) <= TRENCH_ASSIST_VELOCITY_THRESHOLD) {
-      DogLog.log("SwerveAssist/Trench/VelocityThreshold", false);
-      return false;
-    }
-    DogLog.log("SwerveAssist/Trench/VelocityThreshold", true);
-
-    var allianceZoneAssistPoint = FieldUtil.getClosestAllianceZoneTrenchMidpoint(robotTranslation);
-    var neutralZoneAssistPoint = FieldUtil.getClosestNeutralZoneTrenchMidpoint(robotTranslation);
-    DogLog.log(
-        "SwerveAssist/Trench/ClosestAllianceZoneTrenchMidpoint",
-        new Pose2d(allianceZoneAssistPoint, Rotation2d.kCCW_90deg));
-    DogLog.log(
-        "SwerveAssist/Trench/ClosestNeutralZoneTrenchMidpoint",
-        new Pose2d(neutralZoneAssistPoint, Rotation2d.kCCW_90deg));
-
-    // Check if velocity angle is toward trench
-    var velocityAngle = MathHelpers.getDriveDirection(fieldRelativeSpeeds);
-    var angleToAllianceZoneAssistPoint =
-        MathHelpers.getDriveDirection(robotPose, allianceZoneAssistPoint);
-    var angleToNeutralZoneAssistPoint =
-        MathHelpers.getDriveDirection(robotPose, neutralZoneAssistPoint);
-
-    if (MathUtil.isNear(
-            velocityAngle.getDegrees(),
-            angleToAllianceZoneAssistPoint.getDegrees(),
-            TRENCH_ASSIST_VELOCITY_ANGLE_TOLERANCE,
-            -180.0,
-            180.0)
-        || MathUtil.isNear(
-            velocityAngle.getDegrees(),
-            angleToNeutralZoneAssistPoint.getDegrees(),
-            TRENCH_ASSIST_VELOCITY_ANGLE_TOLERANCE,
-            -180.0,
-            180.0)) {
-      DogLog.log("SwerveAssist/Trench/VelocityAngleTolerance", true);
-      return true;
-    }
-    DogLog.log("SwerveAssist/Trench/VelocityAngleTolerance", false);
-    return false;
   }
 
   public static boolean ableToWallSnap(
@@ -227,5 +163,51 @@ public class SwerveAssist {
           polarInputSpeeds.vMetersPerSecond, newDirection, wantedSpeeds.omegaRadiansPerSecond);
     }
     return polarInputSpeeds;
+  }
+
+  private static boolean ableToSwerveAssist(
+      Pose2d robotPose,
+      ChassisSpeeds fieldRelativeSpeeds,
+      double velocityThreshold,
+      Translation2d firstAssistPoint,
+      Translation2d secondAssistPoint,
+      double velocityAngleTolerance) {
+    // Check if velocity meets threshold
+    if (MathHelpers.getLinearVelocity(fieldRelativeSpeeds) <= velocityThreshold) {
+      DogLog.log("SwerveAssist/VelocityThreshold", false);
+      return false;
+    }
+    DogLog.log("SwerveAssist/VelocityThreshold", true);
+
+    DogLog.log(
+        "SwerveAssist/ClosestFirstAssistPoint",
+        new Pose2d(firstAssistPoint, Rotation2d.kCCW_90deg));
+    DogLog.log(
+        "SwerveAssist/ClosestSecondAssistPoint",
+        new Pose2d(secondAssistPoint, Rotation2d.kCCW_90deg));
+
+    // Check if velocity angle is toward trench
+    var velocityAngle = MathHelpers.getDriveDirection(fieldRelativeSpeeds);
+    var angleToFirstAssistPoint = MathHelpers.getDriveDirection(robotPose, firstAssistPoint);
+    var angleToSecondAssistPoint = MathHelpers.getDriveDirection(robotPose, secondAssistPoint);
+
+    if (MathUtil.isNear(
+            velocityAngle.getDegrees(),
+            angleToFirstAssistPoint.getDegrees(),
+            velocityAngleTolerance,
+            -180.0,
+            180.0)
+        || MathUtil.isNear(
+            velocityAngle.getDegrees(),
+            angleToSecondAssistPoint.getDegrees(),
+            velocityAngleTolerance,
+            -180.0,
+            180.0)) {
+      DogLog.log("SwerveAssist/VelocityAngleTolerance", true);
+      return true;
+    }
+
+    DogLog.log("SwerveAssist/VelocityAngleTolerance", false);
+    return false;
   }
 }

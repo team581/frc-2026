@@ -92,9 +92,5 @@ public class Shooter2Config {
                   .withPeakForwardTorqueCurrent(200)
                   .withPeakReverseTorqueCurrent(0));
 
-  public static final TalonFXConfiguration LOWER_MOTOR_CONFIG = null;
-
-  public static final TalonFXConfiguration UPPER_MOTOR_CONFIG = null;
-
   private Shooter2Config() {}
 }

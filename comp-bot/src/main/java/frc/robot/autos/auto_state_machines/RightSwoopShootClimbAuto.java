@@ -172,7 +172,7 @@ public class RightSwoopShootClimbAuto extends BaseImperativeAuto<RightSwoopShoot
       case SHOOT_2 -> {}
       case DRIVE_TO_CLIMB -> {
         trailblazer.setActiveSegment(
-            ClimbAssist.getClimbAssistSegment(
+            ClimbAssist.getLineupClimbAssistSegment(
                 robotManager.localization.getPose(), ClimbLocation.CLOSEST));
       }
       case CLIMB -> {}

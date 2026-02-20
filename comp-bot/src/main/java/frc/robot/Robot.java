@@ -12,13 +12,13 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import frc.robot.autos.Autos;
 import frc.robot.climber.Climber;
+import frc.robot.cluster_map.ClusterMap;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.generated.BuildConstants;
 import frc.robot.health.HealthManager;
 import frc.robot.imu.Imu;
 import frc.robot.intake.Intake;
-import frc.robot.lights.Lights;
 import frc.robot.localization.Localization;
 import frc.robot.robot_manager.RobotManager;
 import frc.robot.shooter.Shooter;
@@ -102,12 +102,14 @@ public class Robot extends Base581Robot {
       new Deploy(hardware.leftDeployMotor, hardware.rightDeployMotor, hardware.hopperCANRange);
   private final DyeRotor dyeRotor =
       new DyeRotor(hardware.rotorMotor, hardware.horizontalMotor, hardware.verticalMotor);
-  private final Lights lights = new Lights(hardware.candle);
   private final Vision vision = new Vision(imu, turretLimelight, backLimelight, groundLimelight);
   private final Localization localization =
       new Localization(swerve, hardware.drivetrain, vision, imu);
   private final Turret turret = new Turret(hardware.turretMotor, hardware.turretEncoder, vision);
   private final Climber climber = new Climber(hardware.climbMotor);
+
+  private final ClusterMap clusterMap = new ClusterMap(localization, swerve, groundLimelight);
+
   private final RobotManager robotManager =
       new RobotManager(
           shooterHood,
@@ -119,11 +121,11 @@ public class Robot extends Base581Robot {
           intake,
           deploy,
           vision,
-          lights,
           hardware.driverController,
           health,
           trailblazer,
           climber,
+          clusterMap,
           hardware);
 
   @SuppressWarnings("unused") // Registers itself as a subsystem
@@ -147,6 +149,7 @@ public class Robot extends Base581Robot {
   protected void configureBindings() {
     var driverStart = enabledEvent.and(hardware.driverController.start(buttonBindingsLoop));
     driverStart.rising().ifHigh(robotManager::startTeleopAutoClimbSequence);
+    driverStart.falling().ifHigh(robotManager::stopTeleopAutoClimbAlignment);
 
     var driverBack = enabledEvent.and(hardware.driverController.back(buttonBindingsLoop));
     driverBack.rising().ifHigh(localization::zeroGyro);
@@ -179,11 +182,10 @@ public class Robot extends Base581Robot {
     var operatorY = enabledEvent.and(hardware.operatorController.y(buttonBindingsLoop));
     operatorY.rising().ifHigh(robotManager::manualClimbSequenceForward);
 
+    // Use as idle button when not climbing, otherwise does sequence and eventually gets back to
+    // idle
     var operatorA = enabledEvent.and(hardware.operatorController.a(buttonBindingsLoop));
-    operatorA.rising().ifHigh(robotManager::manualClimbSequenceBackward);
-
-    var operatorDpad = enabledEvent.and(hardware.operatorController.pov(90, buttonBindingsLoop));
-    operatorDpad.rising().ifHigh(robotManager::idleRequest);
+    operatorA.rising().ifHigh(robotManager::manualClimbSequenceBackwardOrIdleRequest);
 
     var operatorLeftTrigger =
         enabledEvent.and(hardware.operatorController.leftTrigger(buttonBindingsLoop));
