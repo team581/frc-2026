@@ -53,7 +53,9 @@ public class AimParameterUtil {
     var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
 
     double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
-    var angle = MathHelpers.getDriveDirection(robot, hubTranslation).minus(Rotation2d.fromDegrees(turretAngle));
+    var angle =
+        MathHelpers.getDriveDirection(robot, hubTranslation)
+            .minus(Rotation2d.fromDegrees(turretAngle));
     return new AimingParameters(angle.getDegrees(), distanceToGoal);
   }
 

@@ -1209,7 +1209,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                   ? robotPose
                   : new Pose2d(
                       FieldUtil.getFallbackScorePoint().getTranslation(), robotPose.getRotation()),
-                      turret.getAngle(),
+              turret.getAngle(),
               swerve.getFieldRelativeSpeeds());
     }
 
