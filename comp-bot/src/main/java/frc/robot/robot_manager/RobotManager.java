@@ -132,7 +132,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           STOP_SHOOTING_FEED ->
           timeout(1) ? RobotState.UNJAM : currentState;
       case PREPARE_FORCE_SCORE -> {
-        if (shooter.atGoal() && !dyeRotor.isJammed() && turret.atGoal() && shooterHood.atGoal()) {
+        // should probably check that turret is at goal as well here, but it was removed for drive practice
+        if (shooter.atGoal() && !dyeRotor.isJammed() && shooterHood.atGoal()) {
           yield RobotState.FORCE_SCORE;
         }
         yield currentState;
