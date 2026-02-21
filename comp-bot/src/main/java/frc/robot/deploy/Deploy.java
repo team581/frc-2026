@@ -279,33 +279,28 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   @Override
   public void simulationPeriodic() {
-    // Only add the leader motor to the sim mechanism. SimpleDifferentialMechanism only sets
-    // ClosedLoopReference on the leader, so averaging both motors would halve the target position.
     var deploySimulation =
         SimKit.positionMechanism(
             "Deploy",
             mechanism ->
                 mechanism
                     .addMotor(leftMotor, ChassisReference.Clockwise_Positive)
+                    .addMotor(rightMotor, ChassisReference.CounterClockwise_Positive)
                     .withMinPosition(DeployConfig.MIN_LENGTH)
                     .withMaxPosition(DeployConfig.MAX_LENGTH));
 
     if (getState() == DeployState.HOME_INWARD) {
-      leftMotor.setPosition(DeployConfig.HOMING_END_POSITION_INWARD);
-      rightMotor.setPosition(DeployConfig.HOMING_END_POSITION_INWARD);
+      // Use seedPosition instead of differentialMechanism.setPosition to avoid creating a
+      // firmware-level sensor offset that compounds with setRawRotorPosition in
+      // applyMechanismState.
+      deploySimulation.seedPosition(DeployConfig.HOMING_END_POSITION_INWARD);
       setStateFromRequest(DeployState.INTAKE);
     }
     if (getState() == DeployState.HOME_OUTWARD) {
-      leftMotor.setPosition(DeployConfig.HOMING_END_POSITION_OUTWARD);
-      rightMotor.setPosition(DeployConfig.HOMING_END_POSITION_OUTWARD);
+      deploySimulation.seedPosition(DeployConfig.HOMING_END_POSITION_OUTWARD);
       setStateFromRequest(DeployState.INTAKE);
     }
 
-    deploySimulation.update();
-
-    // Sync follower motor sim state. getRotorPosition() already accounts for the leader's
-    // inversion, so the value can be used directly as the raw rotor position for the follower.
-    rightMotor.getSimState().setRawRotorPosition(leftMotor.getRotorPosition().getValueAsDouble());
-    rightMotor.getSimState().setRotorVelocity(leftMotor.getRotorVelocity().getValueAsDouble());
+    deploySimulation.update(clamp(getState().getLength()));
   }
 }
