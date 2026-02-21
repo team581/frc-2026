@@ -246,6 +246,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
   public void setStuckAngle(double stuckAngle) {
     this.stuckAngle = stuckAngle;
+    motor.setPosition(Units.degreesToRotations(stuckAngle));
   }
 
   public double getAngle() {

@@ -705,7 +705,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
       case PREPARE_SCORE -> {
         smartTurretHoodPrepareScoreRequest();
-        if (intake.getState() == IntakeState.INTAKE) {
+        if (!DSOptions.USE_TURRET.getAsBoolean()) {
+          swerve.turretStuckAimRequest(scoringParameters.turretAngle());
+        } else if (intake.getState() == IntakeState.INTAKE) {
           swerve.intakeRateLimitedDriveRequest();
         } else {
           swerve.rateLimitedDriveRequest();
@@ -715,7 +717,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case SCORE -> {
         turret.scoreRequest(scoringParameters.turretAngle());
         shooterHood.scoreRequest(scoringParameters.distance());
-        if (intake.getState() == IntakeState.INTAKE) {
+        if (!DSOptions.USE_TURRET.getAsBoolean()) {
+          swerve.turretStuckAimRequest(scoringParameters.turretAngle());
+        } else if (intake.getState() == IntakeState.INTAKE) {
           swerve.intakeRateLimitedDriveRequest();
         } else {
           swerve.rateLimitedDriveRequest();
