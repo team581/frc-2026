@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.SubsystemPriority;
 import java.util.Locale;
+import java.util.OptionalDouble;
 
 public class Limelight extends StateMachineSubsystem<LimelightState> {
   private static final double USE_MT1_ROTATION_THRESHOLD_INCHES = 40;
@@ -116,6 +117,17 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     DogLog.log("Vision/" + name + "/Tags/MT2Timestamp", mTEstimateTimestamp);
     DogLog.log("Vision/" + name + "/Tags/DistanceFromTag", distance);
     return tagResult.update(mTPose, mTEstimateTimestamp, devs);
+  }
+
+  public OptionalDouble getLimelightRotation() {
+    if (RobotBase.isSimulation()) {
+      return OptionalDouble.of(90 - (Math.random() * 5));
+    }
+    var maybeResult = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightTableName);
+    if (poseEstimateValidator.shouldTrust(maybeResult, angularVelocity)) {
+      return OptionalDouble.of(maybeResult.pose.getRotation().getDegrees());
+    }
+    return OptionalDouble.empty();
   }
 
   @Override

@@ -16,6 +16,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.config.DSOptions;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.Vision;
 
@@ -28,6 +29,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private double voltage = 0.0;
   private double statorCurrent = 0.0;
   private double robotRotationFeedForward = 0.0;
+  private double stuckAngle = 0.0;
 
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withEnableFOC(false);
 
@@ -70,16 +72,22 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
   @Override
   protected void collectInputs() {
-    currentAngle = Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
+    currentAngle =
+        getState() == TurretState.STUCK
+            ? stuckAngle
+            : Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
+
     velocity = Units.rotationsToDegrees(motor.getVelocity().getValueAsDouble());
     voltage = motor.getMotorVoltage().getValueAsDouble();
     statorCurrent = motor.getStatorCurrent().getValueAsDouble();
 
     // Predict the turret's current angle to account for sensor latency
     double latencyCompensatedAngle =
-        Units.rotationsToDegrees(
-            BaseStatusSignal.getLatencyCompensatedValueAsDouble(
-                motor.getPosition(), motor.getVelocity()));
+        getState() == TurretState.STUCK
+            ? stuckAngle
+            : Units.rotationsToDegrees(
+                BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                    motor.getPosition(), motor.getVelocity()));
 
     // Add the predicted angle to the vision buffer at the current timestamp
     vision.addTurretObservation(Timer.getFPGATimestamp(), latencyCompensatedAngle, velocity);
@@ -118,6 +126,9 @@ public class Turret extends StateMachineSubsystem<TurretState> {
             positionRequest.withPosition(
                 Units.degreesToRotations(
                     clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle)))));
+      }
+      case STUCK -> {
+        motor.disable();
       }
       default -> {}
     }
@@ -159,16 +170,28 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   }
 
   public void scoreRequest(double goalAngle) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = goalAngle;
     setState(TurretState.SCORE);
   }
 
   public void climbScoreRequest(boolean isLeft) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = 0.0;
     setState(TurretState.CLIMB_SCORE);
   }
 
   public void climbRequest(Pose2d robotPose) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     goalAngle =
         TurretCalculator.calculateTurretAimingAngle(
             robotPose, AprilTags.getClimbTagPose().getTranslation());
@@ -176,16 +199,28 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   }
 
   public void feedRequest(double goalAngle) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = goalAngle;
     setState(TurretState.FEED);
   }
 
   public void idleScoreRequest(double goalAngle) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = goalAngle;
     setState(TurretState.IDLE_SCORE);
   }
 
   public void idleFeedRequest(double goalAngle) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = goalAngle;
     setState(TurretState.IDLE_FEED);
   }
@@ -197,7 +232,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   public boolean atGoal() {
     return switch (getState()) {
       case UNHOMED -> false;
-
+      case STUCK -> true;
       // TODO: Reconsider for turret wrapping
       default ->
           MathUtil.isNear(
@@ -205,7 +240,19 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     };
   }
 
+  public void stuckRequest() {
+    setStateFromRequest(TurretState.STUCK);
+  }
+
+  public void setStuckAngle(double stuckAngle) {
+    this.stuckAngle = stuckAngle;
+    motor.setPosition(Units.degreesToRotations(stuckAngle));
+  }
+
   public double getAngle() {
+    if (getState() == TurretState.STUCK) {
+      return stuckAngle;
+    }
     return currentAngle;
   }
 

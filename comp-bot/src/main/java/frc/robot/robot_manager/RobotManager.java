@@ -705,7 +705,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
       case PREPARE_SCORE -> {
         smartTurretHoodPrepareScoreRequest();
-        if (intake.getState() == IntakeState.INTAKE) {
+        if (!DSOptions.USE_TURRET.getAsBoolean()) {
+          swerve.turretStuckAimRequest(scoringParameters.turretAngle());
+        } else if (intake.getState() == IntakeState.INTAKE) {
           swerve.intakeRateLimitedDriveRequest();
         } else {
           swerve.rateLimitedDriveRequest();
@@ -715,7 +717,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case SCORE -> {
         turret.scoreRequest(scoringParameters.turretAngle());
         shooterHood.scoreRequest(scoringParameters.distance());
-        if (intake.getState() == IntakeState.INTAKE) {
+        if (!DSOptions.USE_TURRET.getAsBoolean()) {
+          swerve.turretStuckAimRequest(scoringParameters.turretAngle());
+        } else if (intake.getState() == IntakeState.INTAKE) {
           swerve.intakeRateLimitedDriveRequest();
         } else {
           swerve.rateLimitedDriveRequest();
@@ -1071,6 +1075,13 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     robotPose = localization.getPose();
     vision.setEstimatedPoseAngle(robotPose.getRotation().getDegrees());
     turret.setRobotRotationRate(swerve.getFieldRelativeSpeeds().omegaRadiansPerSecond);
+
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      vision.calibrateTurretRequest();
+      turret.stuckRequest();
+      turret.setStuckAngle(vision.getCalibratedTurretAngle().orElse(0.0));
+    }
+
     if (health.isLocalizationHealthy()) {
       climbLocationIsLeft = ClimbLocation.getNearest(robotPose) == ClimbLocation.LEFT;
     } else {
@@ -1090,6 +1101,17 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 : new Pose2d(
                     FieldUtil.getFallbackScorePoint().getTranslation(), robotPose.getRotation()),
             swerve.getFieldRelativeSpeeds());
+
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      scoringParameters =
+          AimParameterUtil.getTurretStuckScoringParameters(
+              health.isLocalizationHealthy()
+                  ? robotPose
+                  : new Pose2d(
+                      FieldUtil.getFallbackScorePoint().getTranslation(), robotPose.getRotation()),
+              turret.getAngle(),
+              swerve.getFieldRelativeSpeeds());
+    }
 
     shooter.getScoreTimeOfFlight(scoringParameters.distance());
     feedingParameters =
