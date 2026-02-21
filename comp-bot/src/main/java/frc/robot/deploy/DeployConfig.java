@@ -1,6 +1,7 @@
 package frc.robot.deploy;
 
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -8,6 +9,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.GainSchedKpBehaviorValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -52,6 +54,10 @@ public class DeployConfig {
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(200.0)
                   .withMotionMagicAcceleration(300.0))
+          .withClosedLoopGeneral(
+              new ClosedLoopGeneralConfigs()
+                  .withGainSchedErrorThreshold(1)
+                  .withGainSchedKpBehavior(GainSchedKpBehaviorValue.Discontinuous))
           .withSlot0(AVERAGE_GAINS)
           .withSlot1(DIFFERENCE_GAINS);
   public static final TalonFXConfiguration RIGHT_MOTOR_CONFIG =
@@ -68,6 +74,10 @@ public class DeployConfig {
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(200.0)
                   .withMotionMagicAcceleration(300.0))
+          .withClosedLoopGeneral(
+              new ClosedLoopGeneralConfigs()
+                  .withGainSchedErrorThreshold(1)
+                  .withGainSchedKpBehavior(GainSchedKpBehaviorValue.Discontinuous))
           .withSlot0(AVERAGE_GAINS)
           .withSlot1(DIFFERENCE_GAINS);
   // TODO: Discuss/set CANrange config during bringup
