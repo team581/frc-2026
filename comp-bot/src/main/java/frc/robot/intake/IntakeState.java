@@ -4,7 +4,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum IntakeState {
-  INTAKE(12),
+  INTAKE(6),
   IDLE(0),
   SHOOT(3);
 
