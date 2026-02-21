@@ -868,19 +868,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     }
   }
 
-  private void smartHoodPrepareScoreRequest() {
-
-    // Hood Behavior
-    if (!health.isLocalizationHealthy() || nearTrench) {
-      shooterHood.idleRequest();
-      DogLog.log("RobotManager/Scoring/SmartPrepareScore/HoodStatus", "NearTrench");
-    } else {
-      DogLog.log("RobotManager/Scoring/SmartPrepareScore/HoodStatus", "NotNearTrench");
-
-      shooterHood.scoreRequest(scoringParameters.distance());
-    }
-  }
-
   private void smartTurretHoodPrepareFeedRequest() {
     // Turret behavior
     if (FieldUtil.isRobotPastObstacleTowardAllianceZone(robotPose.getTranslation())) {
