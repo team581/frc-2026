@@ -22,8 +22,8 @@ public class SwerveAssist {
   private static final double BUMP_ASSIST_VELOCITY_ANGLE_TOLERANCE = 22.5;
 
   // Angles to round the snap to when swerve assisting
-  public static final double TRENCH_SNAP_ROUND_ANGLE = 180.0;
-  public static final double BUMP_SNAP_ROUND_ANGLE = 90.0;
+  public static final Rotation2d TRENCH_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
+  public static final Rotation2d BUMP_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
 
   private static final DoubleSupplier WALL_SNAPS_VELOCITY_ANGLE_THRESHOLD =
       DogLog.tunable("Swerve/WallSnaps/VelocityAngleThresholdDegrees", 30.0, Degrees);
@@ -139,12 +139,18 @@ public class SwerveAssist {
     return distanceToWallThreshold && velocityAngleTowardWall && rotationAngleTowardWall;
   }
 
-  public static double getRoundedSnapAngle(Rotation2d robotHeading, double roundingAngle) {
-    DogLog.log("SwerveAssist/TrenchAssistDebug/RobotHeading", robotHeading.getDegrees());
-    DogLog.log(
-        "SwerveAssist/TrenchAssistDebug/RoundedSnapAngle",
-        Math.round(robotHeading.getDegrees() / roundingAngle) * roundingAngle);
-    return Math.round(robotHeading.getDegrees() / roundingAngle) * roundingAngle;
+  public static Rotation2d getRoundedSnapAngle(Rotation2d robotHeading, Rotation2d roundingAngle) {
+    // No rounding method exists for Rotation2ds; instead convert to a double in degrees, use
+    // Math.round(), then convert back to a Rotation2d
+    var robotHeadingDegrees = robotHeading.getDegrees();
+    var roundingAngleDegrees = roundingAngle.getDegrees();
+    var roundedSnapAngleDegrees =
+        FmsUtil.isRedAlliance()
+            ? Math.round(robotHeadingDegrees / roundingAngleDegrees) * roundingAngleDegrees + 180.0
+            : Math.round(robotHeadingDegrees / roundingAngleDegrees) * roundingAngleDegrees;
+
+    DogLog.log("SwerveAssist/RoundedSnapAngle", roundedSnapAngleDegrees);
+    return Rotation2d.fromDegrees(roundedSnapAngleDegrees);
   }
 
   public static PolarChassisSpeeds getTrenchAssistSpeeds(
