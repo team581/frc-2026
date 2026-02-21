@@ -41,7 +41,7 @@ public class SwerveAssist {
     var robotTranslation = robotPose.getTranslation();
 
     // Check if in bump assist zone
-    if (FieldUtil.getCurrentBumpAssistZone(robotPose.getTranslation()).isEmpty()) {
+    if (FieldUtil.getCurrentBumpAssistZone(robotTranslation).isEmpty()) {
       return false;
     } else {
       return ableToSwerveAssist(
@@ -140,7 +140,7 @@ public class SwerveAssist {
   }
 
   public static double getRoundedSnapAngle(Rotation2d robotHeading, double roundingAngle) {
-    DogLog.log("SwerveAssist/TrenchAssistDebug/RobotHeading", robotHeading);
+    DogLog.log("SwerveAssist/TrenchAssistDebug/RobotHeading", robotHeading.getDegrees());
     DogLog.log(
         "SwerveAssist/TrenchAssistDebug/RoundedSnapAngle",
         Math.round(robotHeading.getDegrees() / roundingAngle) * roundingAngle);
