@@ -258,5 +258,22 @@ public class Vision extends StateMachineSubsystem<VisionState> {
       }
       default -> {}
     }
+
+    if (turretCalibrated) {
+      OptionalDouble maybeLimelightMegatagRotation = turretLimelight.getLimelightRotation();
+      if (maybeLimelightMegatagRotation.isPresent()) {
+
+        double limelightRotation = maybeLimelightMegatagRotation.getAsDouble();
+        DogLog.log("TurretCal/FRTurretAngle", limelightRotation);
+        var turretAngleRobotRelative = MathHelpers.angleModulus(limelightRotation - robotHeading);
+
+        DogLog.log("TurretCal/RRTurretAngle", turretAngleRobotRelative);
+
+        filteredTurretCalibration =
+            staticTurretCalibrationFilter.calculate(turretAngleRobotRelative);
+
+        DogLog.log("TurretCal/FilteredRRTurretAngle", filteredTurretCalibration);
+      }
+    }
   }
 }
