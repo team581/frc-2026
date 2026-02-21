@@ -129,7 +129,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case STOP_SHOOTING_SCORE,
           STOP_SHOOTING_PRESET_SCORE,
           STOP_SHOOTING_PRESET_FEED,
-          STOP_SHOOTING_STATIC_TURRET_SCORE,
           STOP_SHOOTING_FEED ->
           timeout(1) ? RobotState.UNJAM : currentState;
       case PREPARE_FORCE_SCORE -> {
@@ -211,42 +210,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         }
 
         yield RobotState.PREPARE_SCORE;
-      }
-      case PREPARE_STATIC_TURRET_SCORE -> {
-        logScoringTransition();
-        if (shooter.atGoal()
-            && localization.isTrustworthy()
-            && FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
-            && !dyeRotor.isJammed()
-            && shooterHood.atGoal()
-            && isHubActive) {
-          yield RobotState.STATIC_TURRET_SCORE;
-        }
-        yield currentState;
-      }
-      case STATIC_TURRET_SCORE -> {
-        logScoringTransition();
-        // If we are not in the alliance zone while vision is online, stop tracking the
-        // hub.
-        // Otherwise, if vision is dead and we cannot reliable track whether we are in
-        // the alliance
-        // zone, we still want to be able to score
-        if (health.isLocalizationHealthy()
-            && !FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())) {
-          DogLog.timestamp("RobotManager/ScoreTransition/RobotNotInAllianceZone");
-          yield RobotState.IDLE;
-        }
-
-        if (!FeatureFlags.CANCEL_IN_PROGRESS_SHOT.getAsBoolean()
-            || ((!FeatureFlags.CANCEL_IN_PROGRESS_SHOT_RPM_DIP.getAsBoolean() || shooter.atGoal())
-                && localization.isTrustworthy()
-                && !dyeRotor.isJammed()
-                && shooterHood.atGoal()
-                && isHubActive)) {
-          yield currentState;
-        }
-
-        yield RobotState.PREPARE_STATIC_TURRET_SCORE;
       }
       case PRESET_SCORE -> {
         if (shooter.atGoal()
@@ -351,39 +314,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         // Set hood behavior separately while idling
         dyeRotor.idleRequest();
         // Set turret behavior separately while idling
-        deploy.intakeRequest();
-        intake.idleRequest();
-        swerve.normalDriveRequest();
-        climber.stowRequest();
-      }
-      case PREPARE_STATIC_TURRET_SCORE -> {
-        vision.calibrateTurretRequest();
-        shooter.scoreRequest(scoringParameters.distance());
-        shooterHood.scoreRequest(scoringParameters.distance());
-        dyeRotor.idleRequest();
-        // Turret is controlled depending on what zone we're in
-        // Deploy is controlled separately
-        // Intake is controlled separately
-        swerve.normalDriveRequest();
-        climber.stowRequest();
-      }
-      case STATIC_TURRET_SCORE -> {
-        vision.calibrateTurretRequest();
-        shooter.scoreRequest(scoringParameters.distance());
-        shooterHood.scoreRequest(scoringParameters.distance());
-        dyeRotor.shootRequest();
-        turret.scoreRequest(scoringParameters.turretAngle());
-        deploy.shuffleRequest();
-        intake.shootRequest();
-        swerve.normalDriveRequest();
-        climber.stowRequest();
-      }
-      case STOP_SHOOTING_STATIC_TURRET_SCORE -> {
-        vision.calibrateTurretRequest();
-        shooter.scoreRequest(scoringParameters.distance());
-        shooterHood.scoreRequest(scoringParameters.distance());
-        dyeRotor.idleRequest();
-        turret.scoreRequest(scoringParameters.turretAngle());
         deploy.intakeRequest();
         intake.idleRequest();
         swerve.normalDriveRequest();
@@ -874,23 +804,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           MANUAL_CLIMB_6_HANGING_L3 -> {
         turret.climbRequest(robotPose);
       }
-
-      case PREPARE_STATIC_TURRET_SCORE -> {
-        smartHoodPrepareScoreRequest();
-        turret.stuckRequest();
-        swerve.turretStuckAimRequest(scoringParameters.turretAngle());
-        // isHubActive always logged
-      }
-      case STATIC_TURRET_SCORE -> {
-        turret.stuckRequest();
-        swerve.turretStuckAimRequest(scoringParameters.turretAngle());
-        shooterHood.scoreRequest(scoringParameters.distance());
-        if (intake.getState() == IntakeState.INTAKE) {
-          swerve.intakeRateLimitedDriveRequest();
-        } else {
-          swerve.rateLimitedDriveRequest();
-        }
-      }
       default -> {}
     }
     DogLog.log("RobotManager/Feeding/FeedLocation", feedLocation);
@@ -1020,9 +933,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         && getState() != RobotState.SCORE) {
       if (!health.isLocalizationHealthy()) {
         setStateFromRequest(RobotState.PREPARE_PRESET_SCORE);
-      }
-      if (!DSOptions.USE_TURRET.getAsBoolean()) {
-        setStateFromRequest(RobotState.PREPARE_STATIC_TURRET_SCORE);
       } else {
         setStateFromRequest(RobotState.PREPARE_SCORE);
       }
