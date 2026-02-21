@@ -7,6 +7,9 @@ public enum RightStraightShootClimbAutoState {
   INTAKE_ACROSS_MIDLINE_2,
   DRIVE_BACK_2,
   SHOOT_2,
+  INTAKE_ACROSS_MIDLINE_3,
+  DRIVE_BACK_3,
+  SHOOT_3,
   DRIVE_TO_CLIMB,
   CLIMB,
   DONE;
