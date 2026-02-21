@@ -168,13 +168,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
         rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
       }
-      case HOPPER_SHUFFLING_OUT -> {
-        var position =
-            MathUtil.interpolate(
-                DeployState.HOPPER_SHUFFLING_OUT.getLength(),
-                DeployState.HOPPER_SHUFFLING_IN.getLength(),
-                hopperShuffleTimer.get() / 3.5);
-      }
+      case HOPPER_SHUFFLING_OUT -> {}
       default -> {
         differentialMechanism.setControl(
             differentialPositionVoltageRequest
