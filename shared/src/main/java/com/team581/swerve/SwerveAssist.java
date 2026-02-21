@@ -6,7 +6,6 @@ import com.team581.math.MathHelpers;
 import com.team581.math.PolarChassisSpeeds;
 import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -140,9 +139,11 @@ public class SwerveAssist {
     return distanceToWallThreshold && velocityAngleTowardWall && rotationAngleTowardWall;
   }
 
-    public static double getRoundedSnapAngle(Rotation2d robotHeading, double roundingAngle) {
-      DogLog.log("SwerveAssist/TrenchAssistDebug/RobotHeading", robotHeading);
-      DogLog.log("SwerveAssist/TrenchAssistDebug/RoundedSnapAngle", Math.round(robotHeading.getDegrees() / roundingAngle) * roundingAngle);
+  public static double getRoundedSnapAngle(Rotation2d robotHeading, double roundingAngle) {
+    DogLog.log("SwerveAssist/TrenchAssistDebug/RobotHeading", robotHeading);
+    DogLog.log(
+        "SwerveAssist/TrenchAssistDebug/RoundedSnapAngle",
+        Math.round(robotHeading.getDegrees() / roundingAngle) * roundingAngle);
     return Math.round(robotHeading.getDegrees() / roundingAngle) * roundingAngle;
   }
 
