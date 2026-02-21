@@ -142,15 +142,9 @@ public class SwerveAssist {
   public static Rotation2d getRoundedSnapAngle(Rotation2d robotHeading, Rotation2d roundingAngle) {
     // No rounding method exists for Rotation2ds; instead convert to a double in degrees, use
     // Math.round(), then convert back to a Rotation2d
-    var robotHeadingDegrees = robotHeading.getDegrees();
-    var roundingAngleDegrees = roundingAngle.getDegrees();
-    var roundedSnapAngleDegrees =
-        FmsUtil.isRedAlliance()
-            ? Math.round(robotHeadingDegrees / roundingAngleDegrees) * roundingAngleDegrees + 180.0
-            : Math.round(robotHeadingDegrees / roundingAngleDegrees) * roundingAngleDegrees;
-
-    DogLog.log("SwerveAssist/RoundedSnapAngle", roundedSnapAngleDegrees);
-    return Rotation2d.fromDegrees(roundedSnapAngleDegrees);
+    return Rotation2d.fromDegrees(
+        Math.round(robotHeading.getDegrees() / roundingAngle.getDegrees())
+            * roundingAngle.getDegrees());
   }
 
   public static PolarChassisSpeeds getTrenchAssistSpeeds(
