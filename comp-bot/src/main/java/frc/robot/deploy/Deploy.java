@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.Hardware;
 import frc.robot.config.DSOptions;
 import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -24,8 +23,7 @@ import frc.robot.util.scheduling.SubsystemPriority;
 public class Deploy extends StateMachineSubsystem<DeployState> {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
-  private final SimpleDifferentialMechanism<TalonFX> differentialMechanism =
-      new SimpleDifferentialMechanism<>(TalonFX::new, Hardware.differentialConstants);
+  private final SimpleDifferentialMechanism<TalonFX> differentialMechanism;
   private final CANrange hopperCANRange;
   private final LinearFilter hopperFilter = LinearFilter.movingAverage(5);
   private final DifferentialMotionMagicVoltage differentialPositionVoltageRequest =
@@ -47,16 +45,17 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   private final Timer hopperShuffleTimer = new Timer();
   private final Timer canRangeUpdateTimer = new Timer();
 
-  public Deploy(TalonFX leftMotor, TalonFX rightMotor, CANrange hopperCANRange) {
+  public Deploy(
+      SimpleDifferentialMechanism<TalonFX> differentialMechanism, CANrange hopperCANRange) {
     super(SubsystemPriority.DEPLOY, DeployState.UNHOMED);
-    this.leftMotor = leftMotor;
-    this.rightMotor = rightMotor;
+    this.differentialMechanism = differentialMechanism;
+    this.leftMotor = differentialMechanism.getLeader();
+    this.rightMotor = differentialMechanism.getFollower();
     this.hopperCANRange = hopperCANRange;
+
     hopperShuffleTimer.start();
     canRangeUpdateTimer.start();
 
-    leftMotor.getConfigurator().apply(DeployConfig.LEFT_MOTOR_CONFIG);
-    rightMotor.getConfigurator().apply(DeployConfig.RIGHT_MOTOR_CONFIG);
     hopperCANRange.getConfigurator().apply(DeployConfig.CAN_RANGE_CONFIG);
 
     TunablePid.register("Deploy/Left", leftMotor, DeployConfig.LEFT_MOTOR_CONFIG);
@@ -180,17 +179,6 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   @Override
   protected void whileInState(DeployState state) {
-    switch (state) {
-      case HOME_INWARD -> {
-        leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_INWARD);
-        rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_INWARD);
-      }
-      case HOME_OUTWARD -> {
-        leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
-        rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
-      }
-    }
-
     DogLog.log("Deploy/LeftMotor/Position", leftMotorPosition);
     DogLog.log("Deploy/RightMotor/Position", rightMotorPosition);
     DogLog.log("Deploy/GoalPosition", getState().getLength());
