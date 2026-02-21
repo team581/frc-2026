@@ -703,6 +703,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     switch (state) {
       case IDLE, UNJAM -> {
         smartTurretHoodIdleRequest();
+        if (intake.getState() == IntakeState.INTAKE) {
+          swerve.intakeDriveRequest();
+        } else {
+          swerve.normalDriveRequest();
+        }
       }
 
       case PREPARE_SCORE -> {
