@@ -33,7 +33,6 @@ public class Shooter2Config {
 
   public static final double TEST_VOLTAGE = 6.0;
 
-
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToScoreRPM", Map.entry(Units.inchesToMeters(5.5), 4200.0));

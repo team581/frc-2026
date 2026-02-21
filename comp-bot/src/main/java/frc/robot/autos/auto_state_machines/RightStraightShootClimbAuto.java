@@ -36,7 +36,13 @@ public class RightStraightShootClimbAuto
       Trailblazer.segment(
               AutoPoint.ofRed(new Pose2d(11.2, 7.45, Rotation2d.k180deg)),
               AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),
-              AutoPoint.of(()->Point.ofRed(robotManager.clusterMap.getBestClusterPose().orElse(new Pose2d(8.852, 5.2, Rotation2d.kCW_90deg))))
+              AutoPoint.of(
+                      () ->
+                          Point.ofRed(
+                              robotManager
+                                  .clusterMap
+                                  .getBestClusterPose()
+                                  .orElseGet(() -> new Pose2d(8.852, 5.2, Rotation2d.kCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(2, 30)))
           .withLinearConstraints(3.0, 10)
           .untilFinished(new PoseErrorTolerance(0.1, 3));
