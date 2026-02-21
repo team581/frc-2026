@@ -167,7 +167,6 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
         rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
       }
-      case HOPPER_SHUFFLING_OUT -> {}
       default -> {
         differentialMechanism.setControl(
             differentialPositionVoltageRequest
