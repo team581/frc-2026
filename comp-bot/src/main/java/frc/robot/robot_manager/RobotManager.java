@@ -63,6 +63,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private boolean isMoving = false;
 
   private double timeSinceMatchStart = 0.0;
+  private double timeUntilHubInactive = 0.0;
+  private double timeUntilHubActive = 0.0;
   private boolean isHubActive = true;
   private final DoubleSubscriber tunableHubStateOffset =
       DogLog.tunable("RobotManager/MatchTimeOffset", 0.0);
@@ -824,6 +826,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/TimeSinceMatchStart", timeSinceMatchStart);
     DogLog.log("RobotManager/TimeSinceTeleopEnable", teleopTimer.get());
 
+    DogLog.log("RobotManager/TimeUntilInactive", timeUntilHubInactive);
+    DogLog.log("RobotManager/TimeUntilActive", timeUntilHubActive);
+
     MechanismVisualizer.log(
         robotPose,
         turret.getAngle(),
@@ -1128,6 +1133,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
 
     isHubActive = getIsHubActive();
+    timeUntilHubInactive = FmsUtil.timeUntilInactive(timeSinceMatchStart, isHubActive);
+    timeUntilHubActive = FmsUtil.timeUntilActive(timeSinceMatchStart);
   }
 
   private boolean getIsHubActive() {
