@@ -26,7 +26,7 @@ public class TurretConfig {
   public static final double HOMING_END_POSITION = MIN_ANGLE;
   public static final DoubleSubscriber TOLERANCE = DogLog.tunable("Turret/Tolerance", 1.0);
 
-  public static final double MOTOR_TO_TURRET = ((220/14)*(36/10));
+  public static final double MOTOR_TO_TURRET = ((220 / 14) * (36 / 10));
 
   // CAL NUMBER
   public static final double ROTOR_CAL_OFFSET = 0.251220703125;
