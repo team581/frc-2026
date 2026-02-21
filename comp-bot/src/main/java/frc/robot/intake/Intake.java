@@ -28,12 +28,6 @@ public class Intake extends StateMachineSubsystem<IntakeState> {
   }
 
   @Override
-  protected void whileInState(IntakeState state) {
-    // TODO: Remove after bringup
-    afterTransition(state);
-  }
-
-  @Override
   protected void afterTransition(IntakeState newState) {
     switch (newState) {
       case IDLE -> {
