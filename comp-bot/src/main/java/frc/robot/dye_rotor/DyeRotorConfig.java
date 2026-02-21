@@ -36,8 +36,8 @@ public class DyeRotorConfig {
               new CurrentLimitsConfigs()
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true)
-                  .withStatorCurrentLimit(100)
-                  .withSupplyCurrentLimit(100))
+                  .withStatorCurrentLimit(40.0)
+                  .withSupplyCurrentLimit(40.0))
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
