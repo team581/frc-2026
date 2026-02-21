@@ -47,7 +47,7 @@ public class Robot extends Base581Robot {
               false,
               Units.inchesToMeters(0.0),
               Units.inchesToMeters(0.0),
-              Units.inchesToMeters(20.432677 + 0.25),
+              Units.inchesToMeters(20.348),
               30.0,
               0.0,
               0.0));
