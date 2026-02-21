@@ -35,7 +35,7 @@ public class ShooterHoodConfig {
   public static final TalonFXConfiguration MOTOR_CONFIG =
       new TalonFXConfiguration()
           .withFeedback(
-              new FeedbackConfigs().withSensorToMechanismRatio((340.0 * 42.0) / (14.0 * 8.0)))
+              new FeedbackConfigs().withSensorToMechanismRatio((336.0 * 42.0) / (14.0 * 8.0)))
           .withCurrentLimits(
               new CurrentLimitsConfigs().withStatorCurrentLimit(20).withSupplyCurrentLimit(10))
           .withVoltage(new VoltageConfigs().withPeakForwardVoltage(10).withPeakReverseVoltage(-10))
