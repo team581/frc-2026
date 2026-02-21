@@ -86,7 +86,7 @@ public class RightStraightShootClimbAuto
           .withLinearConstraints(3.0, 10)
           .untilFinished(new PoseErrorTolerance(0.5, 3));
 
-   private final AutoSegment driveBackAndShootThree =
+  private final AutoSegment driveBackAndShootThree =
       Trailblazer.segment(
               AutoPoint.ofRed(new Pose2d(8.85, 5.8, Rotation2d.kCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.5, 3)),
@@ -96,7 +96,8 @@ public class RightStraightShootClimbAuto
               AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.k180deg)),
               AutoPoint.ofRed(new Pose2d(13.5, 7.45, Rotation2d.k180deg)))
           .withLinearConstraints(3.0, 10)
-          .untilFinished(new PoseErrorTolerance(0.5, 3));         
+          .untilFinished(new PoseErrorTolerance(0.5, 3));
+
   public RightStraightShootClimbAuto(RobotManager robotManager, Trailblazer trailblazer) {
     super(RightStraightShootClimbAutoState.INTAKE_ACROSS_MIDLINE_1, robotManager, trailblazer);
   }
@@ -160,18 +161,18 @@ public class RightStraightShootClimbAuto
         }
       }
       case DRIVE_BACK_3 -> {
-      if (trailblazer.passedMarker(Markers.START_SHOOT_RQ)) {
-        yield RightStraightShootClimbAutoState.SHOOT_3;
-      } else {
-        yield currentState;
-      }
+        if (trailblazer.passedMarker(Markers.START_SHOOT_RQ)) {
+          yield RightStraightShootClimbAutoState.SHOOT_3;
+        } else {
+          yield currentState;
+        }
       }
       case SHOOT_3 -> {
-      if (trailblazer.atGoal(robotManager.localization.getPose()) && timeout(5.0)) {
-        yield RightStraightShootClimbAutoState.DRIVE_TO_CLIMB;
-      } else {
-        yield currentState;
-      }
+        if (trailblazer.atGoal(robotManager.localization.getPose()) && timeout(5.0)) {
+          yield RightStraightShootClimbAutoState.DRIVE_TO_CLIMB;
+        } else {
+          yield currentState;
+        }
       }
       case DRIVE_TO_CLIMB -> {
         if (trailblazer.atGoal(robotManager.localization.getPose())) {
