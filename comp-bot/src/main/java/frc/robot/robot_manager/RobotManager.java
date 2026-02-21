@@ -374,7 +374,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case PREPARE_SCORE -> {
         vision.setState(VisionState.HUB_TAGS);
         shooter.scoreRequest(scoringParameters.distance());
-        shooterHood.scoreRequest(scoringParameters.distance());
         dyeRotor.idleRequest();
         // Turret is controlled depending on what zone we're in
         // Deploy is controlled separately
