@@ -375,7 +375,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.HUB_TAGS);
         shooter.scoreRequest(scoringParameters.distance());
         dyeRotor.idleRequest();
-        // Turret is controlled depending on what zone we're in
+        // Turret and hood are controlled depending on what zone we're in
         // Deploy is controlled separately
         // Intake is controlled separately
         swerve.normalDriveRequest();
