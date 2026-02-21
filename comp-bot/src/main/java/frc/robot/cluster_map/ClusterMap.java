@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.config.FeatureFlags;
 import frc.robot.localization.Localization;
@@ -58,6 +59,11 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   }
 
   public Optional<Pose2d> getBestClusterPose() {
+    if (RobotBase.isSimulation()) {
+      var fakeBestCluster = new Pose2d(9, 5, localization.getPose().getRotation());
+       var rotation = MathHelpers.getDriveDirection(localization.getPose(), fakeBestCluster);
+    return timeout(5.0) ? Optional.of(new Pose2d(9, 5, rotation)) : Optional.empty();
+    }
     if (clusterMap.isEmpty()) {
       return Optional.empty();
     }
