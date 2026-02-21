@@ -4,11 +4,11 @@ import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum DeployState {
-  INTAKE(DeployConfig.MAX_LENGTH),
+ INTAKE(DeployConfig.MAX_LENGTH - 0.25),
   STOW(1.0),
-  HOPPER_SHUFFLING_OUT(INTAKE.getLength() - 1.0),
-  HOPPER_SHUFFLING_IN(INTAKE.getLength() - 3.0),
-  HOPPER_SHUFFLE_END(HOPPER_SHUFFLING_IN.getLength() - 3.0),
+  HOPPER_SHUFFLING_OUT(INTAKE.getLength()),
+  HOPPER_SHUFFLING_IN(HOPPER_SHUFFLING_OUT.getLength() - 4.0),
+  HOPPER_SHUFFLING_FINISH(6.0),
   HOME_INWARD(0),
   HOME_OUTWARD(DeployConfig.MAX_LENGTH),
   UNHOMED(0);

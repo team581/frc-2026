@@ -90,6 +90,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()) {
           hopperShuffleTimer.reset();
           setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
+          hopperShuffleTimer.restart();
         }
       }
     }
@@ -106,7 +107,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   protected DeployState getNextState(DeployState currentState) {
     return switch (currentState) {
       // Do nothing
-      case UNHOMED, INTAKE, STOW, HOPPER_SHUFFLE_END -> currentState;
+      case UNHOMED, INTAKE, STOW, HOPPER_SHUFFLING_FINISH -> currentState;
 
       case HOME_INWARD -> {
         if (leftMotor.getStatorCurrent().getValueAsDouble() > DeployConfig.HOMING_CURRENT
@@ -128,7 +129,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       }
       case HOPPER_SHUFFLING_OUT -> {
         if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION)) {
-          yield DeployState.HOPPER_SHUFFLE_END;
+          yield DeployState.HOPPER_SHUFFLING_FINISH;
         }
         if (atGoal() && ableToHopperShuffle) {
           yield DeployState.HOPPER_SHUFFLING_IN;
@@ -138,7 +139,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
       case HOPPER_SHUFFLING_IN -> {
         if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION)) {
-          yield DeployState.HOPPER_SHUFFLE_END;
+          yield DeployState.HOPPER_SHUFFLING_FINISH;
         }
         if (atGoal() && ableToHopperShuffle) {
           yield DeployState.HOPPER_SHUFFLING_OUT;
@@ -166,6 +167,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       case HOME_OUTWARD -> {
         leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
         rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
+      }
+      case HOPPER_SHUFFLING_OUT -> {
+         var position = MathUtil.interpolate(DeployState.HOPPER_SHUFFLING_OUT.getLength(), DeployState.HOPPER_SHUFFLING_IN.getLength(), hopperShuffleTimer.get() / 3.5);
       }
       default -> {
         differentialMechanism.setControl(
