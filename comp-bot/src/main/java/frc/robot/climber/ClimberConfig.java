@@ -29,4 +29,6 @@ public class ClimberConfig {
       Point.ofRed(new Pose2d(14.968, 4.748, Rotation2d.k180deg));
 
   public static final double TOLERANCE = 0.1;
+
+  private ClimberConfig() {}
 }
