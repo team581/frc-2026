@@ -45,25 +45,24 @@ public class FmsUtil {
     double timeUntilSwitch = 0.0;
 
     if (timeSinceMatchStart <= END_GAME_TIME_STAMP) {
-     timeUntilSwitch = END_GAME_TIME_STAMP - timeSinceMatchStart;
+      timeUntilSwitch = END_GAME_TIME_STAMP - timeSinceMatchStart;
     }
     if (timeSinceMatchStart <= SHIFT4TIME_STAMP) {
-     timeUntilSwitch = SHIFT4TIME_STAMP - timeSinceMatchStart;
+      timeUntilSwitch = SHIFT4TIME_STAMP - timeSinceMatchStart;
     }
     if (timeSinceMatchStart <= SHIFT3TIME_STAMP) {
-     timeUntilSwitch = SHIFT3TIME_STAMP - timeSinceMatchStart;
+      timeUntilSwitch = SHIFT3TIME_STAMP - timeSinceMatchStart;
     }
     if (timeSinceMatchStart <= SHIFT2TIME_STAMP) {
-     timeUntilSwitch = SHIFT2TIME_STAMP - timeSinceMatchStart;
+      timeUntilSwitch = SHIFT2TIME_STAMP - timeSinceMatchStart;
     }
     if (timeSinceMatchStart <= SHIFT1TIME_STAMP) {
-     timeUntilSwitch = SHIFT1TIME_STAMP - timeSinceMatchStart;
+      timeUntilSwitch = SHIFT1TIME_STAMP - timeSinceMatchStart;
     }
-     if (timeSinceMatchStart <= TRANSITION_SHIFT_TIME_STAMP) {
-   timeUntilSwitch = TRANSITION_SHIFT_TIME_STAMP - timeSinceMatchStart;
+    if (timeSinceMatchStart <= TRANSITION_SHIFT_TIME_STAMP) {
+      timeUntilSwitch = TRANSITION_SHIFT_TIME_STAMP - timeSinceMatchStart;
     }
-      return timeUntilSwitch;
-
+    return timeUntilSwitch;
   }
 
   public static double timeUntilInactive(double timeSinceMatchStart, boolean isHubActive) {
@@ -78,10 +77,10 @@ public class FmsUtil {
         return SHIFT3TIME_DURATION - timeSinceMatchStart;
       }
       if (timeSinceMatchStart >= SHIFT2TIME_STAMP) {
-        return SHIFT2TIME_DURATION- timeSinceMatchStart;
+        return SHIFT2TIME_DURATION - timeSinceMatchStart;
       }
       if (timeSinceMatchStart >= SHIFT1TIME_STAMP) {
-        return SHIFT1TIME_DURATION- timeSinceMatchStart;
+        return SHIFT1TIME_DURATION - timeSinceMatchStart;
       }
       if (timeSinceMatchStart >= TRANSITION_SHIFT_TIME_STAMP) {
         return TRANSITION_DURATION - timeSinceMatchStart;
