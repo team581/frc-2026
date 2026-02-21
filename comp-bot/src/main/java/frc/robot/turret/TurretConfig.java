@@ -52,11 +52,8 @@ public class TurretConfig {
       new CANcoderConfiguration()
           .withMagnetSensor(
               new MagnetSensorConfigs()
-                  //  TODO: Measure
                   .withMagnetOffset(ROTOR_CAL_OFFSET)
-                  // TODO: Fix
                   .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
-                  // TODO: Fix
                   .withAbsoluteSensorDiscontinuityPoint(0.5));
 
   private TurretConfig() {}
