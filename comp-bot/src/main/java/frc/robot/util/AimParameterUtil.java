@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.shooter.ShooterConfig;
 import frc.robot.turret.TurretCalculator;
+import frc.robot.turret.TurretConfig;
 
 public class AimParameterUtil {
   private static final ShootOnTheMove FEEDING_SOTM =
@@ -50,11 +51,11 @@ public class AimParameterUtil {
             FieldUtil.HUB_POSE.getPose().getTranslation(),
             fieldRelativeSpeeds);
 
-    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
-
+    var turretCompenstatedRobotPose = robot.plus(TurretConfig.TURRET_TO_ROBOT);
+    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(turretCompenstatedRobotPose);
     double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
     var angle =
-        MathHelpers.getDriveDirection(robot, hubTranslation)
+        MathHelpers.getDriveDirection(robotPoseInAllianceZone, hubTranslation)
             .minus(Rotation2d.fromDegrees(turretAngle));
     return new AimingParameters(angle.getDegrees(), distanceToGoal);
   }
