@@ -29,6 +29,10 @@ public record AutoPoint<T extends Enum<T>>(
     return of(Point.ofRed(pose));
   }
 
+  public Pose2d getPose() {
+    return poseSupplier.get().getPose();
+  }
+
   public AutoPoint<T> withLinearConstraints(double maxVelocity, double maxAcceleration) {
     return new AutoPoint<T>(
         poseSupplier,
