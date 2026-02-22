@@ -53,7 +53,7 @@ public class ShooterConfig {
           Map.entry(5.5, 1.0));
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIGS =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(1))
+          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(18.0 / 12.0))
           .withMotionMagic(
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(MAX_SAFE_RPM / 60.0)
@@ -76,7 +76,7 @@ public class ShooterConfig {
                   .withPeakReverseTorqueCurrent(0));
   public static final TalonFXConfiguration RIGHT_MOTOR_CONFIG =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(1))
+          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(18.0 / 12.0))
           .withMotionMagic(
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(MAX_SAFE_RPM / 60.0)
