@@ -147,6 +147,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       case PREPARE_SCORE -> {
         logScoringTransition();
+
+        if (DSOptions.AUTO_SCORE.getAsBoolean() && !isHubActive) {
+          yield RobotState.STOP_SHOOTING_SCORE;
+        }
         if (shooter.atGoal()
             && localization.isTrustworthy()
             && FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
@@ -204,7 +208,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if (health.isLocalizationHealthy()
             && !FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())) {
           DogLog.timestamp("RobotManager/ScoreTransition/RobotNotInAllianceZone");
-          yield RobotState.IDLE;
+          yield RobotState.STOP_SHOOTING_SCORE;
+        }
+
+        if (!isHubActive) {
+          yield RobotState.STOP_SHOOTING_SCORE;
         }
 
         if (!FeatureFlags.CANCEL_IN_PROGRESS_SHOT.getAsBoolean()
@@ -387,6 +395,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         // Deploy is controlled separately
         // Intake is controlled separately
         swerve.normalDriveRequest();
+        deploy.intakeRequest();
         climber.stowRequest();
       }
       case SCORE -> {
@@ -1141,7 +1150,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   private boolean getIsHubActiveOrNotUsingState() {
-    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomousEnabled()) {
+  if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomousEnabled()) {
       return true;
     }
 
