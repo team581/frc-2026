@@ -44,18 +44,16 @@ public class RightPullSwoopFeedAuto extends BaseImperativeAuto<RightPullSwoopFee
           .untilFinished(new PoseErrorTolerance(0.1, 3));
 
   private final AutoSegment cleanUpIntakeAndShoot =
-      Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(11.2, 7.45, Rotation2d.k180deg)),
-              AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),
-              AutoPoint.of(
+           Trailblazer.segment(
+              AutoPoint.ofRed(new Pose2d(15.643, 7.45, Rotation2d.kZero)),
+                            AutoPoint.of(
                       () ->
                           Point.ofRed(
                               robotManager
                                   .clusterMap
                                   .getBestClusterPose()
-                                  .orElseGet(() -> new Pose2d(8.852, 5.0, Rotation2d.kCW_90deg))))
-                  .withTransitionTolerance(new PoseErrorTolerance(2, 3))
-                  .withMarker(Markers.START_SHOOT_RQ))
+                                  .orElseGet(() -> new Pose2d(15.286, 6.074, Rotation2d.kCW_90deg)))).withMarker(Markers.START_SHOOT_RQ)
+                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)))
           .withLinearConstraints(3.0, 10)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
           .untilFinished(new PoseErrorTolerance(0.1, 3));
@@ -77,12 +75,12 @@ public class RightPullSwoopFeedAuto extends BaseImperativeAuto<RightPullSwoopFee
               AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
-              AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.k180deg)),
-              AutoPoint.ofRed(new Pose2d(13.0, 7.45, Rotation2d.k180deg)))
+              AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.kZero)),
+              AutoPoint.ofRed(new Pose2d(13.0, 7.45, Rotation2d.kZero)))
           .withLinearConstraints(3.0, 10)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
           .untilFinished(new PoseErrorTolerance(0.5, 3));
-
+        
   public RightPullSwoopFeedAuto(RobotManager robotManager, Trailblazer trailblazer) {
     super(RightPullSwoopFeedAutoState.INTAKE_ACROSS_MIDLINE_1, robotManager, trailblazer);
   }
