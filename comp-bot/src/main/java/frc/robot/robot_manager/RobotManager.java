@@ -26,7 +26,6 @@ import frc.robot.intake.Intake;
 import frc.robot.intake.IntakeState;
 import frc.robot.localization.Localization;
 import frc.robot.shooter.Shooter;
-import frc.robot.shooter.Shooter2;
 import frc.robot.shooter_hood.ShooterHood;
 import frc.robot.swerve.Swerve;
 import frc.robot.turret.Turret;
