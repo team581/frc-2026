@@ -29,7 +29,7 @@ public class FeatureFlags {
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
 
   public static final BooleanSupplier STOP_SHOOTING_STATE =
-      FeatureFlag.of("UseStopShootingState", false);
+      FeatureFlag.of("UseStopShootingState", true);
 
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT_RPM_DIP =
       FeatureFlag.of("StopScoringRPMDip", true);
