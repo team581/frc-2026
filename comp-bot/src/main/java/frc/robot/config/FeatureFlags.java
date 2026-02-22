@@ -21,7 +21,7 @@ public class FeatureFlags {
   public static final BooleanSupplier INTAKE_WALL_SNAPS = FeatureFlag.of("IntakeWallSnaps", false);
 
   public static final BooleanSupplier LOOKAHEAD_SCORING =
-      FeatureFlag.of("TimeOfFlightInHubActivity", false);
+      FeatureFlag.of("TimeOfFlightInHubActivity", true);
 
   public static final BooleanSupplier RATE_LIMITED_DRIVING =
       FeatureFlag.of("RateLimitedDriving", true);
