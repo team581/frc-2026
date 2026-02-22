@@ -14,8 +14,7 @@ import frc.robot.climber.ClimbLocation;
 import frc.robot.robot_manager.ClimbAssist;
 import frc.robot.robot_manager.RobotManager;
 
-public class RightPullSwoopFeedAuto
-    extends BaseImperativeAuto<RightPullSwoopFeedAutoState> {
+public class RightPullSwoopFeedAuto extends BaseImperativeAuto<RightPullSwoopFeedAutoState> {
 
   public enum Markers {
     START_SHOOT_RQ,
@@ -38,7 +37,7 @@ public class RightPullSwoopFeedAuto
   private final AutoSegment intakeAcrossMidlineTwo =
       Trailblazer.segment(
               AutoPoint.ofRed(new Pose2d(8.74, 5.6, Rotation2d.kCW_90deg))
-              .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
+                  .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.ofRed(new Pose2d(8.74, 4.4, Rotation2d.kCW_90deg)))
           .withLinearConstraints(3.0, 10)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
@@ -64,8 +63,9 @@ public class RightPullSwoopFeedAuto
   private final AutoSegment driveBackAndFeed =
       Trailblazer.segment(
               AutoPoint.ofRed(new Pose2d(10.379, 3.231, Rotation2d.kCCW_90deg))
-              .withTransitionTolerance(new PoseErrorTolerance(0.5, 20)),
-              AutoPoint.ofRed(new Pose2d(10.379, 5.566, Rotation2d.kCCW_90deg)).withMarker(Markers.START_FEED_RQ))
+                  .withTransitionTolerance(new PoseErrorTolerance(0.5, 20)),
+              AutoPoint.ofRed(new Pose2d(10.379, 5.566, Rotation2d.kCCW_90deg))
+                  .withMarker(Markers.START_FEED_RQ))
           .withLinearConstraints(3.0, 10)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
           .untilFinished(new PoseErrorTolerance(0.3, 3));
@@ -93,8 +93,7 @@ public class RightPullSwoopFeedAuto
   }
 
   @Override
-  protected RightPullSwoopFeedAutoState getNextState(
-      RightPullSwoopFeedAutoState currentState) {
+  protected RightPullSwoopFeedAutoState getNextState(RightPullSwoopFeedAutoState currentState) {
     return switch (currentState) {
       case INTAKE_ACROSS_MIDLINE_1 -> {
         if (trailblazer.atGoal(robotManager.localization.getPose())) {
@@ -153,18 +152,18 @@ public class RightPullSwoopFeedAuto
         }
       }
       case DRIVE_TO_CLIMB -> {
-      if (trailblazer.atGoal(robotManager.localization.getPose())) {
-        yield RightPullSwoopFeedAutoState.CLIMB;
-      } else {
-        yield currentState;
-      }
+        if (trailblazer.atGoal(robotManager.localization.getPose())) {
+          yield RightPullSwoopFeedAutoState.CLIMB;
+        } else {
+          yield currentState;
+        }
       }
       case CLIMB -> {
-      if (trailblazer.atGoal(robotManager.localization.getPose())) {
-        yield RightPullSwoopFeedAutoState.DONE;
-      } else {
-        yield currentState;
-      }
+        if (trailblazer.atGoal(robotManager.localization.getPose())) {
+          yield RightPullSwoopFeedAutoState.DONE;
+        } else {
+          yield currentState;
+        }
       }
       case DONE -> {
         if (trailblazer.atGoal(robotManager.localization.getPose())) {
