@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.Filesystem;
  * Make Elastic layout available via HTTP
  * https://frc-elastic.gitbook.io/docs/additional-features-and-references/remote-layout-downloading#on-robot-configuration
  *
- * <p>Use the "merge" strategy for downloading the layout
+ * <p>Use the "full reload" strategy for downloading the layout
  */
 public final class ElasticLayoutUtil {
   private static final int PORT = 5800;
