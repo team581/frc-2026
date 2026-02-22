@@ -13,13 +13,9 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team581.math.PolynomialRegression;
 import com.team581.util.tuning.TunableInterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.util.Units;
 import java.util.Map;
 
 public class Shooter2Config {
-  public static final int RPM_TOLERANCE_SHOOTER = 100;
-
-  public static final double MAX_SAFE_RPM = 5000;
 
   public static final double SELF_TEST_TOP_MOTOR_EXPECTED_RPM = 2500;
   public static final double SELF_TEST_TOP_MOTOR_RPM_TOLERANCE = 250;
@@ -33,15 +29,23 @@ public class Shooter2Config {
 
   public static final double TEST_VOLTAGE = 6.0;
 
+  public static final int RPM_TOLERANCE_SHOOTER = 100;
+
+  public static final double MAX_SAFE_RPM = 5000;
+
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
-          "Shooter/DistanceToScoreRPM", Map.entry(Units.inchesToMeters(5.5), 4200.0));
+          "Shooter/DistanceToScoreRPM",
+          Map.entry(5.5, 4200.0),
+          Map.entry(3.57, 3200.0),
+          Map.entry(1.25, 2500.0));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEEDING_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToFeedingRPM",
-          Map.entry(1.0, 2000.0),
-          Map.entry(2.0, 3500.0),
-          Map.entry(5.0, 5000.0));
+          Map.entry(10.0, 5000.0),
+          Map.entry(5.0, 3000.0),
+          Map.entry(3.57, 2500.0),
+          Map.entry(1.25, 2000.0));
   public static final PolynomialRegression SCORING_REGRESSION_MODEL =
       PolynomialRegression.quadratic("Shooter/ScoringRegression", DISTANCE_TO_SCORE_RPM);
   public static final PolynomialRegression FEEDING_REGRESSION_MODEL =
@@ -50,17 +54,21 @@ public class Shooter2Config {
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToScoreToF",
-          Map.entry(Units.inchesToMeters(36.0), 0.2),
-          Map.entry(Units.inchesToMeters(96.0), 0.5));
+          Map.entry(3.57, 0.953),
+          Map.entry(1.25, 0.933),
+          Map.entry(5.5, 1.0));
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
-          "Shooter/DistanceToFeedToF", Map.entry(Units.inchesToMeters(57.0), 0.0));
+          "Shooter/DistanceToFeedToF",
+          Map.entry(3.57, 0.953),
+          Map.entry(1.25, 0.933),
+          Map.entry(5.5, 1.0));
 
   public static final TalonFXConfiguration TOP_MOTOR_CONFIGS =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(15.0 / 18.0))
-          .withMotionMagic(
+           .withMotionMagic(
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(MAX_SAFE_RPM / 60.0)
                   .withMotionMagicAcceleration(4000.0 / 60.0))
@@ -74,7 +82,7 @@ public class Shooter2Config {
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.CounterClockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(0.8).withKV(0.1225).withKS(0.0))
+          .withSlot0(new Slot0Configs().withKP(0.55).withKV(0.117).withKS(0.0))
           .withVoltage(new VoltageConfigs().withPeakReverseVoltage(0))
           .withTorqueCurrent(
               new TorqueCurrentConfigs()
@@ -97,7 +105,7 @@ public class Shooter2Config {
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.Clockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(0.8).withKV(0.1225).withKS(0.0))
+          .withSlot0(new Slot0Configs().withKP(0.55).withKV(0.117).withKS(0.0))
           .withVoltage(new VoltageConfigs().withPeakReverseVoltage(0))
           .withTorqueCurrent(
               new TorqueCurrentConfigs()
