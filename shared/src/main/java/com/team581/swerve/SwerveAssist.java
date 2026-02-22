@@ -120,27 +120,11 @@ public class SwerveAssist {
 
     // Check if we are driving fast enough in the direction of the intake
 
-    var distanceFromWall = ASSIST_POINT_DISTANCE_FROM_WALL;
     if (goalSpeedIsLateral) {
-      if (robotPose.getX() > FieldUtil.FIELD_LENGTH_X / 2.0) {
-        distanceFromWall = FieldUtil.FIELD_LENGTH_X - ASSIST_POINT_DISTANCE_FROM_WALL;
-      }
+      if (robotPose.getX() > FieldUtil.FIELD_LENGTH_X / 2.0) {}
 
-      if (fieldRelativeSpeeds.vyMetersPerSecond > 0) {
-
-      } else {
-
-      }
     } else {
-      if (robotPose.getY() > FieldUtil.FIELD_WIDTH_Y / 2.0) {
-        distanceFromWall = FieldUtil.FIELD_WIDTH_Y - ASSIST_POINT_DISTANCE_FROM_WALL;
-      }
-
-      if (fieldRelativeSpeeds.vxMetersPerSecond > 0) {
-
-      } else {
-
-      }
+      if (robotPose.getY() > FieldUtil.FIELD_WIDTH_Y / 2.0) {}
     }
 
     return ableToSwerveAssist(
