@@ -280,7 +280,9 @@ public class SwerveAssist {
         MathHelpers.getClosestPointOnRectanglePerimeter(robotTranslation, FieldUtil.FIELD_BOUNDS);
     var closestWallIsADriverStationWall = robotTranslation.getY() == closestWallTranslation.getY();
     var angleToWall = robotTranslation.minus(closestWallTranslation).getAngle();
-    var roundedDriveDirection = getRoundedSnapAngle(MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_ASSIST_SNAP_ROUND_ANGLE);
+    var roundedDriveDirection =
+        getRoundedSnapAngle(
+            MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_ASSIST_SNAP_ROUND_ANGLE);
     var roundedSnapAngle = getRoundedSnapAngle(roundedDriveDirection, WALL_ASSIST_SNAP_ROUND_ANGLE);
     var direction = 0;
 
