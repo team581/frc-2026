@@ -14,7 +14,7 @@ import java.util.function.BooleanSupplier;
 
 public record Point(Pose2d redPose, Pose2d bluePose) {
   public static final BooleanSupplier CLAMPED_POINTS_FEATURE_FLAG =
-      FeatureFlag.of("ClampedAutoPoints", true);
+      FeatureFlag.of("ClampedAutoPoints", false);
 
   private static final Rectangle2d CLAMPED_AREA =
       new Rectangle2d(new Translation2d(16.54, 8.069), new Translation2d(8.25, 1.649));
