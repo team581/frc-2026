@@ -41,6 +41,30 @@ public class FmsUtil {
     return alliance == Alliance.Red;
   }
 
+  public static double timeUntilInactive(double timeSinceMatchStart, boolean isHubActive) {
+    if (isHubActive) {
+      if (timeSinceMatchStart >= END_GAME_TIME_STAMP) {
+        return ENDGAME_DURATION - timeSinceMatchStart;
+      }
+      if (timeSinceMatchStart >= SHIFT4TIME_STAMP) {
+        return SHIFT4TIME_DURATION - timeSinceMatchStart;
+      }
+      if (timeSinceMatchStart >= SHIFT3TIME_STAMP) {
+        return SHIFT3TIME_DURATION - timeSinceMatchStart;
+      }
+      if (timeSinceMatchStart >= SHIFT2TIME_STAMP) {
+        return SHIFT2TIME_DURATION - timeSinceMatchStart;
+      }
+      if (timeSinceMatchStart >= SHIFT1TIME_STAMP) {
+        return SHIFT1TIME_DURATION - timeSinceMatchStart;
+      }
+      if (timeSinceMatchStart >= TRANSITION_SHIFT_TIME_STAMP) {
+        return TRANSITION_DURATION - timeSinceMatchStart;
+      }
+    }
+    return 0;
+  }
+
   public static double timeUntilNextShift(double timeSinceMatchStart) {
     if (DriverStation.isDisabled() || !DriverStation.isTeleop()) {
       return 0.0;
@@ -66,30 +90,6 @@ public class FmsUtil {
       timeUntilSwitch = TRANSITION_SHIFT_TIME_STAMP - timeSinceMatchStart;
     }
     return timeUntilSwitch;
-  }
-
-  public static double timeUntilInactive(double timeSinceMatchStart, boolean isHubActive) {
-    if (isHubActive) {
-      if (timeSinceMatchStart >= END_GAME_TIME_STAMP) {
-        return ENDGAME_DURATION - timeSinceMatchStart;
-      }
-      if (timeSinceMatchStart >= SHIFT4TIME_STAMP) {
-        return SHIFT4TIME_DURATION - timeSinceMatchStart;
-      }
-      if (timeSinceMatchStart >= SHIFT3TIME_STAMP) {
-        return SHIFT3TIME_DURATION - timeSinceMatchStart;
-      }
-      if (timeSinceMatchStart >= SHIFT2TIME_STAMP) {
-        return SHIFT2TIME_DURATION - timeSinceMatchStart;
-      }
-      if (timeSinceMatchStart >= SHIFT1TIME_STAMP) {
-        return SHIFT1TIME_DURATION - timeSinceMatchStart;
-      }
-      if (timeSinceMatchStart >= TRANSITION_SHIFT_TIME_STAMP) {
-        return TRANSITION_DURATION - timeSinceMatchStart;
-      }
-    }
-    return 0;
   }
 
   static Optional<Boolean> isAutoWinner() {
