@@ -140,7 +140,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         yield currentState;
       }
       case IDLE -> {
-        if (DSOptions.USE_HUB_STATE.getAsBoolean() && isHubActive) {
+        if (DSOptions.AUTO_SCORE.getAsBoolean() && isHubActive) {
           yield RobotState.PREPARE_SCORE;
         }
         yield currentState;
