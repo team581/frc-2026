@@ -25,7 +25,7 @@ import frc.robot.health.HealthManager;
 import frc.robot.intake.Intake;
 import frc.robot.intake.IntakeState;
 import frc.robot.localization.Localization;
-import frc.robot.shooter.Shooter;
+import frc.robot.shooter.Shooter2;
 import frc.robot.shooter_hood.ShooterHood;
 import frc.robot.swerve.Swerve;
 import frc.robot.turret.Turret;
@@ -40,7 +40,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   public final Swerve swerve;
   public final Hardware hardware;
   private final ShooterHood shooterHood;
-  private final Shooter shooter;
+  private final Shooter2 shooter;
   private final DyeRotor dyeRotor;
   public final Deploy deploy;
   private final Turret turret;
@@ -75,7 +75,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       ShooterHood shooterHood,
       Localization localization,
       Swerve swerve,
-      Shooter shooter,
+      Shooter2 shooter,
       DyeRotor dyeRotor,
       Turret turret,
       Intake intake,

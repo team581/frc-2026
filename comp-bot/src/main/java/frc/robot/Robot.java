@@ -21,7 +21,7 @@ import frc.robot.imu.Imu;
 import frc.robot.intake.Intake;
 import frc.robot.localization.Localization;
 import frc.robot.robot_manager.RobotManager;
-import frc.robot.shooter.Shooter;
+import frc.robot.shooter.Shooter2;
 import frc.robot.shooter_hood.ShooterHood;
 import frc.robot.swerve.Swerve;
 import frc.robot.turret.Turret;
@@ -95,8 +95,8 @@ public class Robot extends Base581Robot {
 
   private final ShooterHood shooterHood = new ShooterHood(hardware.shooterHoodMotor);
 
-  private final Shooter shooter =
-      new Shooter(hardware.shooterLeftMotor, hardware.shooterRightMotor);
+  private final Shooter2 shooter =
+      new Shooter2(hardware.shooterLeftMotor, hardware.shooterRightMotor);
   private final Intake intake = new Intake(hardware.intakeMotor);
   private final Deploy deploy =
       new Deploy(hardware.deployDifferentialMechanism, hardware.hopperCANRange);
