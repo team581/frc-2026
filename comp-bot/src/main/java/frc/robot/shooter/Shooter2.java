@@ -24,8 +24,8 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
         : Shooter2Config.DISTANCE_TO_FEEDING_RPM.get(distance);
   }
 
-  private final TalonFX topMotor;
   private final TalonFX bottomMotor;
+  private final TalonFX topMotor;
 
   private final VelocityVoltage velocityRequest =
       new VelocityVoltage(0).withLimitReverseMotion(true).withEnableFOC(true);
@@ -39,17 +39,17 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
   private double topMotorRpm = 0;
   private double bottomMotorRpm = 0;
 
-  public Shooter2(TalonFX topMotor, TalonFX bottomMotor) {
+  public Shooter2(TalonFX bottomMotor, TalonFX topMotor) {
     super(SubsystemPriority.SHOOTER, ShooterState2.IDLE);
 
-    topMotor.getConfigurator().apply(Shooter2Config.TOP_MOTOR_CONFIGS);
     bottomMotor.getConfigurator().apply(Shooter2Config.BOTTOM_MOTOR_CONFIG);
+    topMotor.getConfigurator().apply(Shooter2Config.TOP_MOTOR_CONFIGS);
 
-    TunablePid.register("Shooter/TopShooter", topMotor, Shooter2Config.TOP_MOTOR_CONFIGS);
     TunablePid.register("Shooter/BottomShooter", bottomMotor, Shooter2Config.BOTTOM_MOTOR_CONFIG);
+    TunablePid.register("Shooter/TopShooter", topMotor, Shooter2Config.TOP_MOTOR_CONFIGS);
 
-    this.topMotor = topMotor;
     this.bottomMotor = bottomMotor;
+    this.topMotor = topMotor;
   }
 
   public void startSelfTestRequest() {

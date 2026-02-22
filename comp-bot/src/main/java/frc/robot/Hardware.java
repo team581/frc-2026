@@ -22,8 +22,8 @@ public class Hardware {
   private final CANBus canivore = new CANBus("581CANivore");
   private final CANBus rio = new CANBus();
 
-  public final TalonFX shooterLeftMotor = new TalonFX(15, rio);
-  public final TalonFX shooterRightMotor = new TalonFX(16, rio);
+  public final TalonFX shooterBottomMotor = new TalonFX(15, rio);
+  public final TalonFX shooterTopMotor = new TalonFX(16, rio);
   public final TalonFX turretMotor = new TalonFX(17, canivore);
   public final TalonFX rotorMotor = new TalonFX(18, canivore);
   public final TalonFX horizontalMotor = new TalonFX(19, rio);
