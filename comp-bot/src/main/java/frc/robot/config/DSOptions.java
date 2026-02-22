@@ -11,7 +11,6 @@ public final class DSOptions {
   public static final BooleanSubscriber USE_CANRANGE = DSOption.of("UseCANRange", false);
   public static final BooleanSubscriber USE_TURRET = DSOption.of("UseTurret", true);
 
-	// TODO: This should be true when the CANrange is actually physically on the robot
-	private DSOptions() {
-	}
+  // TODO: This should be true when the CANrange is actually physically on the robot
+  private DSOptions() {}
 }
