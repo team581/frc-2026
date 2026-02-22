@@ -146,7 +146,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   private boolean ableToBumpAssist = false;
   private boolean ableToTrenchAssist = false;
-  private boolean ableToWallIntakeDriveAssist = false;
+  private boolean ableToWallAssist = false;
   private boolean ableToWallSnap = false;
   private boolean ableToDirectionSnap = false;
   private Translation2d lastWallIntakePoint = Translation2d.kZero;
@@ -235,11 +235,11 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToBumpAssist(drivetrainState.Pose, fieldRelativeSpeeds);
-    ableToWallIntakeDriveAssist =
-        FeatureFlags.WALL_INTAKE_DRIVE_ASSIST.getAsBoolean()
+    ableToWallAssist =
+        FeatureFlags.WALL_ASSIST.getAsBoolean()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
-            && SwerveAssist.ableToWallIntakeDriveAssist(drivetrainState.Pose, fieldRelativeSpeeds);
+            && SwerveAssist.ableToWallAssist(drivetrainState.Pose, fieldRelativeSpeeds);
 
     if (getState() == SwerveState.INTAKE) {
       lastWallIntakePoint =
@@ -323,7 +323,17 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     switch (currentState) {
       case MANUAL -> {
         var speeds = driveSource.getRequestedSpeeds();
-        if (ableToTrenchAssist) {
+        if (ableToWallAssist) {
+          var wallAssistSpeeds =
+              SwerveAssist.getWallAssistSpeeds(drivetrainState.Pose.getTranslation(), speeds);
+          drivetrain.setControl(
+              withFieldRelativeTargetDirection(
+                  drivePerspectiveSnapsOpenLoop
+                      .withVelocityX(wallAssistSpeeds.vxMetersPerSecond)
+                      .withVelocityY(wallAssistSpeeds.vyMetersPerSecond),
+                  SwerveAssist.getRoundedSnapAngle(
+                      drivetrainState.Pose.getRotation(), SwerveAssist.BUMP_SNAP_ROUND_ANGLE)));
+        } else if (ableToTrenchAssist) {
 
           DogLog.timestamp("Swerve/TrenchAssistActive");
           var trenchAssistSpeeds =
@@ -571,7 +581,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     DogLog.log("Swerve/FieldRelativeSpeeds", fieldRelativeSpeeds);
     DogLog.log("Swerve/AbleToBumpAssist", ableToBumpAssist);
     DogLog.log("Swerve/AbleToTrenchAssist", ableToTrenchAssist);
-    DogLog.log("Swerve/AbleToWallIntakeDriveAssist", ableToWallIntakeDriveAssist);
+    DogLog.log("Swerve/AbleToWallAssist", ableToWallAssist);
   }
 
   @Override
