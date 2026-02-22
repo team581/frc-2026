@@ -29,9 +29,11 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
 
   private final VelocityVoltage velocityRequest =
       new VelocityVoltage(0).withLimitReverseMotion(true).withEnableFOC(true);
+
   private double scoreDistance = 0;
   private double climbScoreRpm = 0;
   private double feedDistance = 0;
+
   private double shootingRpm = 0;
   private double feedingRpm = 0;
   private double topMotorRpm = 0;
@@ -133,6 +135,7 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
   protected void collectInputs() {
     shootingRpm = Math.min(Shooter2Config.MAX_SAFE_RPM, distanceToScoringRpm(scoreDistance));
     feedingRpm = Math.min(Shooter2Config.MAX_SAFE_RPM, distanceToFeedingRpm(feedDistance));
+
     topMotorRpm = topMotor.getVelocity().getValueAsDouble() * 60.0;
     bottomMotorRpm = bottomMotor.getVelocity().getValueAsDouble() * 60.0;
 
