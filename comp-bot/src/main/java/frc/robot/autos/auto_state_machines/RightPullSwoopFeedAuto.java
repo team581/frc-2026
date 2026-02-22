@@ -44,15 +44,17 @@ public class RightPullSwoopFeedAuto extends BaseImperativeAuto<RightPullSwoopFee
           .untilFinished(new PoseErrorTolerance(0.1, 3));
 
   private final AutoSegment cleanUpIntakeAndShoot =
-           Trailblazer.segment(
+      Trailblazer.segment(
               AutoPoint.ofRed(new Pose2d(15.643, 7.45, Rotation2d.kZero)),
-                            AutoPoint.of(
+              AutoPoint.of(
                       () ->
                           Point.ofRed(
                               robotManager
                                   .clusterMap
                                   .getBestClusterPose()
-                                  .orElseGet(() -> new Pose2d(15.286, 6.074, Rotation2d.kCW_90deg)))).withMarker(Markers.START_SHOOT_RQ)
+                                  .orElseGet(
+                                      () -> new Pose2d(15.286, 6.074, Rotation2d.kCW_90deg))))
+                  .withMarker(Markers.START_SHOOT_RQ)
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)))
           .withLinearConstraints(3.0, 10)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
@@ -80,7 +82,7 @@ public class RightPullSwoopFeedAuto extends BaseImperativeAuto<RightPullSwoopFee
           .withLinearConstraints(3.0, 10)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
           .untilFinished(new PoseErrorTolerance(0.5, 3));
-        
+
   public RightPullSwoopFeedAuto(RobotManager robotManager, Trailblazer trailblazer) {
     super(RightPullSwoopFeedAutoState.INTAKE_ACROSS_MIDLINE_1, robotManager, trailblazer);
   }
