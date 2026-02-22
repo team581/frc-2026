@@ -32,7 +32,7 @@ public class SwerveAssist {
   public static final Rotation2d TRENCH_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
   public static final Rotation2d BUMP_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
 
-  // Wall intake assist values
+  // Wall intake drive assist values
   private static final double WALL_PROXIMITY_THRESHOLD = Units.inchesToMeters(40.0);
   private static final Rotation2d VELOCITY_TOWARD_INTAKE_TOLERANCE = Rotation2d.fromDegrees(60.0);
   private static final double ASSIST_POINT_DISTANCE_FROM_WALL = Units.inchesToMeters(25.0);
@@ -90,38 +90,38 @@ public class SwerveAssist {
   }
 
   // TODO: WORK IN PROGRESS, need to make wallsnaps v2 work & use it in swerve
-  public static boolean ableToWallIntakeAssist(
+  public static boolean ableToWallIntakeDriveAssist(
       Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var closestWallTranslation =
         MathHelpers.getClosestPointOnRectanglePerimeter(
             robotPose.getTranslation(), FieldUtil.FIELD_BOUNDS);
 
-    DogLog.log("SwerveAssist/WallIntakeAssist/ClosestWallTranslation", new Pose2d(closestWallTranslation, Rotation2d.kZero));
+    DogLog.log("SwerveAssist/WallIntakeDriveAssist/ClosestWallTranslation", new Pose2d(closestWallTranslation, Rotation2d.kZero));
 
     // If the closest wall is a driver station wall, then the y component will be equal to the robot's
     var closestWallIsADriverStationWall = robotPose.getY() == closestWallTranslation.getY();
     var closeToNonDriverStationWall = Math.abs(robotPose.getTranslation().getY() - closestWallTranslation.getY()) < WALL_PROXIMITY_THRESHOLD;
     var closeToDriverStationWall = Math.abs(robotPose.getTranslation().getX() - closestWallTranslation.getX()) < WALL_PROXIMITY_THRESHOLD;
-    DogLog.log("SwerveAssist/WallIntakeAssist/CloseToDriverStationWall", closeToDriverStationWall);
+    DogLog.log("SwerveAssist/WallIntakeDriveAssist/CloseToDriverStationWall", closeToDriverStationWall);
 
     // Check if we are close to a wall
     if (!closestWallIsADriverStationWall && closeToNonDriverStationWall) {
       closeToDriverStationWall = false;
-    DogLog.log("SwerveAssist/WallIntakeAssist/CloseToWallCheck", true);
+    DogLog.log("SwerveAssist/WallIntakeDriveAssist/CloseToWallCheck", true);
     } else if (closestWallIsADriverStationWall && closeToDriverStationWall) {
-    DogLog.log("SwerveAssist/WallIntakeAssist/CloseToWallCheck", true);
+    DogLog.log("SwerveAssist/WallIntakeDriveAssist/CloseToWallCheck", true);
     } else {
       // We are not close to any wall
-      DogLog.log("SwerveAssist/WallIntakeAssist/CloseToWallCheck", false);
+      DogLog.log("SwerveAssist/WallIntakeDriveAssist/CloseToWallCheck", false);
       return false;
     }
 
     // Check if drive direction and intake direction are the same
     if (!MathUtil.isNear(robotPose.getRotation().getDegrees(), MathHelpers.getDriveDirection(fieldRelativeSpeeds).getDegrees(), VELOCITY_TOWARD_INTAKE_TOLERANCE.getDegrees(), -180, 180.0)) {
-      DogLog.log("SwerveAssist/WallIntakeAssist/IntakeDriveDirectionCheck", false);
+      DogLog.log("SwerveAssist/WallIntakeDriveAssist/IntakeDriveDirectionCheck", false);
       return false;
     } else
-    DogLog.log("SwerveAssist/WallIntakeAssist/IntakeDriveDirectionCheck", true);
+    DogLog.log("SwerveAssist/WallIntakeDriveAssist/IntakeDriveDirectionCheck", true);
 
     // Check if we are driving fast enough in the direction of the intake parallel to the wall
     var assistPoint = Translation2d.kZero;
@@ -147,7 +147,7 @@ public class SwerveAssist {
         assistPoint = new Translation2d(robotPose.getX() - ASSIST_POINT_DISTANCE_FROM_ROBOT, distanceFromWall);
       }
     }
-    DogLog.log("SwerveAssist/WallIntakeAssist/AssistPoint", new Pose2d(assistPoint, Rotation2d.kZero));
+    DogLog.log("SwerveAssist/WallIntakeDriveAssist/AssistPoint", new Pose2d(assistPoint, Rotation2d.kZero));
 
     return ableToSwerveAssist(
         robotPose,

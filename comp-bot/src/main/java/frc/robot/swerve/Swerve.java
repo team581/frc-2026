@@ -146,7 +146,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   private boolean ableToBumpAssist = false;
   private boolean ableToTrenchAssist = false;
-  private boolean ableToWallIntakeAssist = false;
+  private boolean ableToWallIntakeDriveAssist = false;
   private boolean ableToWallSnap = false;
   private boolean ableToDirectionSnap = false;
   private Translation2d lastWallIntakePoint = Translation2d.kZero;
@@ -235,11 +235,11 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToBumpAssist(drivetrainState.Pose, fieldRelativeSpeeds);
-    ableToWallIntakeAssist =
-        FeatureFlags.WALL_INTAKE_ASSIST.getAsBoolean()
+    ableToWallIntakeDriveAssist =
+        FeatureFlags.WALL_INTAKE_DRIVE_ASSIST.getAsBoolean()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
-            && SwerveAssist.ableToWallIntakeAssist(drivetrainState.Pose, fieldRelativeSpeeds);
+            && SwerveAssist.ableToWallIntakeDriveAssist(drivetrainState.Pose, fieldRelativeSpeeds);
 
     if (getState() == SwerveState.INTAKE) {
       lastWallIntakePoint =
@@ -571,7 +571,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     DogLog.log("Swerve/FieldRelativeSpeeds", fieldRelativeSpeeds);
     DogLog.log("Swerve/AbleToBumpAssist", ableToBumpAssist);
     DogLog.log("Swerve/AbleToTrenchAssist", ableToTrenchAssist);
-    DogLog.log("Swerve/AbleToWallIntakeAssist", ableToWallIntakeAssist);
+    DogLog.log("Swerve/AbleToWallIntakeDriveAssist", ableToWallIntakeDriveAssist);
   }
 
   @Override
