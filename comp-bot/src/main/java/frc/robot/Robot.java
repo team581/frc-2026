@@ -8,11 +8,14 @@ import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.followers.PidPathFollower;
 import com.team581.trailblazer.trackers.HeuristicPathTracker;
 import com.team581.util.FieldUtil;
+import com.team581.util.FmsUtil;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import frc.robot.autos.Autos;
 import frc.robot.climber.Climber;
 import frc.robot.cluster_map.ClusterMap;
+import frc.robot.config.FeatureFlags;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.generated.BuildConstants;
@@ -143,6 +146,17 @@ public class Robot extends Base581Robot {
     finalizeInit();
 
     FieldUtil.debugLogFieldZones();
+  }
+
+  @Override
+  public void robotPeriodic() {
+    super.robotPeriodic();
+
+    if (FeatureFlags.CLAMPED_AUTO_POINTS.getAsBoolean() && !FmsUtil.isRedAlliance()) {
+      DogLog.logFault("Clamped auto points are enabled but current alliance is blue");
+    } else {
+      DogLog.clearFault("Clamped auto points are enabled but current alliance is blue");
+    }
   }
 
   @Override
