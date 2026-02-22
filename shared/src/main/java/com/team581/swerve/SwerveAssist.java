@@ -154,12 +154,12 @@ public class SwerveAssist {
       }
 
       assistPoint =
-        new Translation2d(
-            assistPoint.getX(),
-            MathUtil.clamp(
-                assistPoint.getY(),
-                ASSIST_POINT_DISTANCE_FROM_CORNER,
-                FieldUtil.FIELD_WIDTH_Y - ASSIST_POINT_DISTANCE_FROM_CORNER));
+          new Translation2d(
+              assistPoint.getX(),
+              MathUtil.clamp(
+                  assistPoint.getY(),
+                  ASSIST_POINT_DISTANCE_FROM_CORNER,
+                  FieldUtil.FIELD_WIDTH_Y - ASSIST_POINT_DISTANCE_FROM_CORNER));
     } else {
       if (robotPose.getY() > FieldUtil.FIELD_WIDTH_Y / 2.0) {
         distanceFromWall = FieldUtil.FIELD_WIDTH_Y - ASSIST_POINT_DISTANCE_FROM_WALL;
@@ -176,12 +176,12 @@ public class SwerveAssist {
       }
 
       assistPoint =
-        new Translation2d(
-            MathUtil.clamp(
-                assistPoint.getX(),
-                ASSIST_POINT_DISTANCE_FROM_CORNER,
-                FieldUtil.FIELD_LENGTH_X - ASSIST_POINT_DISTANCE_FROM_CORNER),
-            assistPoint.getY());
+          new Translation2d(
+              MathUtil.clamp(
+                  assistPoint.getX(),
+                  ASSIST_POINT_DISTANCE_FROM_CORNER,
+                  FieldUtil.FIELD_LENGTH_X - ASSIST_POINT_DISTANCE_FROM_CORNER),
+              assistPoint.getY());
     }
     DogLog.log("SwerveAssist/WallAssist/AssistPoint", new Pose2d(assistPoint, Rotation2d.kZero));
 
