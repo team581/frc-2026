@@ -41,7 +41,10 @@ public class FmsUtil {
     return alliance == Alliance.Red;
   }
 
-  public static double timeUntilActive(double timeSinceMatchStart) {
+  public static double timeUntilNextShift(double timeSinceMatchStart) {
+    if (DriverStation.isDisabled() || !DriverStation.isTeleop()) {
+      return 0.0;
+    }
     double timeUntilSwitch = 0.0;
 
     if (timeSinceMatchStart <= END_GAME_TIME_STAMP) {

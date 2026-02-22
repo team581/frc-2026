@@ -63,8 +63,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private boolean isMoving = false;
 
   private double timeSinceMatchStart = 0.0;
-  private double timeUntilHubInactive = 0.0;
-  private double timeUntilHubActive = 0.0;
+  private double timeUntilNextShift = 0.0;
   private boolean isHubActive = true;
   private final DoubleSubscriber tunableHubStateOffset =
       DogLog.tunable("RobotManager/MatchTimeOffset", 0.0);
@@ -831,8 +830,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/TimeSinceMatchStart", timeSinceMatchStart);
     DogLog.log("RobotManager/TimeSinceTeleopEnable", teleopTimer.get());
 
-    DogLog.log("RobotManager/TimeUntilInactive", timeUntilHubInactive);
-    DogLog.log("RobotManager/TimeUntilActive", timeUntilHubActive);
+    DogLog.log("RobotManager/TimeUntilNextShift", timeUntilNextShift);
+        DogLog.log("RobotManager/HubActive", getIsHubActive());
+
 
     MechanismVisualizer.log(
         robotPose,
@@ -1137,16 +1137,19 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
 
-    isHubActive = getIsHubActive();
-    timeUntilHubInactive = FmsUtil.timeUntilInactive(timeSinceMatchStart, isHubActive);
-    timeUntilHubActive = FmsUtil.timeUntilActive(timeSinceMatchStart);
+    isHubActive = getIsHubActiveOrNotUsingState();
+    timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
   }
 
-  private boolean getIsHubActive() {
+  private boolean getIsHubActiveOrNotUsingState() {
     if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomousEnabled()) {
       return true;
     }
 
+    return getIsHubActive();
+  }
+
+   private boolean getIsHubActive() {
     if (FeatureFlags.LOOKAHEAD_SCORING.getAsBoolean()) {
       return FmsUtil.isHubActive(
           timeSinceMatchStart
@@ -1156,6 +1159,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     return FmsUtil.isHubActive(timeSinceMatchStart + tunableHubStateOffset.get());
   }
+
 
   private void logScoringTransition() {
     DogLog.log("RobotManager/Scoring/ScoreTransition/ShooterAtGoal", shooter.atGoal());
