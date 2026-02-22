@@ -331,8 +331,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                   drivePerspectiveSnapsOpenLoop
                       .withVelocityX(wallAssistSpeeds.vxMetersPerSecond)
                       .withVelocityY(wallAssistSpeeds.vyMetersPerSecond),
-                  SwerveAssist.getRoundedSnapAngle(
-                      drivetrainState.Pose.getRotation(), SwerveAssist.BUMP_SNAP_ROUND_ANGLE)));
+                  SwerveAssist.getWallAssistSnapAngle(
+                      drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds)));
         } else if (ableToTrenchAssist) {
 
           DogLog.timestamp("Swerve/TrenchAssistActive");

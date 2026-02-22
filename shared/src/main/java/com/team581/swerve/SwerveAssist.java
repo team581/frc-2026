@@ -32,11 +32,13 @@ public class SwerveAssist {
   public static final Rotation2d TRENCH_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
   public static final Rotation2d BUMP_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
 
-  // Wall intake drive assist values
+  // Wall assist values
   private static final double WALL_PROXIMITY_THRESHOLD = Units.inchesToMeters(45.0);
   private static final Rotation2d VELOCITY_TOWARD_INTAKE_TOLERANCE = Rotation2d.fromDegrees(60.0);
   private static final double ASSIST_POINT_DISTANCE_FROM_WALL = Units.inchesToMeters(25.0);
   private static final double ASSIST_POINT_DISTANCE_FROM_ROBOT = Units.inchesToMeters(60.0);
+  private static final Rotation2d WALL_ASSIST_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
+  private static final Rotation2d WALL_ASSIST_SNAP_OFFSET = Rotation2d.fromDegrees(30.0);
 
   private static final DoubleSupplier WALL_SNAPS_VELOCITY_ANGLE_THRESHOLD =
       DogLog.tunable("Swerve/WallSnaps/VelocityAngleThresholdDegrees", 30.0, Degrees);
@@ -269,6 +271,33 @@ public class SwerveAssist {
           polarInputSpeeds.vMetersPerSecond, newDirection, wantedSpeeds.omegaRadiansPerSecond);
     }
     return polarInputSpeeds;
+  }
+
+  public static Rotation2d getWallAssistSnapAngle(
+      Translation2d robotTranslation, ChassisSpeeds fieldRelativeSpeeds) {
+    // get direction toward wall, then apply offset of snap round angle in that direction
+    var closestWallTranslation =
+        MathHelpers.getClosestPointOnRectanglePerimeter(robotTranslation, FieldUtil.FIELD_BOUNDS);
+    var closestWallIsADriverStationWall = robotTranslation.getY() == closestWallTranslation.getY();
+    var angleToWall = robotTranslation.minus(closestWallTranslation).getAngle();
+    var roundedDriveDirection = getRoundedSnapAngle(MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_ASSIST_SNAP_ROUND_ANGLE);
+    var roundedSnapAngle = getRoundedSnapAngle(roundedDriveDirection, WALL_ASSIST_SNAP_ROUND_ANGLE);
+    var direction = 0;
+
+    if (closestWallIsADriverStationWall) {
+      if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
+        direction = 1;
+      } else {
+        direction = -1;
+      }
+    } else {
+      if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
+        direction = -1;
+      } else {
+        direction = 1;
+      }
+    }
+    return roundedSnapAngle.plus(WALL_ASSIST_SNAP_OFFSET.times(direction));
   }
 
   public static PolarChassisSpeeds getWallAssistSpeeds(
