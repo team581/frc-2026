@@ -68,7 +68,7 @@ public class Shooter2Config {
   public static final TalonFXConfiguration TOP_MOTOR_CONFIGS =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(15.0 / 18.0))
-           .withMotionMagic(
+          .withMotionMagic(
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(MAX_SAFE_RPM / 60.0)
                   .withMotionMagicAcceleration(4000.0 / 60.0))
