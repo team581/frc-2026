@@ -35,7 +35,6 @@ public class SwerveAssist {
   // Wall intake assist values
   private static final double WALL_PROXIMITY_THRESHOLD = Units.inchesToMeters(25.0);
   private static final Rotation2d VELOCITY_TOWARD_INTAKE_TOLERANCE = Rotation2d.fromDegrees(0.0);
-  private static final double ASSIST_POINT_DISTANCE_FROM_WALL = Units.inchesToMeters(20.0);
 
   private static final DoubleSupplier WALL_SNAPS_VELOCITY_ANGLE_THRESHOLD =
       DogLog.tunable("Swerve/WallSnaps/VelocityAngleThresholdDegrees", 30.0, Degrees);
