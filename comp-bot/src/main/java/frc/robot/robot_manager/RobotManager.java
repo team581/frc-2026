@@ -914,7 +914,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     } else {
       DogLog.log("RobotManager/Scoring/SmartPrepareScore/HoodStatus", "NotNearTrench");
 
-      shooterHood.feedRequest(scoringParameters.distance());
+      shooterHood.feedRequest(feedingParameters.distance());
     }
   }
 
