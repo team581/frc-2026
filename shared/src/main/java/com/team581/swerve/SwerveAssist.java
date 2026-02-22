@@ -109,7 +109,8 @@ public class SwerveAssist {
     var closeToDriverStationWall =
         Math.abs(robotPose.getTranslation().getX() - closestWallTranslation.getX())
             < WALL_PROXIMITY_THRESHOLD;
-    DogLog.log("SwerveAssist/WallIntakeAssist/CloseToDriverStationWall", closeToDriverStationWall);
+    DogLog.log(
+        "SwerveAssist/WallIntakeDriveAssist/CloseToDriverStationWall", closeToDriverStationWall);
 
     // Check if we are close to a wall
     if (!closestWallIsADriverStationWall && closeToNonDriverStationWall) {
@@ -167,7 +168,8 @@ public class SwerveAssist {
       }
     }
     DogLog.log(
-        "SwerveAssist/WallIntakeAssist/AssistPoint", new Pose2d(assistPoint, Rotation2d.kZero));
+        "SwerveAssist/WallIntakeDriveAssist/AssistPoint",
+        new Pose2d(assistPoint, Rotation2d.kZero));
 
     return ableToSwerveAssist(
         robotPose,
