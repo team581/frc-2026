@@ -37,6 +37,7 @@ public class SwerveAssist {
   private static final Rotation2d VELOCITY_TOWARD_INTAKE_TOLERANCE = Rotation2d.fromDegrees(60.0);
   private static final double ASSIST_POINT_DISTANCE_FROM_WALL = Units.inchesToMeters(25.0);
   private static final double ASSIST_POINT_DISTANCE_FROM_ROBOT = Units.inchesToMeters(60.0);
+  private static final double ASSIST_POINT_DISTANCE_FROM_CORNER = Units.inchesToMeters(60.0);
   private static final Rotation2d WALL_ASSIST_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
   private static final Rotation2d WALL_ASSIST_SNAP_OFFSET = Rotation2d.fromDegrees(30.0);
 
@@ -151,6 +152,14 @@ public class SwerveAssist {
             new Translation2d(
                 distanceFromWall, robotPose.getY() - ASSIST_POINT_DISTANCE_FROM_ROBOT);
       }
+
+      assistPoint =
+        new Translation2d(
+            assistPoint.getX(),
+            MathUtil.clamp(
+                assistPoint.getY(),
+                ASSIST_POINT_DISTANCE_FROM_CORNER,
+                FieldUtil.FIELD_WIDTH_Y - ASSIST_POINT_DISTANCE_FROM_CORNER));
     } else {
       if (robotPose.getY() > FieldUtil.FIELD_WIDTH_Y / 2.0) {
         distanceFromWall = FieldUtil.FIELD_WIDTH_Y - ASSIST_POINT_DISTANCE_FROM_WALL;
@@ -165,6 +174,14 @@ public class SwerveAssist {
             new Translation2d(
                 robotPose.getX() - ASSIST_POINT_DISTANCE_FROM_ROBOT, distanceFromWall);
       }
+
+      assistPoint =
+        new Translation2d(
+            MathUtil.clamp(
+                assistPoint.getX(),
+                ASSIST_POINT_DISTANCE_FROM_CORNER,
+                FieldUtil.FIELD_LENGTH_X - ASSIST_POINT_DISTANCE_FROM_CORNER),
+            assistPoint.getY());
     }
     DogLog.log("SwerveAssist/WallAssist/AssistPoint", new Pose2d(assistPoint, Rotation2d.kZero));
 
@@ -280,7 +297,9 @@ public class SwerveAssist {
         MathHelpers.getClosestPointOnRectanglePerimeter(robotTranslation, FieldUtil.FIELD_BOUNDS);
     var closestWallIsADriverStationWall = robotTranslation.getY() == closestWallTranslation.getY();
     var angleToWall = robotTranslation.minus(closestWallTranslation).getAngle();
-    var roundedDriveDirection = getRoundedSnapAngle(MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_ASSIST_SNAP_ROUND_ANGLE);
+    var roundedDriveDirection =
+        getRoundedSnapAngle(
+            MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_ASSIST_SNAP_ROUND_ANGLE);
     var roundedSnapAngle = getRoundedSnapAngle(roundedDriveDirection, WALL_ASSIST_SNAP_ROUND_ANGLE);
     var direction = 0;
 
