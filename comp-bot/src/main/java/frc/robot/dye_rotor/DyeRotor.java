@@ -85,6 +85,12 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
         }
         yield currentState;
       }
+      case IDLE -> {
+        if (!nearIdlePosition()) {
+          yield DyeRotorState.RESET_TO_IDLE;
+        }
+        yield currentState;
+      }
       default -> currentState;
     };
   }
