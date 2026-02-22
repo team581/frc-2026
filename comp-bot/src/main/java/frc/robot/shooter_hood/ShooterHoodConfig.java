@@ -19,10 +19,10 @@ public class ShooterHoodConfig {
    * This is the effective angle of the shooter hood relative to the floor when the shooter hood is
    * fully retracted.
    */
-  public static final double ANGLE_FROM_HORIZONTAL = 22.558525;
+  public static final double ANGLE_FROM_HORIZONTAL = 21.4;
 
   // TODO Update safe zone amount
-  public static final double MAX_ANGLE = 46.5 - 2;
+  public static final double MAX_ANGLE = 43.0;
   public static final double MIN_ANGLE = ANGLE_FROM_HORIZONTAL + 1;
   public static final double IDLE_ANGLE = ANGLE_FROM_HORIZONTAL + 2;
 
