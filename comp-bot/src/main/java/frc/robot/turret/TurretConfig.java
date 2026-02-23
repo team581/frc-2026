@@ -20,8 +20,8 @@ public class TurretConfig {
   public static final double MIN_ANGLE_HOMING = -270;
   public static final double MAX_ANGLE_HOMING = 270;
   // TODO: adjust after bringup
-  public static final double MIN_ANGLE = -110;
-  public static final double MAX_ANGLE = 85;
+  public static final double MIN_ANGLE = -318.0;
+  public static final double MAX_ANGLE = -16.6;
   public static final double OUT_OF_BOUNDS_THRESHOLD = 1.0;
   public static final double HOMING_END_POSITION = MIN_ANGLE;
   public static final DoubleSubscriber TOLERANCE = DogLog.tunable("Turret/Tolerance", 1.0);
