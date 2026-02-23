@@ -34,7 +34,7 @@ public class FeatureFlags {
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT_RPM_DIP =
       FeatureFlag.of("StopScoringRPMDip", true);
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT =
-      FeatureFlag.of("CancelInProgressShot", true);
+      FeatureFlag.of("CancelInProgressShot", false);
 
   public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
 
