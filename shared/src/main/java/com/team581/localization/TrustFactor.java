@@ -12,8 +12,7 @@ public class TrustFactor {
       DogLog.tunable("TrustFactor/PostCollisionAddition", 5.0);
   private static final DoubleSubscriber TRUSTWORTHY_THRESHOLD =
       DogLog.tunable("TrustFactor/TrustworthyThreshold", 1.0);
-  private static final DoubleSubscriber TAG_SEEN_DENOMINATOR =
-      DogLog.tunable("TrustFactor/TagSeenDenominator", 2.0);
+
   private static final DoubleSubscriber TAG_SEEN_MAX =
       DogLog.tunable("TrustFactor/TagSeenMax", 30.0);
   private static final DoubleSubscriber LOST_THRESHOLD =
@@ -53,7 +52,7 @@ public class TrustFactor {
   }
 
   public void tagSeen(double xyDev) {
-    trustFactor = Math.min(trustFactor*((xyDev)*10), TAG_SEEN_MAX.get());
+    trustFactor = Math.min(trustFactor * (xyDev * 10), TAG_SEEN_MAX.get());
   }
 
   public void update(Pose2d robotPose, boolean collisionDetected) {
