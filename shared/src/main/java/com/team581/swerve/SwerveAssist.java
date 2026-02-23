@@ -97,9 +97,10 @@ public class SwerveAssist {
         MathHelpers.getClosestPointOnRectanglePerimeter(
             robotPose.getTranslation(), FieldUtil.FIELD_BOUNDS);
 
-    if (!FieldUtil.getCurrentWallAssistCornerZone(robotPose.getTranslation()).isEmpty()) {
+    if (FieldUtil.getCurrentWallAssistCornerZone(robotPose.getTranslation()).isPresent()) {
       // TODO: Make real logic
-      // Temporary logic to test out wall assist in the corner - just say we are always able to assist if in that corner
+      // Temporary logic to test out wall assist in the corner - just say we are always able to
+      // assist if in that corner
       return true;
     }
 
@@ -333,20 +334,36 @@ public class SwerveAssist {
       // TODO: Make better logic for corners, use pure pursuit type path following
       // If we are in a wall assist corner zone, get curved corner assist speeds
 
-      // Rotate velocity to face arc center so that the x component is radial, y component is tangential
+      // Rotate velocity to face arc center so that the x component is radial, y component is
+      // tangential
       var cornerArcCenter = FieldUtil.getClosestWallAssistCornerArcCenter(robotTranslation);
-      var robotToArcCenterAngle = robotTranslation.minus(FieldUtil.getClosestWallAssistCornerArcCenter(robotTranslation)).getAngle();
-      var robotToArcCenterVelocity = new Translation2d(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond).rotateBy(robotToArcCenterAngle.unaryMinus());
+      var robotToArcCenterAngle =
+          robotTranslation
+              .minus(FieldUtil.getClosestWallAssistCornerArcCenter(robotTranslation))
+              .getAngle();
+      var robotToArcCenterVelocity =
+          new Translation2d(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond)
+              .rotateBy(robotToArcCenterAngle.unaryMinus());
 
-      // Keep tangential velocity alongside the curve and use pid to correct the radial velocity back onto the curve
+      // Keep tangential velocity alongside the curve and use pid to correct the radial velocity
+      // back onto the curve
       var actualRadius = cornerArcCenter.getDistance(robotTranslation);
-      var wantedRadius = FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL -
-      ASSIST_POINT_DISTANCE_FROM_PARALLEL_WALL;
-      robotToArcCenterVelocity = new Translation2d(SWERVE_ASSIST_PID_CONTROLLER.calculate(actualRadius, wantedRadius), robotToArcCenterVelocity.getY());
+      var wantedRadius =
+          FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL
+              - ASSIST_POINT_DISTANCE_FROM_PARALLEL_WALL;
+      robotToArcCenterVelocity =
+          new Translation2d(
+              SWERVE_ASSIST_PID_CONTROLLER.calculate(actualRadius, wantedRadius),
+              robotToArcCenterVelocity.getY());
 
-      DogLog.log("SwerveAssist/WallAssist/Debug/CornerArcCenter", new Pose2d(cornerArcCenter, Rotation2d.kZero));
-      DogLog.log("SwerveAssist/WallAssist/Debug/RobotToArcCenterAngle", robotToArcCenterAngle.getDegrees());
-      DogLog.log("SwerveAssist/WallAssist/Debug/RobotToArcCenterVelocity", robotToArcCenterVelocity);
+      DogLog.log(
+          "SwerveAssist/WallAssist/Debug/CornerArcCenter",
+          new Pose2d(cornerArcCenter, Rotation2d.kZero));
+      DogLog.log(
+          "SwerveAssist/WallAssist/Debug/RobotToArcCenterAngle",
+          robotToArcCenterAngle.getDegrees());
+      DogLog.log(
+          "SwerveAssist/WallAssist/Debug/RobotToArcCenterVelocity", robotToArcCenterVelocity);
       DogLog.log("SwerveAssist/WallAssist/Debug/RadiusActual", actualRadius);
       DogLog.log("SwerveAssist/WallAssist/Debug/RaidusWanted", wantedRadius);
 
@@ -354,8 +371,11 @@ public class SwerveAssist {
       var arcCompensatedVelocity = robotToArcCenterVelocity.rotateBy(robotToArcCenterAngle);
       DogLog.log("SwerveAssist/WallAssist/Debug/ArcCompensatedVelocity", arcCompensatedVelocity);
 
-
-      wantedSpeeds = new PolarChassisSpeeds(arcCompensatedVelocity.getX(), arcCompensatedVelocity.getY(), inputSpeeds.omegaRadiansPerSecond);
+      wantedSpeeds =
+          new PolarChassisSpeeds(
+              arcCompensatedVelocity.getX(),
+              arcCompensatedVelocity.getY(),
+              inputSpeeds.omegaRadiansPerSecond);
     } else {
       // Else get linear wall assist speeds
 
@@ -403,8 +423,9 @@ public class SwerveAssist {
 
     var polarInputSpeeds = new PolarChassisSpeeds(inputSpeeds);
 
-      // In corners, give the assist full authority to prevent drifting
-    if (polarInputSpeeds.vMetersPerSecond > 1e-5 && !FieldUtil.getCurrentWallAssistCornerZone(robotTranslation).isPresent()) {
+    // In corners, give the assist full authority to prevent drifting
+    if (polarInputSpeeds.vMetersPerSecond > 1e-5
+        && FieldUtil.getCurrentWallAssistCornerZone(robotTranslation).isEmpty()) {
       var scalar = polarInputSpeeds.vMetersPerSecond / 4.75;
       scalar = Math.min(scalar, 0.75);
       var newDirection = polarInputSpeeds.direction.interpolate(wantedSpeeds.direction, scalar);
