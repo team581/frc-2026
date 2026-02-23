@@ -38,6 +38,9 @@ public class FeatureFlags {
 
   public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
 
+  public static final BooleanSupplier HOOD_ALWAYS_IDLE = FeatureFlag.of("HoodAlwaysIdle", true);
+
+
   public static final BooleanSupplier CLAMPED_AUTO_POINTS = Point.CLAMPED_POINTS_FEATURE_FLAG;
 
   private FeatureFlags() {}
