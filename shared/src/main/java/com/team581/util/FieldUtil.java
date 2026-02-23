@@ -207,6 +207,34 @@ public class FieldUtil {
           BLUE_DEPOT_TRENCH_SIDE_BUMP_POINT,
           RED_DEPOT_TRENCH_SIDE_BUMP_POINT,
           RED_OUTPOST_TRENCH_SIDE_BUMP_POINT);
+
+  // Wall assist zone calculations
+  public static final double ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL = Units.inchesToMeters(60.0);
+
+  private static final Translation2d BLUE_OUTPOST_WALL_ASSIST_CORNER_ARC_CENTER = new Translation2d(ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL, ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL);
+  private static final Translation2d BLUE_DEPOT_WALL_ASSIST_CORNER_ARC_CENTER = new Translation2d(ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL, FIELD_WIDTH_Y - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL);
+  private static final Translation2d RED_DEPOT_WALL_ASSIST_CORNER_ARC_CENTER = new Translation2d(FIELD_LENGTH_X - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL, ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL);
+  private static final Translation2d RED_OUTPOST_WALL_ASSIST_CORNER_ARC_CENTER = new Translation2d(FIELD_LENGTH_X - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL, FIELD_WIDTH_Y - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL);
+
+  private static final List<Translation2d> WALL_ASSIST_CORNER_ARC_CENTERS =
+      ImmutableList.of(
+          BLUE_OUTPOST_WALL_ASSIST_CORNER_ARC_CENTER,
+          BLUE_DEPOT_WALL_ASSIST_CORNER_ARC_CENTER,
+          RED_DEPOT_WALL_ASSIST_CORNER_ARC_CENTER,
+          RED_OUTPOST_WALL_ASSIST_CORNER_ARC_CENTER);
+
+  private static final Rectangle2d BLUE_OUTPOST_WALL_ASSIST_CORNER_ZONE = new Rectangle2d(new Translation2d(0.0, 0.0), BLUE_OUTPOST_WALL_ASSIST_CORNER_ARC_CENTER);
+  private static final Rectangle2d BLUE_DEPOT_WALL_ASSIST_CORNER_ZONE = new Rectangle2d(new Translation2d(0.0, FIELD_WIDTH_Y), BLUE_DEPOT_WALL_ASSIST_CORNER_ARC_CENTER);
+  private static final Rectangle2d RED_DEPOT_WALL_ASSIST_CORNER_ZONE = new Rectangle2d(new Translation2d(FIELD_LENGTH_X, 0.0), RED_DEPOT_WALL_ASSIST_CORNER_ARC_CENTER);
+  private static final Rectangle2d RED_OUTPOST_WALL_ASSIST_CORNER_ZONE = new Rectangle2d(new Translation2d(FIELD_LENGTH_X, FIELD_WIDTH_Y), RED_OUTPOST_WALL_ASSIST_CORNER_ARC_CENTER);
+
+  private static final List<Rectangle2d> WALL_ASSIST_CORNER_ZONES =
+      ImmutableList.of(
+          BLUE_OUTPOST_WALL_ASSIST_CORNER_ZONE,
+          BLUE_DEPOT_WALL_ASSIST_CORNER_ZONE,
+          RED_DEPOT_WALL_ASSIST_CORNER_ZONE,
+          RED_OUTPOST_WALL_ASSIST_CORNER_ZONE);
+
   // TODO: Validate these points
   private static final Pose2d BLUE_LEFT_FALLBACK =
       new Pose2d(BLUE_OBSTACLE_X - TRENCH_LENGTH_X / 2.0, AprilTags.TAG_7.getY(), new Rotation2d());
@@ -372,6 +400,38 @@ public class FieldUtil {
     DogLog.log(
         "FieldUtil/RedOutpost/BumpAssistPoints/TrenchSideBumpPoint",
         new Pose2d(RED_OUTPOST_TRENCH_SIDE_BUMP_POINT, Rotation2d.kZero));
+
+    // Wall assist corner zones
+    DogLog.log("FieldUtil/BlueOutpost/WallAssistCornerZones/Corner1",
+        new Pose2d(
+            MathHelpers.getCorners(BLUE_OUTPOST_WALL_ASSIST_CORNER_ZONE).get(0), Rotation2d.kCW_90deg));
+    DogLog.log("FieldUtil/BlueOutpost/WallAssistCornerZones/Corner2",
+        new Pose2d(
+            MathHelpers.getCorners(BLUE_OUTPOST_WALL_ASSIST_CORNER_ZONE).get(2), Rotation2d.kCW_90deg));
+    DogLog.log("FieldUtil/BlueDepot/WallAssistCornerZones/Corner1",
+        new Pose2d(
+            MathHelpers.getCorners(BLUE_DEPOT_WALL_ASSIST_CORNER_ZONE).get(0), Rotation2d.kCW_90deg));
+    DogLog.log("FieldUtil/BlueDepot/WallAssistCornerZones/Corner2",
+        new Pose2d(
+            MathHelpers.getCorners(BLUE_DEPOT_WALL_ASSIST_CORNER_ZONE).get(2), Rotation2d.kCW_90deg));
+    DogLog.log("FieldUtil/RedDepot/WallAssistCornerZones/Corner1",
+        new Pose2d(
+            MathHelpers.getCorners(RED_DEPOT_WALL_ASSIST_CORNER_ZONE).get(0), Rotation2d.kCW_90deg));
+    DogLog.log("FieldUtil/RedDepot/WallAssistCornerZones/Corner2",
+        new Pose2d(
+            MathHelpers.getCorners(RED_DEPOT_WALL_ASSIST_CORNER_ZONE).get(2), Rotation2d.kCW_90deg));
+    DogLog.log("FieldUtil/RedOutpost/WallAssistCornerZones/Corner1",
+        new Pose2d(
+            MathHelpers.getCorners(RED_OUTPOST_WALL_ASSIST_CORNER_ZONE).get(0), Rotation2d.kCW_90deg));
+    DogLog.log("FieldUtil/RedOutpost/WallAssistCornerZones/Corner2",
+        new Pose2d(
+            MathHelpers.getCorners(RED_OUTPOST_WALL_ASSIST_CORNER_ZONE).get(2), Rotation2d.kCW_90deg));
+
+    // Wall assist corner arc centers
+    DogLog.log("FieldUtil/BlueOutpost/WallAssistCornerArcCenter", new Pose2d(BLUE_OUTPOST_WALL_ASSIST_CORNER_ARC_CENTER, Rotation2d.kZero));
+    DogLog.log("FieldUtil/BlueDepot/WallAssistCornerArcCenter", new Pose2d(BLUE_DEPOT_WALL_ASSIST_CORNER_ARC_CENTER, Rotation2d.kZero));
+    DogLog.log("FieldUtil/RedDepot/WallAssistCornerArcCenter", new Pose2d(RED_DEPOT_WALL_ASSIST_CORNER_ARC_CENTER, Rotation2d.kZero));
+    DogLog.log("FieldUtil/RedOutpost/WallAssistCornerArcCenter", new Pose2d(RED_OUTPOST_WALL_ASSIST_CORNER_ARC_CENTER, Rotation2d.kZero));
   }
 
   public static double getAllianceZoneX() {
@@ -401,6 +461,14 @@ public class FieldUtil {
   /** Returns the trench assist zone that the robot is currently in, if it exists. */
   public static Optional<Rectangle2d> getCurrentTrenchAssistZone(Translation2d robotPose) {
     return TRENCH_ASSIST_ZONES.stream().filter(zone -> zone.contains(robotPose)).findFirst();
+  }
+
+  public static Optional<Rectangle2d> getCurrentWallAssistCornerZone(Translation2d robotPose) {
+    return WALL_ASSIST_CORNER_ZONES.stream().filter(zone -> zone.contains(robotPose)).findFirst();
+  }
+
+  public static Translation2d getClosestWallAssistCornerArcCenter(Translation2d robotTranslation) {
+    return robotTranslation.nearest(WALL_ASSIST_CORNER_ARC_CENTERS);
   }
 
   public static Pose2d getFallbackScorePoint() {
