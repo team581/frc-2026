@@ -90,7 +90,7 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
 
   private void ingestTagResult(TagResult result) {
     DogLog.timestamp("Localization/IngestTagResult");
-    trustFactor.tagSeen();
+    trustFactor.tagSeen(result.standardDevs().getData()[0]);
     var visionPose = result.pose();
 
     if (!vision.seenTagRecentlyForReset()) {
