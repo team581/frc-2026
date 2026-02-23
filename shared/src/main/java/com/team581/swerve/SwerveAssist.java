@@ -153,12 +153,13 @@ public class SwerveAssist {
       }
 
       assistPoint =
-        new Translation2d(
-            assistPoint.getX(),
-            MathUtil.clamp(
-                assistPoint.getY(),
-                FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL,
-                FieldUtil.FIELD_WIDTH_Y - FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
+          new Translation2d(
+              assistPoint.getX(),
+              MathUtil.clamp(
+                  assistPoint.getY(),
+                  FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL,
+                  FieldUtil.FIELD_WIDTH_Y
+                      - FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
     } else {
       if (robotPose.getY() > FieldUtil.FIELD_WIDTH_Y / 2.0) {
         distanceFromWall = FieldUtil.FIELD_WIDTH_Y - ASSIST_POINT_DISTANCE_FROM_PARALLEL_WALL;
@@ -175,12 +176,13 @@ public class SwerveAssist {
       }
 
       assistPoint =
-        new Translation2d(
-            MathUtil.clamp(
-                assistPoint.getX(),
-                FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL,
-                FieldUtil.FIELD_LENGTH_X - FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL),
-            assistPoint.getY());
+          new Translation2d(
+              MathUtil.clamp(
+                  assistPoint.getX(),
+                  FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL,
+                  FieldUtil.FIELD_LENGTH_X
+                      - FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL),
+              assistPoint.getY());
     }
     DogLog.log("SwerveAssist/WallAssist/AssistPoint", new Pose2d(assistPoint, Rotation2d.kZero));
 
@@ -321,19 +323,21 @@ public class SwerveAssist {
   public static PolarChassisSpeeds getWallAssistSpeeds(
       Translation2d robotTranslation, ChassisSpeeds inputSpeeds) {
     PolarChassisSpeeds wantedSpeeds;
-    if (!FieldUtil.getCurrentWallAssistCornerZone(robotTranslation).isEmpty()) {
+    if (FieldUtil.getCurrentWallAssistCornerZone(robotTranslation).isPresent()) {
       wantedSpeeds = new PolarChassisSpeeds();
       // // If we are in a wall assist corner zone, get curved corner assist speeds
       // var cornerArcCenter = FieldUtil.getClosestWallAssistCornerArcCenter(robotTranslation);
       // var actualRadius = cornerArcCenter.getDistance(robotTranslation);
-      // var wantedRadius = FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL - ASSIST_POINT_DISTANCE_FROM_PARALLEL_WALL;
+      // var wantedRadius = FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL -
+      // ASSIST_POINT_DISTANCE_FROM_PARALLEL_WALL;
       // // TODO: Get corner assist speeds
       // var radialVelocity = SWERVE_ASSIST_PID_CONTROLLER.calculate(actualRadius, wantedRadius);
     } else {
       // Else get linear wall assist speeds
       var closestWallTranslation =
           MathHelpers.getClosestPointOnRectanglePerimeter(robotTranslation, FieldUtil.FIELD_BOUNDS);
-      var closestWallIsADriverStationWall = robotTranslation.getY() == closestWallTranslation.getY();
+      var closestWallIsADriverStationWall =
+          robotTranslation.getY() == closestWallTranslation.getY();
       var wantedLinearVelocity = 0.0;
 
       var distanceFromWall = ASSIST_POINT_DISTANCE_FROM_PARALLEL_WALL;
