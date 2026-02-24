@@ -746,6 +746,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.rateLimitedDriveRequest();
         }
+
+        if (FeatureFlags.DYE_ROTOR_CLEANUP_MODE.getAsBoolean()&&intake.getState() == IntakeState.INTAKE) {
+          dyeRotor.cleanupRequest();
+        } else {
+          dyeRotor.shootRequest();
+        }
       }
       case PREPARE_FEED -> {
         smartTurretHoodPrepareFeedRequest();
@@ -762,6 +768,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           swerve.intakeDriveRequest();
         } else {
           swerve.normalDriveRequest();
+        }
+
+        if (FeatureFlags.DYE_ROTOR_CLEANUP_MODE.getAsBoolean()&&intake.getState() == IntakeState.INTAKE) {
+          dyeRotor.cleanupRequest();
+        } else {
+          dyeRotor.shootRequest();
         }
       }
 

@@ -53,6 +53,12 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     }
   }
 
+  public void cleanupRequest() {
+    if (getState() != DyeRotorState.UNHOMED) {
+      setStateFromRequest(DyeRotorState.CLEANUP_INTAKE_SCAN);
+    }
+  }
+
   public void unjamRequest() {
     if (getState() != DyeRotorState.UNHOMED) {
       setStateFromRequest(DyeRotorState.UNJAM);
@@ -90,6 +96,22 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
           yield DyeRotorState.RESET_TO_IDLE;
         }
         yield currentState;
+      }
+      case CLEANUP_INTAKE_SCAN -> {
+        if (rotorAngle >= DyeRotorState.CLEANUP_WHIP_AROUND.rotorPosition
+            || rotorAngle <= DyeRotorState.CLEANUP_INTAKE_SCAN.rotorPosition) {
+          yield DyeRotorState.CLEANUP_WHIP_AROUND;
+        } else {
+          yield currentState;
+        }
+      }
+      case CLEANUP_WHIP_AROUND -> {
+        if (rotorAngle >= DyeRotorState.CLEANUP_INTAKE_SCAN.rotorPosition
+            && rotorAngle < DyeRotorState.CLEANUP_WHIP_AROUND.rotorPosition) {
+          yield DyeRotorState.CLEANUP_INTAKE_SCAN;
+        } else {
+          yield currentState;
+        }
       }
       default -> currentState;
     };

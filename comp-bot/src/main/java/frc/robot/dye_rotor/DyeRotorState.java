@@ -8,6 +8,9 @@ public enum DyeRotorState {
   RESET_TO_IDLE(10.0, 180.0, 0.0, 0.0),
   IDLE(0.0, 180.0, 0.0, 0.0),
   SHOOT(20.0, 180.0, 10.0, 10.0),
+  CLEANUP_INTAKE_SCAN(5.0, -145.0, 10.0, 10.0),
+  CLEANUP_WHIP_AROUND(20.0, 55.0, 10.0, 10.0),
+
   UNJAM(0.0, 180.0, 0.0, 0.0);
 
   private static double bpsToRpm(double bps) {
