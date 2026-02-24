@@ -94,9 +94,13 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
     DogLog.log("Turret/Angle", currentAngle);
     DogLog.log("Turret/Motor/LatencyCompensatedAngle", latencyCompensatedAngle);
-    DogLog.log(
-        "Turret/Encoder/EncoderAngle",
-        Units.rotationsToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
+    double encoderAbs = encoder.getAbsolutePosition().getValueAsDouble();
+    double motorPosition = motor.getRotorPosition().getValueAsDouble();
+
+    var turretPos =
+        TurretCalculator.calculateHomedPositionFromMotorAndEncoder(motorPosition, encoderAbs);
+    DogLog.log("Turret/HomedAngle", Units.rotationsToDegrees(turretPos));
+    DogLog.log("Turret/Encoder/EncoderAngle", Units.rotationsToDegrees(encoderAbs));
   }
 
   @Override
