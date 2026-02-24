@@ -97,7 +97,7 @@ public class SwerveAssist {
         MathHelpers.getClosestPointOnRectanglePerimeter(
             robotPose.getTranslation(), FieldUtil.FIELD_BOUNDS);
 
-    if (!FieldUtil.getCurrentWallAssistCornerZone(robotPose.getTranslation()).isEmpty()) {
+    if (FieldUtil.getCurrentWallAssistCornerZone(robotPose.getTranslation()).isPresent()) {
       // TODO: Possibly need to determine ableToSnap logic near corner
     }
 
@@ -302,7 +302,9 @@ public class SwerveAssist {
         MathHelpers.getClosestPointOnRectanglePerimeter(robotTranslation, FieldUtil.FIELD_BOUNDS);
     var closestWallIsADriverStationWall = robotTranslation.getY() == closestWallTranslation.getY();
     var angleToWall = robotTranslation.minus(closestWallTranslation).getAngle();
-    var roundedSnapAngle = getRoundedSnapAngle(MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_ASSIST_SNAP_ROUND_ANGLE);
+    var roundedSnapAngle =
+        getRoundedSnapAngle(
+            MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_ASSIST_SNAP_ROUND_ANGLE);
     var direction = 0;
     // TODO: check what to do in corners
     if (closestWallIsADriverStationWall) {

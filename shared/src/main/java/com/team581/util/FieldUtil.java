@@ -213,16 +213,29 @@ public class FieldUtil {
       Units.inchesToMeters(60.0);
 
   private static final Rectangle2d BLUE_OUTPOST_WALL_ASSIST_CORNER_ZONE =
-      new Rectangle2d(new Translation2d(0.0, 0.0), new Translation2d(ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL, ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
+      new Rectangle2d(
+          new Translation2d(0.0, 0.0),
+          new Translation2d(
+              ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL,
+              ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
   private static final Rectangle2d BLUE_DEPOT_WALL_ASSIST_CORNER_ZONE =
       new Rectangle2d(
-          new Translation2d(0.0, FIELD_WIDTH_Y), new Translation2d(ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL, FIELD_WIDTH_Y - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
+          new Translation2d(0.0, FIELD_WIDTH_Y),
+          new Translation2d(
+              ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL,
+              FIELD_WIDTH_Y - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
   private static final Rectangle2d RED_DEPOT_WALL_ASSIST_CORNER_ZONE =
       new Rectangle2d(
-          new Translation2d(FIELD_LENGTH_X, 0.0), new Translation2d(FIELD_LENGTH_X - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL, ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
+          new Translation2d(FIELD_LENGTH_X, 0.0),
+          new Translation2d(
+              FIELD_LENGTH_X - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL,
+              ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
   private static final Rectangle2d RED_OUTPOST_WALL_ASSIST_CORNER_ZONE =
       new Rectangle2d(
-          new Translation2d(FIELD_LENGTH_X, FIELD_WIDTH_Y), new Translation2d(FIELD_LENGTH_X - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL, FIELD_WIDTH_Y - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
+          new Translation2d(FIELD_LENGTH_X, FIELD_WIDTH_Y),
+          new Translation2d(
+              FIELD_LENGTH_X - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL,
+              FIELD_WIDTH_Y - ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL));
 
   private static final List<Rectangle2d> WALL_ASSIST_CORNER_ZONES =
       ImmutableList.of(
