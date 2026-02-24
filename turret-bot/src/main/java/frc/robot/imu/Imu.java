@@ -25,6 +25,8 @@ public class Imu extends BaseImuSubsystem {
 
   @Override
   public void collectInputs() {
+    super.collectInputs();
+
     double pigeonFilteredXAccel =
         pigeonXAccelFilter.calculate(drivetrain.getPigeon2().getAccelerationX().getValueAsDouble());
     double pigeonFilteredYAccel =
