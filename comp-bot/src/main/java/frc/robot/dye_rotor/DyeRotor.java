@@ -58,7 +58,7 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
   }
 
   public void feedRequest(double distance) {
-        feedDistance = distance;
+    feedDistance = distance;
 
     if (getState() != DyeRotorState.UNHOMED) {
       setStateFromRequest(DyeRotorState.FEED);
@@ -133,7 +133,7 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
           yield currentState;
         }
       }
-         case FEED_CLEANUP_INTAKE_SCAN -> {
+      case FEED_CLEANUP_INTAKE_SCAN -> {
         if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_WHIP_AROUND.rotorPosition
             || rotorAngle <= DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN.rotorPosition) {
           yield DyeRotorState.FEED_CLEANUP_WHIP_AROUND;
@@ -157,13 +157,19 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
   protected void whileInState(DyeRotorState currentState) {
 
     switch (currentState) {
-      case SCORE, SCORE_CLEANUP_INTAKE_SCAN, SCORE_CLEANUP_WHIP_AROUND-> {
-        rotorMotor.setControl(rotorVelocityRequest.withVelocity(currentState.getRotorRPM(DyeRotorConfig.DISTANCE_TO_SCORE_BPS.get(scoreDistance)) / 60.0));
+      case SCORE, SCORE_CLEANUP_INTAKE_SCAN, SCORE_CLEANUP_WHIP_AROUND -> {
+        rotorMotor.setControl(
+            rotorVelocityRequest.withVelocity(
+                currentState.getRotorRPM(DyeRotorConfig.DISTANCE_TO_SCORE_BPS.get(scoreDistance))
+                    / 60.0));
         horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
         verticalMotor.setVoltage(currentState.getVerticalVoltage());
       }
-      case FEED, FEED_CLEANUP_INTAKE_SCAN, FEED_CLEANUP_WHIP_AROUND-> {
-        rotorMotor.setControl(rotorVelocityRequest.withVelocity(currentState.getRotorRPM(DyeRotorConfig.DISTANCE_TO_FEED_BPS.get(feedDistance)) / 60.0));
+      case FEED, FEED_CLEANUP_INTAKE_SCAN, FEED_CLEANUP_WHIP_AROUND -> {
+        rotorMotor.setControl(
+            rotorVelocityRequest.withVelocity(
+                currentState.getRotorRPM(DyeRotorConfig.DISTANCE_TO_FEED_BPS.get(feedDistance))
+                    / 60.0));
         horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
         verticalMotor.setVoltage(currentState.getVerticalVoltage());
       }

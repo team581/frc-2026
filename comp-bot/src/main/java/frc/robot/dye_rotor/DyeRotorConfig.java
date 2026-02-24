@@ -1,7 +1,5 @@
 package frc.robot.dye_rotor;
 
-import java.util.Map;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -11,11 +9,11 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team581.util.tuning.TunableInterpolatingDoubleTreeMap;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import java.util.Map;
 
 public class DyeRotorConfig {
   public static final Debouncer IS_SHOOTING_DEBOUNCER = new Debouncer(1.0);
@@ -28,7 +26,7 @@ public class DyeRotorConfig {
   public static final DoubleSubscriber JAM_CURRENT_THRESHOLD =
       DogLog.tunable("DyeRotor/Horizontal/JamCurrentThreshold", 75.0);
 
-       public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_BPS =
+  public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_BPS =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "DyeRotor/DistanceToScoreBPS",
           Map.entry(5.56, 10.0),
