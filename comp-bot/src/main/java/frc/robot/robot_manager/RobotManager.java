@@ -348,7 +348,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.TAGS);
         shooter.scoreRequest(scoringParameters.distance());
         shooterHood.scoreRequest(scoringParameters.distance());
-        dyeRotor.shootRequest();
+        dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(scoringParameters.turretAngle());
         deploy.shuffleRequest();
         intake.shootRequest();
@@ -369,7 +369,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.TAGS);
         shooter.feedRequest(feedingParameters.distance());
         shooterHood.feedRequest(feedingParameters.distance());
-        dyeRotor.shootRequest();
+        dyeRotor.feedRequest(feedingParameters.distance());
         turret.feedRequest(feedingParameters.turretAngle());
         deploy.shuffleRequest();
         intake.shootRequest();
@@ -402,7 +402,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.HUB_TAGS);
         shooter.scoreRequest(scoringParameters.distance());
         shooterHood.scoreRequest(scoringParameters.distance());
-        dyeRotor.shootRequest();
+        dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(scoringParameters.turretAngle());
         deploy.shuffleRequest();
         intake.shootRequest();
@@ -435,7 +435,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.TAGS);
         shooter.feedRequest(PRESET_FEED_DISTANCE);
         shooterHood.feedRequest(PRESET_FEED_DISTANCE);
-        dyeRotor.shootRequest();
+        dyeRotor.feedRequest(feedingParameters.distance());
         turret.feedRequest(0);
         deploy.shuffleRequest();
         intake.shootRequest();
@@ -468,7 +468,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.TAGS);
         shooter.scoreRequest(scoringParameters.distance());
         shooterHood.scoreRequest(scoringParameters.distance());
-        dyeRotor.shootRequest();
+          dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(scoringParameters.turretAngle());
         deploy.shuffleRequest();
         intake.shootRequest();
@@ -658,7 +658,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.TAGS);
         shooter.climbScoreRequest(climbLocationIsLeft);
         shooterHood.climbScoreRequest(climbLocationIsLeft);
-        dyeRotor.shootRequest();
+          dyeRotor.scoreRequest(scoringParameters.distance());
         turret.climbScoreRequest(climbLocationIsLeft);
         deploy.stowRequest();
         intake.shootRequest();
@@ -749,9 +749,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
         if (FeatureFlags.DYE_ROTOR_CLEANUP_MODE.getAsBoolean()
             && intake.getState() == IntakeState.INTAKE) {
-          dyeRotor.cleanupRequest();
+          dyeRotor.scoreCleanupRequest(scoringParameters.distance());
         } else {
-          dyeRotor.shootRequest();
+          dyeRotor.scoreRequest(scoringParameters.distance());
         }
       }
       case PREPARE_FEED -> {
@@ -773,9 +773,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
         if (FeatureFlags.DYE_ROTOR_CLEANUP_MODE.getAsBoolean()
             && intake.getState() == IntakeState.INTAKE) {
-          dyeRotor.cleanupRequest();
+        dyeRotor.feedCleanupRequest(feedingParameters.distance());
         } else {
-          dyeRotor.shootRequest();
+          dyeRotor.feedRequest(feedingParameters.distance());
         }
       }
 

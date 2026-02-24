@@ -33,6 +33,9 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
   private boolean isShooting = false;
   private boolean isShootingDebounced = false;
 
+  private double scoreDistance = 0;
+  private double feedDistance = 0;
+
   public DyeRotor(TalonFX rotorMotor, TalonFX horizontalMotor, TalonFX verticalMotor) {
     super(SubsystemPriority.DYE_ROTOR, DyeRotorState.UNHOMED);
 
@@ -47,15 +50,32 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     this.verticalMotor = verticalMotor;
   }
 
-  public void shootRequest() {
+  public void scoreRequest(double distance) {
+    scoreDistance = distance;
     if (getState() != DyeRotorState.UNHOMED) {
-      setStateFromRequest(DyeRotorState.SHOOT);
+      setStateFromRequest(DyeRotorState.SCORE);
     }
   }
 
-  public void cleanupRequest() {
+  public void feedRequest(double distance) {
+        feedDistance = distance;
+
     if (getState() != DyeRotorState.UNHOMED) {
-      setStateFromRequest(DyeRotorState.CLEANUP_INTAKE_SCAN);
+      setStateFromRequest(DyeRotorState.FEED);
+    }
+  }
+
+  public void scoreCleanupRequest(double distance) {
+    scoreDistance = distance;
+    if (getState() != DyeRotorState.UNHOMED) {
+      setStateFromRequest(DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN);
+    }
+  }
+
+  public void feedCleanupRequest(double distance) {
+    feedDistance = distance;
+    if (getState() != DyeRotorState.UNHOMED) {
+      setStateFromRequest(DyeRotorState.FEED_CLEANUP_INTAKE_SCAN);
     }
   }
 
@@ -97,18 +117,34 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
         }
         yield currentState;
       }
-      case CLEANUP_INTAKE_SCAN -> {
-        if (rotorAngle >= DyeRotorState.CLEANUP_WHIP_AROUND.rotorPosition
-            || rotorAngle <= DyeRotorState.CLEANUP_INTAKE_SCAN.rotorPosition) {
-          yield DyeRotorState.CLEANUP_WHIP_AROUND;
+      case SCORE_CLEANUP_INTAKE_SCAN -> {
+        if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_WHIP_AROUND.rotorPosition
+            || rotorAngle <= DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN.rotorPosition) {
+          yield DyeRotorState.SCORE_CLEANUP_WHIP_AROUND;
         } else {
           yield currentState;
         }
       }
-      case CLEANUP_WHIP_AROUND -> {
-        if (rotorAngle >= DyeRotorState.CLEANUP_INTAKE_SCAN.rotorPosition
-            && rotorAngle < DyeRotorState.CLEANUP_WHIP_AROUND.rotorPosition) {
-          yield DyeRotorState.CLEANUP_INTAKE_SCAN;
+      case SCORE_CLEANUP_WHIP_AROUND -> {
+        if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN.rotorPosition
+            && rotorAngle < DyeRotorState.SCORE_CLEANUP_WHIP_AROUND.rotorPosition) {
+          yield DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN;
+        } else {
+          yield currentState;
+        }
+      }
+         case FEED_CLEANUP_INTAKE_SCAN -> {
+        if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_WHIP_AROUND.rotorPosition
+            || rotorAngle <= DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN.rotorPosition) {
+          yield DyeRotorState.FEED_CLEANUP_WHIP_AROUND;
+        } else {
+          yield currentState;
+        }
+      }
+      case FEED_CLEANUP_WHIP_AROUND -> {
+        if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN.rotorPosition
+            && rotorAngle < DyeRotorState.SCORE_CLEANUP_WHIP_AROUND.rotorPosition) {
+          yield DyeRotorState.FEED_CLEANUP_INTAKE_SCAN;
         } else {
           yield currentState;
         }
@@ -120,10 +156,23 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
   @Override
   protected void whileInState(DyeRotorState currentState) {
 
-    // TODO: Move to afterTransition once we are done tuning
-    rotorMotor.setControl(rotorVelocityRequest.withVelocity(currentState.getRotorRPM() / 60.0));
-    horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
-    verticalMotor.setVoltage(currentState.getVerticalVoltage());
+    switch (currentState) {
+      case SCORE, SCORE_CLEANUP_INTAKE_SCAN, SCORE_CLEANUP_WHIP_AROUND-> {
+        rotorMotor.setControl(rotorVelocityRequest.withVelocity(currentState.getRotorRPM(DyeRotorConfig.DISTANCE_TO_SCORE_BPS.get(scoreDistance)) / 60.0));
+        horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
+        verticalMotor.setVoltage(currentState.getVerticalVoltage());
+      }
+      case FEED, FEED_CLEANUP_INTAKE_SCAN, FEED_CLEANUP_WHIP_AROUND-> {
+        rotorMotor.setControl(rotorVelocityRequest.withVelocity(currentState.getRotorRPM(DyeRotorConfig.DISTANCE_TO_FEED_BPS.get(feedDistance)) / 60.0));
+        horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
+        verticalMotor.setVoltage(currentState.getVerticalVoltage());
+      }
+      default -> {
+        rotorMotor.setControl(rotorVelocityRequest.withVelocity(currentState.getRotorRPM() / 60.0));
+        horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
+        verticalMotor.setVoltage(currentState.getVerticalVoltage());
+      }
+    }
 
     DogLog.log("DyeRotor/Rotor/RPM", rotorMotorRpm);
     DogLog.log("DyeRotor/Rotor/GoalRPM", currentState.rotorRPM);
