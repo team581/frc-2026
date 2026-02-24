@@ -15,9 +15,7 @@ public class BaseTurretCalculator {
       double turretEncoderPosition,
       double motorToTurretRatio,
       double encoderToTurretRatio,
-      double motorRotationResolution,
-      double minTurretAngleRotations,
-      double maxTurretAngleRotations) {
+      double motorRotationResolution) {
     double rotor_position = turretMotorPosition % 1;
     DogLog.log("Turret/Calculator/motor_mod", rotor_position);
     double rotorRotationsRelativeToTurret = rotor_position / motorToTurretRatio;
@@ -54,7 +52,7 @@ public class BaseTurretCalculator {
     DogLog.log("Turret/Calculator/turretPos", turretPos);
     DogLog.log("Turret/Calculator/turretPosDegrees", Units.rotationsToDegrees(turretPos));
 
-    return MathUtil.inputModulus(turretPos, minTurretAngleRotations, maxTurretAngleRotations);
+    return turretPos;
   }
 
   public static double calculateSwerveTurretCompensationAngle(
