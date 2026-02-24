@@ -324,13 +324,11 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       case MANUAL -> {
         var speeds = driveSource.getRequestedSpeeds();
         if (ableToWallAssist) {
-          var wallAssistSpeeds =
-              SwerveAssist.getWallAssistSpeeds(drivetrainState.Pose.getTranslation(), speeds);
           drivetrain.setControl(
               withFieldRelativeTargetDirection(
                   drivePerspectiveSnapsOpenLoop
-                      .withVelocityX(wallAssistSpeeds.vxMetersPerSecond)
-                      .withVelocityY(wallAssistSpeeds.vyMetersPerSecond),
+                      .withVelocityX(speeds.vxMetersPerSecond)
+                      .withVelocityY(speeds.vyMetersPerSecond),
                   SwerveAssist.getWallAssistSnapAngle(
                       drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds)));
         } else if (ableToTrenchAssist) {
