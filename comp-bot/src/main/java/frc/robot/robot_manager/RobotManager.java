@@ -765,7 +765,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case FEED -> {
         turret.feedRequest(feedingParameters.turretAngle());
         shooterHood.feedRequest(feedingParameters.distance());
-      if (intake.getState() == IntakeState.INTAKE) {
+        if (intake.getState() == IntakeState.INTAKE) {
           swerve.intakeDriveRequest();
         } else {
           swerve.normalDriveRequest();
