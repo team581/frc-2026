@@ -134,16 +134,16 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
         }
       }
       case FEED_CLEANUP_INTAKE_SCAN -> {
-        if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_WHIP_AROUND.rotorPosition
-            || rotorAngle <= DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN.rotorPosition) {
+        if (rotorAngle >= DyeRotorState.FEED_CLEANUP_WHIP_AROUND.rotorPosition
+            || rotorAngle <= DyeRotorState.FEED_CLEANUP_INTAKE_SCAN.rotorPosition) {
           yield DyeRotorState.FEED_CLEANUP_WHIP_AROUND;
         } else {
           yield currentState;
         }
       }
       case FEED_CLEANUP_WHIP_AROUND -> {
-        if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN.rotorPosition
-            && rotorAngle < DyeRotorState.SCORE_CLEANUP_WHIP_AROUND.rotorPosition) {
+        if (rotorAngle >= DyeRotorState.FEED_CLEANUP_INTAKE_SCAN.rotorPosition
+            && rotorAngle < DyeRotorState.FEED_CLEANUP_WHIP_AROUND.rotorPosition) {
           yield DyeRotorState.FEED_CLEANUP_INTAKE_SCAN;
         } else {
           yield currentState;
