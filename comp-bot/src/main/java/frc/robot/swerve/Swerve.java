@@ -226,13 +226,11 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
     ableToTrenchAssist =
         DSOptions.USE_SWERVE_ASSIST.get()
-            && FeatureFlags.TRENCH_ASSIST.getAsBoolean()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToTrenchAssist(drivetrainState.Pose, fieldRelativeSpeeds);
     ableToBumpAssist =
         DSOptions.USE_SWERVE_ASSIST.get()
-            && FeatureFlags.BUMP_ASSIST.getAsBoolean()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToBumpAssist(drivetrainState.Pose, fieldRelativeSpeeds);
