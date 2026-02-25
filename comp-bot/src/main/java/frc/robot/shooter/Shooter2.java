@@ -43,7 +43,7 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
     super(SubsystemPriority.SHOOTER, ShooterState2.IDLE);
 
     bottomMotor.getConfigurator().apply(Shooter2Config.BOTTOM_MOTOR_CONFIG);
-    topMotor.getConfigurator().apply(Shooter2Config.TOP_MOTOR_CONFIGS);
+    topMotor.getConfigurator().apply(Shooter2Config.BOTTOM_MOTOR_CONFIG);
 
     TunablePid.register("Shooter/BottomShooter", bottomMotor, Shooter2Config.BOTTOM_MOTOR_CONFIG);
     TunablePid.register("Shooter/TopShooter", topMotor, Shooter2Config.TOP_MOTOR_CONFIGS);
@@ -120,11 +120,11 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
         topMotor.stopMotor();
         bottomMotor.stopMotor();
       }
-      case SELF_TEST_BOTTOM_MOTOR -> {
+      case SELF_TEST_LEFT_MOTOR -> {
         bottomMotor.setVoltage(Shooter2Config.TEST_VOLTAGE);
         topMotor.stopMotor();
       }
-      case SELF_TEST_TOP_MOTOR -> {
+      case SELF_TEST_RIGHT_MOTOR -> {
         topMotor.setVoltage(Shooter2Config.TEST_VOLTAGE);
         bottomMotor.stopMotor();
       }
@@ -139,32 +139,32 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
     topMotorRpm = topMotor.getVelocity().getValueAsDouble() * 60.0;
     bottomMotorRpm = bottomMotor.getVelocity().getValueAsDouble() * 60.0;
 
-    if (getState() == ShooterState2.SELF_TEST_TOP_MOTOR) {
+    if (getState() == ShooterState2.SELF_TEST_LEFT_MOTOR) {
       DogLog.log(
           "Shooter/SelfTest/TopMotor/VelocityGood",
           MathUtil.isNear(
               Shooter2Config.SELF_TEST_TOP_MOTOR_EXPECTED_RPM,
               topMotorRpm,
-              Shooter2Config.SELF_TEST_TOP_MOTOR_RPM_TOLERANCE));
+              Shooter2Config.SELF_TEST_BOTTOM_MOTOR_RPM_TOLERANCE));
       DogLog.log(
           "Shooter/SelfTest/TopMotor/CurrentGood",
           MathUtil.isNear(
               Shooter2Config.SELF_TEST_TOP_MOTOR_EXPECTED_CURRENT,
               topMotor.getStatorCurrent().getValueAsDouble(),
-              Shooter2Config.SELF_TEST_TOP_MOTOR_CURRENT_TOLERANCE));
+              Shooter2Config.SELF_TEST_BOTTOM_MOTOR_CURRENT_TOLERANCE));
     }
 
-    if (getState() == ShooterState2.SELF_TEST_BOTTOM_MOTOR) {
+    if (getState() == ShooterState2.SELF_TEST_RIGHT_MOTOR) {
       DogLog.log(
           "Shooter/SelfTest/BottomMotor/VelocityGood",
           MathUtil.isNear(
-              Shooter2Config.SELF_TEST_BOTTOM_MOTOR_EXPECTED_RPM,
+              Shooter2Config.SELF_TEST_TOP_MOTOR_EXPECTED_RPM,
               topMotorRpm,
               Shooter2Config.SELF_TEST_BOTTOM_MOTOR_RPM_TOLERANCE));
       DogLog.log(
           "Shooter/SelfTest/BottomMotor/CurrentGood",
           MathUtil.isNear(
-              Shooter2Config.SELF_TEST_BOTTOM_MOTOR_EXPECTED_CURRENT,
+              Shooter2Config.SELF_TEST_TOP_MOTOR_EXPECTED_CURRENT,
               bottomMotor.getStatorCurrent().getValueAsDouble(),
               Shooter2Config.SELF_TEST_BOTTOM_MOTOR_CURRENT_TOLERANCE));
     }
@@ -191,12 +191,12 @@ public class Shooter2 extends StateMachineSubsystem<ShooterState2> {
   @Override
   protected ShooterState2 getNextState(ShooterState2 currentState) {
     return switch (currentState) {
-      case SELF_TEST_TOP_MOTOR -> timeout(5) ? ShooterState2.SELF_TEST_STOP_MOTORS : currentState;
+      case SELF_TEST_LEFT_MOTOR -> timeout(5) ? ShooterState2.SELF_TEST_STOP_MOTORS : currentState;
       // TODO: This is currently looping between SELF_TEST_STOP_MOTORS and SELF_TEST_BOTTOM_MOTOR
       // infinitely
       case SELF_TEST_STOP_MOTORS ->
-          timeout(2) ? ShooterState2.SELF_TEST_BOTTOM_MOTOR : currentState;
-      case SELF_TEST_BOTTOM_MOTOR ->
+          timeout(2) ? ShooterState2.SELF_TEST_RIGHT_MOTOR : currentState;
+      case SELF_TEST_RIGHT_MOTOR ->
           timeout(5) ? ShooterState2.SELF_TEST_STOP_MOTORS : currentState;
       case SELF_TEST -> currentState;
 
