@@ -1180,7 +1180,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     isMoving = MathHelpers.getLinearVelocity(speeds) > 0.2;
 
     if (MathUtil.isNear(0.0, MathHelpers.getDriveDirection(speeds).getDegrees(), 45, -180, 180)) {
-       tryingToIntake = true;
+      tryingToIntake = true;
     } else {
       tryingToIntake = false;
     }
