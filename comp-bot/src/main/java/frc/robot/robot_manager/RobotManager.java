@@ -8,6 +8,7 @@ import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -61,6 +62,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private AimingParameters feedingParameters = new AimingParameters(0, 0);
   private static final double PRESET_FEED_DISTANCE = 0.0;
   private boolean isMoving = false;
+  private boolean drivingToIntake = false;
+  private boolean tryingToIntake = false;
 
   private double timeSinceMatchStart = 0.0;
   private double timeUntilNextShift = 0.0;
@@ -846,6 +849,16 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       default -> {}
     }
+    if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+      if (tryingToIntake) {
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
+        }
+      }
+    }
+
     DogLog.log("RobotManager/Feeding/FeedLocation", feedLocation);
     DogLog.log("RobotManager/Feeding/FeedParameters", feedingParameters);
     DogLog.log("RobotManager/Scoring/ScoringParameters", scoringParameters);
@@ -856,6 +869,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     DogLog.log("RobotManager/TimeUntilNextShift", timeUntilNextShift);
     DogLog.log("RobotManager/HubActive", getIsHubActive());
+    DogLog.log("RobotManager/DrivingToIntake", drivingToIntake);
 
     MechanismVisualizer.log(
         robotPose,
@@ -1002,6 +1016,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   public void intakeRequest() {
+    tryingToIntake = true;
     intake.intakeRequest();
     deploy.intakeRequest();
   }
@@ -1170,6 +1185,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     isHubActive = getIsHubActiveOrNotUsingState();
     timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
+    var swerveVector = MathHelpers.getDriveDirection(speeds);
+    drivingToIntake =
+        MathUtil.isNear(robotPose.getRotation().getDegrees(), swerveVector.getDegrees(), 20);
   }
 
   private boolean getIsHubActiveOrNotUsingState() {
