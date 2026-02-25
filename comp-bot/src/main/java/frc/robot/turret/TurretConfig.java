@@ -52,7 +52,7 @@ public class TurretConfig {
               new MagnetSensorConfigs()
                   .withMagnetOffset(ROTOR_CAL_OFFSET)
                   .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
-                  .withAbsoluteSensorDiscontinuityPoint(0.5));
+                  .withAbsoluteSensorDiscontinuityPoint(0.2));
 
   private TurretConfig() {}
 }
