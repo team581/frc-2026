@@ -5,58 +5,59 @@ import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import java.util.function.Function;
 
-public class Bindings {
+public class ControllerBindings {
   private final XboxController controller;
   private final BooleanEvent enabledEvent;
   private final EventLoop eventLoop;
 
-  public Bindings(EventLoop eventLoop, BooleanEvent enabledEvent, XboxController controller) {
+  public ControllerBindings(
+      EventLoop eventLoop, BooleanEvent enabledEvent, XboxController controller) {
     this.controller = controller;
     this.enabledEvent = enabledEvent;
     this.eventLoop = eventLoop;
   }
 
-  public ButtonBinding a() {
+  public ButtonEvent a() {
     return button(controller::a);
   }
 
-  public ButtonBinding b() {
+  public ButtonEvent b() {
     return button(controller::b);
   }
 
-  public ButtonBinding back() {
+  public ButtonEvent back() {
     return button(controller::back);
   }
 
-  public ButtonBinding button(Function<EventLoop, BooleanEvent> rawEvent) {
-    return new ButtonBinding(eventLoop, rawEvent.apply(eventLoop).and(enabledEvent));
+  public ButtonEvent button(Function<EventLoop, BooleanEvent> rawEvent) {
+    return new ButtonEvent(eventLoop, rawEvent.apply(eventLoop).and(enabledEvent));
   }
 
-  public ButtonBinding leftBumper() {
+  public ButtonEvent leftBumper() {
     return button(controller::leftBumper);
   }
 
-  public ButtonBinding leftTrigger() {
+  public ButtonEvent leftTrigger() {
     return button(controller::leftTrigger);
   }
 
-  public ButtonBinding rightBumper() {
+  public ButtonEvent rightBumper() {
     return button(controller::rightBumper);
   }
 
-  public ButtonBinding rightTrigger() {
+  public ButtonEvent rightTrigger() {
     return button(controller::rightTrigger);
   }
 
-  public ButtonBinding start() {
+  public ButtonEvent start() {
     return button(controller::start);
   }
 
-  public ButtonBinding x() {
+  public ButtonEvent x() {
     return button(controller::x);
   }
 
-  public ButtonBinding y() {
+  public ButtonEvent y() {
     return button(controller::y);
   }
 }

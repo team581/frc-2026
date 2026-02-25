@@ -3,7 +3,7 @@ package frc.robot;
 import com.team581.Base581Robot;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
-import com.team581.controller.Bindings;
+import com.team581.controller.ControllerBindings;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.followers.PidPathFollower;
@@ -162,8 +162,10 @@ public class Robot extends Base581Robot {
 
   @Override
   protected void configureBindings() {
-    var driver = new Bindings(buttonBindingsLoop, enabledEvent, hardware.driverController);
-    var operator = new Bindings(buttonBindingsLoop, enabledEvent, hardware.operatorController);
+    var driver =
+        new ControllerBindings(buttonBindingsLoop, enabledEvent, hardware.driverController);
+    var operator =
+        new ControllerBindings(buttonBindingsLoop, enabledEvent, hardware.operatorController);
 
     // Independent bindings (no cross-controller interactions)
 
