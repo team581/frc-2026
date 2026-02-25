@@ -1043,7 +1043,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   public void intakeRequest() {
-    tryingToIntake = true;
     intake.intakeRequest();
     deploy.intakeRequest();
   }
@@ -1180,6 +1179,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     var speeds = swerve.getFieldRelativeSpeeds();
     isMoving = MathHelpers.getLinearVelocity(speeds) > 0.2;
 
+    if (MathUtil.isNear(0.0, MathHelpers.getDriveDirection(speeds).getDegrees(), 45, -180, 180)) {
+       tryingToIntake = true;
+    } else {
+      tryingToIntake = false;
+    }
     nearTrench =
         FieldUtil.inTrench(robotPose.getTranslation())
             || SwerveAssist.ableToTrenchAssist(robotPose, swerve.getFieldRelativeSpeeds());
