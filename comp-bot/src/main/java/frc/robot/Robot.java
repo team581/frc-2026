@@ -3,6 +3,7 @@ package frc.robot;
 import com.team581.Base581Robot;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
+import com.team581.controller.Bindings;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.followers.PidPathFollower;
@@ -161,67 +162,101 @@ public class Robot extends Base581Robot {
 
   @Override
   protected void configureBindings() {
-    var driverStart = enabledEvent.and(hardware.driverController.start(buttonBindingsLoop));
-    driverStart.rising().ifHigh(robotManager::startTeleopAutoClimbSequence);
-    driverStart.falling().ifHigh(robotManager::stopTeleopAutoClimbAlignment);
+    var driver = new Bindings(buttonBindingsLoop, enabledEvent, hardware.driverController);
+    var operator = new Bindings(buttonBindingsLoop, enabledEvent, hardware.operatorController);
 
-    var driverBack = enabledEvent.and(hardware.driverController.back(buttonBindingsLoop));
-    driverBack.rising().ifHigh(localization::zeroGyro);
+    // Independent bindings (no cross-controller interactions)
 
-    var driverLeftTrigger =
-        enabledEvent.and(hardware.driverController.leftTrigger(buttonBindingsLoop));
-    driverLeftTrigger.rising().ifHigh(robotManager::intakeRequest);
-    driverLeftTrigger.falling().ifHigh(robotManager::cancelIntakeRequest);
+    driver
+        .start()
+        .onPress(robotManager::startTeleopAutoClimbSequence)
+        .onRelease(robotManager::stopTeleopAutoClimbAlignment);
 
-    var driverRightTrigger =
-        enabledEvent.and(hardware.driverController.rightTrigger(buttonBindingsLoop));
-    driverRightTrigger.rising().ifHigh(robotManager::prepareScoreRequest);
-    driverRightTrigger.falling().ifHigh(robotManager::idleRequest);
+    driver.back().onPress(localization::zeroGyro);
 
-    var driverRightBumper =
-        enabledEvent.and(hardware.driverController.rightBumper(buttonBindingsLoop));
-    driverRightBumper.rising().ifHigh(robotManager::prepareFeedRequest);
-    driverRightBumper.falling().ifHigh(robotManager::idleRequest);
+    operator.start().onPress(robotManager::homeDeployRequest);
 
-    var operatorStart = enabledEvent.and(hardware.operatorController.start(buttonBindingsLoop));
-    operatorStart.rising().ifHigh(robotManager::homeDeployRequest);
+    operator.back().onPress(robotManager::homeShooterHoodRequest);
 
-    var operatorBack = enabledEvent.and(hardware.operatorController.back(buttonBindingsLoop));
-    operatorBack.rising().ifHigh(robotManager::homeShooterHoodRequest);
+    operator.y().onPress(robotManager::manualClimbSequenceForward);
 
-    var operatorX = enabledEvent.and(hardware.operatorController.x(buttonBindingsLoop));
-    operatorX.rising().ifHigh(robotManager::unjamRequest);
-    operatorX.falling().ifHigh(robotManager::idleRequest);
-
-    var operatorY = enabledEvent.and(hardware.operatorController.y(buttonBindingsLoop));
-    operatorY.rising().ifHigh(robotManager::manualClimbSequenceForward);
-
-    var operatorB = enabledEvent.and(hardware.operatorController.b(buttonBindingsLoop));
-    operatorB.rising().ifHigh(robotManager::prepareFeedRequest);
-    operatorB.falling().ifHigh(robotManager::idleRequest);
-
-    var operatorRightTrigger =
-        enabledEvent.and(hardware.operatorController.rightTrigger(buttonBindingsLoop));
-    operatorRightTrigger.rising().ifHigh(robotManager::prepareScoreRequest);
-    operatorRightTrigger.falling().ifHigh(robotManager::idleRequest);
     // Use as idle button when not climbing, otherwise does sequence and eventually gets back to
     // idle
-    var operatorA = enabledEvent.and(hardware.operatorController.a(buttonBindingsLoop));
-    operatorA.rising().ifHigh(robotManager::manualClimbSequenceBackwardOrIdleRequest);
+    operator.a().onPress(robotManager::manualClimbSequenceBackwardOrIdleRequest);
 
-    var operatorLeftTrigger =
-        enabledEvent.and(hardware.operatorController.leftTrigger(buttonBindingsLoop));
-    operatorLeftTrigger.rising().ifHigh(robotManager::stowDeployRequest);
-    operatorLeftTrigger.falling().ifHigh(deploy::intakeRequest);
+    operator
+        .leftBumper()
+        .onPress(robotManager::setFeedGoalLeftRequest)
+        .onRelease(robotManager::setFeedGoalClosestRequest);
 
-    var operatorLeftBumper =
-        enabledEvent.and(hardware.operatorController.leftBumper(buttonBindingsLoop));
-    operatorLeftBumper.rising().ifHigh(robotManager::setFeedGoalLeftRequest);
-    operatorLeftBumper.falling().ifHigh(robotManager::setFeedGoalClosestRequest);
+    operator
+        .rightBumper()
+        .onPress(robotManager::setFeedGoalRightRequest)
+        .onRelease(robotManager::setFeedGoalClosestRequest);
 
-    var operatorRightBumper =
-        enabledEvent.and(hardware.operatorController.rightBumper(buttonBindingsLoop));
-    operatorRightBumper.rising().ifHigh(robotManager::setFeedGoalRightRequest);
-    operatorRightBumper.falling().ifHigh(robotManager::setFeedGoalClosestRequest);
+    // Intake group: driver left trigger and operator left trigger interact
+    // Operator stow takes priority over driver intake. When either button is released, the state
+    // is restored based on the other controller's held buttons.
+
+    var driverLeftTrigger = driver.leftTrigger();
+    var operatorLeftTrigger = operator.leftTrigger();
+
+    driverLeftTrigger.onPress(
+        () -> {
+          if (!operatorLeftTrigger.getAsBoolean()) {
+            robotManager.intakeRequest();
+          }
+        });
+    driverLeftTrigger.onRelease(
+        () -> {
+          if (!operatorLeftTrigger.getAsBoolean()) {
+            robotManager.cancelIntakeRequest();
+          }
+        });
+
+    operatorLeftTrigger.onPress(robotManager::stowDeployRequest);
+    operatorLeftTrigger.onRelease(
+        () -> {
+          if (driverLeftTrigger.getAsBoolean()) {
+            robotManager.intakeRequest();
+          } else {
+            deploy.intakeRequest();
+          }
+        });
+
+    // Score/Feed/Idle group: these buttons all send idleRequest on release, so releasing one
+    // can stomp on the other controller's held state. On release, restore to the highest-priority
+    // held state instead of always going to idle.
+
+    var driverRightTrigger = driver.rightTrigger();
+    var driverRightBumper = driver.rightBumper();
+    var operatorRightTrigger = operator.rightTrigger();
+    var operatorBButton = operator.b();
+    var operatorXButton = operator.x();
+
+    driverRightTrigger.onPress(robotManager::prepareScoreRequest);
+    driverRightBumper.onPress(robotManager::prepareFeedRequest);
+    operatorRightTrigger.onPress(robotManager::prepareScoreRequest);
+    operatorBButton.onPress(robotManager::prepareFeedRequest);
+    operatorXButton.onPress(robotManager::unjamRequest);
+
+    Runnable restoreOrIdle =
+        () -> {
+          if (driverRightTrigger.getAsBoolean() || operatorRightTrigger.getAsBoolean()) {
+            robotManager.prepareScoreRequest();
+          } else if (driverRightBumper.getAsBoolean() || operatorBButton.getAsBoolean()) {
+            robotManager.prepareFeedRequest();
+          } else if (operatorXButton.getAsBoolean()) {
+            robotManager.unjamRequest();
+          } else {
+            robotManager.idleRequest();
+          }
+        };
+
+    driverRightTrigger.onRelease(restoreOrIdle);
+    driverRightBumper.onRelease(restoreOrIdle);
+    operatorRightTrigger.onRelease(restoreOrIdle);
+    operatorBButton.onRelease(restoreOrIdle);
+    operatorXButton.onRelease(restoreOrIdle);
   }
 }
