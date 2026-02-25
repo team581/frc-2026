@@ -34,6 +34,13 @@ public class ClimbAssist {
         .untilFinished(FINISHED_TOLERANCE);
   }
 
+  public static ClimbLocation getClimbLocation(Pose2d robot, boolean doFallback) {
+    if (doFallback) {
+      return getDriverStationClimbLocation();
+    }
+    return ClimbLocation.getNearest(robot);
+  }
+
   /** Gets climb location based off driver station number */
   public static ClimbLocation getDriverStationClimbLocation() {
     var location = DriverStation.getLocation().orElse(1);
@@ -51,12 +58,5 @@ public class ClimbAssist {
     }
 
     return ClimbLocation.RIGHT;
-  }
-
-  public static ClimbLocation getClimbLocation(Pose2d robot, boolean doFallback) {
-    if (doFallback) {
-      return getDriverStationClimbLocation();
-    }
-    return ClimbLocation.getNearest(robot);
   }
 }
