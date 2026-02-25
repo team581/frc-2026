@@ -1049,6 +1049,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   public void cancelIntakeRequest() {
+    tryingToIntake = false;
     intake.idleRequest();
 
     // If we are shooting while cancelling a previous intake request, send a new
