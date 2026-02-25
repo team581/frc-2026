@@ -939,11 +939,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     robotPose = localization.getPose();
     vision.setEstimatedPoseAngle(robotPose.getRotation().getDegrees());
     turret.setRobotRotationRate(swerve.getFieldRelativeSpeeds().omegaRadiansPerSecond);
-    if (health.isLocalizationHealthy()) {
-      climbLocationIsLeft = ClimbLocation.getNearest(robotPose) == ClimbLocation.LEFT;
-    } else {
-      climbLocationIsLeft = ClimbAssist.getClimbLocation() == ClimbLocation.LEFT;
-    }
+    climbLocationIsLeft = ClimbAssist.getClimbLocation(robotPose, health.isLocalizationHealthy()) == ClimbLocation.LEFT;
     var speeds = swerve.getFieldRelativeSpeeds();
     isMoving = MathHelpers.getLinearVelocity(speeds) > 0.2;
 

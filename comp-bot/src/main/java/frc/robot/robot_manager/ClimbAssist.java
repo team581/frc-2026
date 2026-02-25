@@ -35,7 +35,7 @@ public class ClimbAssist {
   }
 
   /** Gets climb location based off driver station number */
-  public static ClimbLocation getClimbLocation() {
+  public static ClimbLocation getDriverStationClimbLocation() {
     var location = DriverStation.getLocation().orElse(1);
 
     if (FmsUtil.isRedAlliance()) {
@@ -51,5 +51,12 @@ public class ClimbAssist {
     }
 
     return ClimbLocation.RIGHT;
+  }
+
+  public static ClimbLocation getClimbLocation(Pose2d robot, boolean doFallback) {
+    if (doFallback) {
+      return getDriverStationClimbLocation();
+    }
+    return ClimbLocation.getNearest(robot);
   }
 }
