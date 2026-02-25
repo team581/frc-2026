@@ -106,7 +106,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   protected DeployState getNextState(DeployState currentState) {
     return switch (currentState) {
       // Do nothing
-      case UNHOMED, INTAKE, STOW, HOPPER_SHUFFLING_FINISH -> currentState;
+      case UNHOMED, INTAKE, STOW -> currentState;
 
       case HOME_INWARD -> {
         if (leftMotor.getStatorCurrent().getValueAsDouble() > DeployConfig.HOMING_CURRENT
@@ -127,7 +127,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         }
       }
       case HOPPER_SHUFFLING_OUT -> {
-        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION)) {
+        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
           yield DeployState.HOPPER_SHUFFLING_FINISH;
         }
         if (atGoal() && ableToHopperShuffle) {
@@ -137,11 +137,21 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
       }
 
       case HOPPER_SHUFFLING_IN -> {
-        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION)) {
+        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
           yield DeployState.HOPPER_SHUFFLING_FINISH;
         }
         if (atGoal() && ableToHopperShuffle) {
           yield DeployState.HOPPER_SHUFFLING_OUT;
+        }
+        yield currentState;
+      }
+      case HOPPER_SHUFFLING_FINISH -> {
+        if (atGoal()) {
+          hopperShuffleTimer.reset();
+          if (timeout(1.0)) {
+
+            yield DeployState.HOPPER_SHUFFLING_OUT;
+          }
         }
         yield currentState;
       }
