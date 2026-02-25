@@ -48,7 +48,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private final SlewRateLimiter scoringXLinearVelocitySlewRateLimiter = new SlewRateLimiter(7);
   private final SlewRateLimiter scoringYLinearVelocitySlewRateLimiter = new SlewRateLimiter(7);
 
-
   private final CircularFilter lastDriveDirectionFilter = new CircularFilter(15);
 
   private static final PhoenixPIDController ORIGINAL_HEADING_PID =
@@ -285,7 +284,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             scoringYLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vyMetersPerSecond);
 
         rateLimitedSpeeds =
-            new ChassisSpeeds(rateLimitedXVelocity, rateLimitedYVelocity, requestedSpeeds.omegaRadiansPerSecond);
+            new ChassisSpeeds(
+                rateLimitedXVelocity, rateLimitedYVelocity, requestedSpeeds.omegaRadiansPerSecond);
       } else {
         rateLimitedSpeeds = requestedSpeeds;
       }
