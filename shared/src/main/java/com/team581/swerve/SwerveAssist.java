@@ -31,14 +31,14 @@ public class SwerveAssist {
   // Angles to round the snap to when swerve assisting
   public static final Rotation2d TRENCH_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
   public static final Rotation2d BUMP_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
+  private static final Rotation2d WALL_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
 
-  // Wall assist values
+  // Wall snap values
   private static final double WALL_PROXIMITY_THRESHOLD = Units.inchesToMeters(45.0);
   private static final Rotation2d VELOCITY_TOWARD_INTAKE_TOLERANCE = Rotation2d.fromDegrees(60.0);
   public static final double ASSIST_POINT_DISTANCE_FROM_PARALLEL_WALL = Units.inchesToMeters(25.0);
   private static final double ASSIST_POINT_DISTANCE_FROM_ROBOT = Units.inchesToMeters(60.0);
-  private static final Rotation2d WALL_ASSIST_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
-  private static final Rotation2d WALL_ASSIST_SNAP_OFFSET = Rotation2d.fromDegrees(30.0);
+  private static final Rotation2d WALL_SNAP_OFFSET = Rotation2d.fromDegrees(30.0);
 
   private static final DoubleSupplier WALL_SNAPS_VELOCITY_ANGLE_THRESHOLD =
       DogLog.tunable("Swerve/WallSnaps/VelocityAngleThresholdDegrees", 30.0, Degrees);
@@ -91,18 +91,19 @@ public class SwerveAssist {
     }
   }
 
-  // TODO: WORK IN PROGRESS, need to make wallsnaps v2 work & use it in swerve
-  public static boolean ableToWallAssist(Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+  // COMP-BOT WALL SNAPS V2
+  public static boolean ableToWallSnap(Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var closestWallTranslation =
         MathHelpers.getClosestPointOnRectanglePerimeter(
             robotPose.getTranslation(), FieldUtil.FIELD_BOUNDS);
 
-    if (FieldUtil.getCurrentWallAssistCornerZone(robotPose.getTranslation()).isPresent()) {
+    if (FieldUtil.getCurrentWallSnapCornerZone(robotPose.getTranslation()).isPresent()) {
       // TODO: Possibly need to determine ableToSnap logic near corner
+      return true;
     }
 
     DogLog.log(
-        "SwerveAssist/WallAssist/ClosestWallTranslation",
+        "SwerveAssist/WallSnaps/ClosestWallTranslation",
         new Pose2d(closestWallTranslation, Rotation2d.kZero));
 
     // If the closest wall is a driver station wall, the y component will be equal to the robot's
@@ -113,17 +114,17 @@ public class SwerveAssist {
     var closeToDriverStationWall =
         Math.abs(robotPose.getTranslation().getX() - closestWallTranslation.getX())
             < WALL_PROXIMITY_THRESHOLD;
-    DogLog.log("SwerveAssist/WallAssist/CloseToDriverStationWall", closeToDriverStationWall);
+    DogLog.log("SwerveAssist/WallSnaps/CloseToDriverStationWall", closeToDriverStationWall);
 
     // Check if we are close to a wall
     if (!closestWallIsADriverStationWall && closeToNonDriverStationWall) {
       closeToDriverStationWall = false;
-      DogLog.log("SwerveAssist/WallAssist/CloseToWallCheck", true);
+      DogLog.log("SwerveAssist/WallSnaps/CloseToWallCheck", true);
     } else if (closestWallIsADriverStationWall && closeToDriverStationWall) {
-      DogLog.log("SwerveAssist/WallAssist/CloseToWallCheck", true);
+      DogLog.log("SwerveAssist/WallSnaps/CloseToWallCheck", true);
     } else {
       // We are not close to any wall
-      DogLog.log("SwerveAssist/WallAssist/CloseToWallCheck", false);
+      DogLog.log("SwerveAssist/WallSnaps/CloseToWallCheck", false);
       return false;
     }
 
@@ -134,9 +135,9 @@ public class SwerveAssist {
         VELOCITY_TOWARD_INTAKE_TOLERANCE.getDegrees(),
         -180,
         180.0)) {
-      DogLog.log("SwerveAssist/WallAssist/IntakeDriveDirectionCheck", false);
+      DogLog.log("SwerveAssist/WallSnaps/IntakeDriveDirectionCheck", false);
       return false;
-    } else DogLog.log("SwerveAssist/WallAssist/IntakeDriveDirectionCheck", true);
+    } else DogLog.log("SwerveAssist/WallSnaps/IntakeDriveDirectionCheck", true);
 
     // Check if we are driving fast enough in the direction of the intake parallel to the wall
     var assistPoint = Translation2d.kZero;
@@ -188,7 +189,7 @@ public class SwerveAssist {
                       - FieldUtil.ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL),
               assistPoint.getY());
     }
-    DogLog.log("SwerveAssist/WallAssist/AssistPoint", new Pose2d(assistPoint, Rotation2d.kZero));
+    DogLog.log("SwerveAssist/WallSnaps/AssistPoint", new Pose2d(assistPoint, Rotation2d.kZero));
 
     return ableToSwerveAssist(
         robotPose,
@@ -198,6 +199,7 @@ public class SwerveAssist {
         WALL_INTAKE_ASSIST_VELOCITY_ANGLE_TOLERANCE);
   }
 
+  // DUMPER-BOT WALL SNAPS V1
   public static boolean ableToWallSnap(
       Pose2d robotPose,
       ChassisSpeeds fieldRelativeSpeeds,
@@ -295,7 +297,7 @@ public class SwerveAssist {
     return polarInputSpeeds;
   }
 
-  public static Rotation2d getWallAssistSnapAngle(
+  public static Rotation2d getWallSnapAngle(
       Translation2d robotTranslation, ChassisSpeeds fieldRelativeSpeeds) {
     // get direction toward wall, then apply offset of snap round angle in that direction
     var closestWallTranslation =
@@ -304,7 +306,7 @@ public class SwerveAssist {
     var angleToWall = robotTranslation.minus(closestWallTranslation).getAngle();
     var roundedSnapAngle =
         getRoundedSnapAngle(
-            MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_ASSIST_SNAP_ROUND_ANGLE);
+            MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
     var direction = 0;
     // TODO: check what to do in corners
     if (closestWallIsADriverStationWall) {
@@ -313,6 +315,10 @@ public class SwerveAssist {
       } else {
         direction = -1;
       }
+
+      // Still snapping to 180, but rotated by 90 to be oriented parallel with the driverstation
+      // wall
+      roundedSnapAngle = roundedSnapAngle.plus(Rotation2d.fromDegrees(-90.0).times(direction));
     } else {
       if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
         direction = -1;
@@ -320,7 +326,7 @@ public class SwerveAssist {
         direction = 1;
       }
     }
-    return roundedSnapAngle.plus(WALL_ASSIST_SNAP_OFFSET.times(direction));
+    return roundedSnapAngle.plus(WALL_SNAP_OFFSET.times(direction));
   }
 
   private static boolean ableToSwerveAssist(
