@@ -146,7 +146,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private boolean ableToBumpAssist = false;
   private boolean ableToTrenchAssist = false;
   private boolean ableToWallIntakeDriveAssist = false;
-  private boolean ableToWallSnap = false;
   private boolean ableToDirectionSnap = false;
   private Translation2d lastWallIntakePoint = Translation2d.kZero;
   private double distanceToWallIntakePoint = 0.0;
@@ -254,16 +253,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
           Rotation2d.fromDegrees(
               lastDriveDirectionFilter.calculate(
                   MathHelpers.getDriveDirection(fieldRelativeSpeeds).getDegrees()));
-
-      ableToWallSnap =
-          FeatureFlags.INTAKE_WALL_SNAPS.getAsBoolean()
-              && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
-              && health.isLocalizationHealthy()
-              && SwerveAssist.ableToWallSnap(
-                  drivetrainState.Pose,
-                  fieldRelativeSpeeds,
-                  filteredLastDriveDirection,
-                  distanceToWallIntakePoint);
 
       ableToDirectionSnap =
           FeatureFlags.INTAKE_DIRECTIONAL_SNAPS.getAsBoolean()
@@ -416,31 +405,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                       .withVelocityY(speeds.vyMetersPerSecond),
                   SwerveAssist.getRoundedSnapAngle(
                       drivetrainState.Pose.getRotation(), SwerveAssist.BUMP_SNAP_ROUND_ANGLE)));
-        } else if (ableToWallSnap) {
-          DogLog.timestamp("Swerve/WallSnaps/Snapping");
-          var closestWallPose =
-              MathHelpers.getClosestPointOnRectanglePerimeter(
-                  drivetrainState.Pose.getTranslation(), FieldUtil.FIELD_BOUNDS);
-          var angleToWall = MathHelpers.getDriveDirection(drivetrainState.Pose, closestWallPose);
-          var centerOfRotationRobotRelative =
-              lastWallIntakePoint
-                  .minus(drivetrainState.Pose.getTranslation())
-                  .rotateBy(drivetrainState.Pose.getRotation().unaryMinus());
-          DogLog.log(
-              "Swerve/WallSnaps/CenterOfRotation",
-              new Pose2d(lastWallIntakePoint, Rotation2d.kZero));
-
-          var swerveSnapsRequest =
-              driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
-                  ? drivePerspectiveIntakeSnapsOpenLoop
-                  : fieldCentricIntakeSnapsClosedLoop;
-          drivetrain.setControl(
-              withFieldRelativeTargetDirection(
-                  swerveSnapsRequest
-                      .withVelocityX(speeds.vxMetersPerSecond)
-                      .withVelocityY(speeds.vyMetersPerSecond)
-                      .withCenterOfRotation(centerOfRotationRobotRelative),
-                  angleToWall));
         } else if (ableToDirectionSnap) {
           DogLog.timestamp("Swerve/DirectionSnaps/Snapping");
           var swerveSnapsRequest =
@@ -488,31 +452,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                       .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond),
                   SwerveAssist.getRoundedSnapAngle(
                       drivetrainState.Pose.getRotation(), SwerveAssist.BUMP_SNAP_ROUND_ANGLE)));
-        } else if (ableToWallSnap) {
-          DogLog.timestamp("Swerve/WallSnaps/Snapping");
-          var closestWallPose =
-              MathHelpers.getClosestPointOnRectanglePerimeter(
-                  drivetrainState.Pose.getTranslation(), FieldUtil.FIELD_BOUNDS);
-          var angleToWall = MathHelpers.getDriveDirection(drivetrainState.Pose, closestWallPose);
-          var centerOfRotationRobotRelative =
-              lastWallIntakePoint
-                  .minus(drivetrainState.Pose.getTranslation())
-                  .rotateBy(drivetrainState.Pose.getRotation().unaryMinus());
-          DogLog.log(
-              "Swerve/WallSnaps/CenterOfRotation",
-              new Pose2d(lastWallIntakePoint, Rotation2d.kZero));
-
-          var swerveSnapsRequest =
-              driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
-                  ? drivePerspectiveIntakeSnapsOpenLoop
-                  : fieldCentricIntakeSnapsClosedLoop;
-          drivetrain.setControl(
-              withFieldRelativeTargetDirection(
-                  swerveSnapsRequest
-                      .withVelocityX(rateLimitedSpeeds.vxMetersPerSecond)
-                      .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond)
-                      .withCenterOfRotation(centerOfRotationRobotRelative),
-                  angleToWall));
         } else if (ableToDirectionSnap) {
           DogLog.timestamp("Swerve/DirectionSnaps/Snapping");
           var swerveSnapsRequest =

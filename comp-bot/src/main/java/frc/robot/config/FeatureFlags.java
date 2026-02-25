@@ -16,8 +16,6 @@ public class FeatureFlags {
 
   public static final BooleanSupplier INTEGRATION_TEST = FeatureFlag.of("IntegrationTest", false);
 
-  public static final BooleanSupplier INTAKE_WALL_SNAPS = FeatureFlag.of("IntakeWallSnaps", false);
-
   public static final BooleanSupplier LOOKAHEAD_SCORING =
       FeatureFlag.of("TimeOfFlightInHubActivity", true);
 

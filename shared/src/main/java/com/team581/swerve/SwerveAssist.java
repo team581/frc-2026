@@ -1,6 +1,5 @@
 package com.team581.swerve;
 
-import static edu.wpi.first.units.Units.Degrees;
 
 import com.team581.math.MathHelpers;
 import com.team581.math.PolarChassisSpeeds;
@@ -38,13 +37,6 @@ public class SwerveAssist {
   private static final double ASSIST_POINT_DISTANCE_FROM_WALL = Units.inchesToMeters(25.0);
   private static final double ASSIST_POINT_DISTANCE_FROM_ROBOT = Units.inchesToMeters(40.0);
 
-  private static final DoubleSupplier WALL_SNAPS_VELOCITY_ANGLE_THRESHOLD =
-      DogLog.tunable("Swerve/WallSnaps/VelocityAngleThresholdDegrees", 30.0, Degrees);
-
-  private static final DoubleSupplier WALL_SNAPS_ROTATION_ANGLE_THRESHOLD =
-      DogLog.tunable("Swerve/WallSnaps/RotationAngleThresholdDegrees", 40.0, Degrees);
-  private static final DoubleSupplier WALL_SNAPS_DISTANCE_THRESHOLD =
-      DogLog.tunable("Swerve/WallSnaps/DistanceThresholdMeters", 2.0);
   private static final DoubleSupplier MIN_ROBOT_VELOCITY_FOR_DIRECTION_SNAPS =
       DogLog.tunable("Swerve/MinRobotVelocityForDirectionSnapsMetersPerSecond", 0.5);
 
@@ -177,69 +169,6 @@ public class SwerveAssist {
         WALL_INTAKE_ASSIST_VELOCITY_THRESHOLD,
         assistPoint,
         WALL_INTAKE_ASSIST_VELOCITY_ANGLE_TOLERANCE);
-  }
-
-  public static boolean ableToWallSnap(
-      Pose2d robotPose,
-      ChassisSpeeds fieldRelativeSpeeds,
-      Rotation2d filteredLastDriveDirection,
-      double distanceToWallIntakePoint) {
-
-    var closestWallTranslation =
-        MathHelpers.getClosestPointOnRectanglePerimeter(
-            robotPose.getTranslation(), FieldUtil.FIELD_BOUNDS);
-
-    DogLog.log(
-        "Swerve/WallSnaps/ClosestWallPose", new Pose2d(closestWallTranslation, Rotation2d.kZero));
-
-    DogLog.log(
-        "Swerve/WallSnaps/FilteredVelocityAngle", filteredLastDriveDirection.getDegrees(), Degrees);
-
-    var angleToWall = MathHelpers.getDriveDirection(robotPose, closestWallTranslation);
-    DogLog.log("Swerve/WallSnaps/AngleToWall", angleToWall.getDegrees(), Degrees);
-
-    double robotAngle = robotPose.getRotation().getDegrees();
-
-    var intakeAngleDifference = MathHelpers.angleModulus(angleToWall.getDegrees() - robotAngle);
-    DogLog.log("Swerve/WallSnaps/IntakeAngleDifference", intakeAngleDifference);
-    var driveAngleDifference =
-        MathHelpers.angleModulus(
-            angleToWall.getDegrees() - filteredLastDriveDirection.getDegrees());
-    DogLog.log("Swerve/WallSnaps/DriveAngleDifference", driveAngleDifference);
-
-    var signMisMatch =
-        Math.abs(
-                    MathHelpers.angleModulus(
-                        filteredLastDriveDirection.getDegrees() - angleToWall.getDegrees()))
-                > 1e-5
-            && Math.signum(intakeAngleDifference) != Math.signum(driveAngleDifference);
-    DogLog.log("Swerve/WallSnaps/SignMisMatch", signMisMatch);
-    if (signMisMatch) {
-      return false;
-    }
-
-    var velocityAngleTowardWall =
-        MathHelpers.getLinearVelocity(fieldRelativeSpeeds) > 0.01
-            && MathUtil.isNear(
-                angleToWall.getDegrees(),
-                filteredLastDriveDirection.getDegrees(),
-                WALL_SNAPS_VELOCITY_ANGLE_THRESHOLD.getAsDouble(),
-                -180,
-                180);
-    var rotationAngleTowardWall =
-        MathUtil.isNear(
-            angleToWall.getDegrees(),
-            robotAngle,
-            WALL_SNAPS_ROTATION_ANGLE_THRESHOLD.getAsDouble(),
-            -180,
-            180);
-
-    var distanceToWallThreshold =
-        distanceToWallIntakePoint < WALL_SNAPS_DISTANCE_THRESHOLD.getAsDouble();
-    DogLog.log("Swerve/WallSnaps/DistanceToWall", distanceToWallThreshold);
-    DogLog.log("Swerve/WallSnaps/VelocityAngleTowardWall", velocityAngleTowardWall);
-    DogLog.log("Swerve/WallSnaps/RotationAngleTowardWall", rotationAngleTowardWall);
-    return distanceToWallThreshold && velocityAngleTowardWall && rotationAngleTowardWall;
   }
 
   public static Rotation2d getRoundedSnapAngle(Rotation2d robotHeading, Rotation2d roundingAngle) {
