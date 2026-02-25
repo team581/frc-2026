@@ -235,7 +235,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToBumpAssist(drivetrainState.Pose, fieldRelativeSpeeds);
     ableToWallIntakeDriveAssist =
-        FeatureFlags.WALL_INTAKE_DRIVE_ASSIST.getAsBoolean()
+        DSOptions.USE_SWERVE_ASSIST.get()
+            && FeatureFlags.WALL_INTAKE_DRIVE_ASSIST.getAsBoolean()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToWallIntakeDriveAssist(drivetrainState.Pose, fieldRelativeSpeeds);
