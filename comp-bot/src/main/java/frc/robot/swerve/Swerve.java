@@ -48,7 +48,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private final SlewRateLimiter scoringXLinearVelocitySlewRateLimiter = new SlewRateLimiter(7);
   private final SlewRateLimiter scoringYLinearVelocitySlewRateLimiter = new SlewRateLimiter(7);
 
-  private final SlewRateLimiter scoringAngularVelocitySlewRateLimiter = new SlewRateLimiter(20);
 
   private final CircularFilter lastDriveDirectionFilter = new CircularFilter(15);
 
@@ -284,10 +283,9 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             scoringXLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vxMetersPerSecond);
         var rateLimitedYVelocity =
             scoringYLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vyMetersPerSecond);
-        var rateLimitedAngularRate =
-            scoringAngularVelocitySlewRateLimiter.calculate(requestedSpeeds.omegaRadiansPerSecond);
+
         rateLimitedSpeeds =
-            new ChassisSpeeds(rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedAngularRate);
+            new ChassisSpeeds(rateLimitedXVelocity, rateLimitedYVelocity, requestedSpeeds.omegaRadiansPerSecond);
       } else {
         rateLimitedSpeeds = requestedSpeeds;
       }
@@ -586,7 +584,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       if (driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP) {
         scoringXLinearVelocitySlewRateLimiter.reset(requestedSpeeds.vxMetersPerSecond);
         scoringYLinearVelocitySlewRateLimiter.reset(requestedSpeeds.vyMetersPerSecond);
-        scoringAngularVelocitySlewRateLimiter.reset(requestedSpeeds.omegaRadiansPerSecond);
       }
     }
   }
