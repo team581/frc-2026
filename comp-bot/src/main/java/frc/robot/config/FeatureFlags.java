@@ -40,7 +40,7 @@ public class FeatureFlags {
 
   public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
 
-  public static final BooleanSupplier HOPPER_SHUFFLE_WHILE_INTAKE =
+  public static final BooleanSupplier HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION =
       FeatureFlag.of("HopperShuffleWhileIntaking", true);
 
   public static final BooleanSupplier HOOD_ALWAYS_IDLE = FeatureFlag.of("HoodAlwaysIdle", true);

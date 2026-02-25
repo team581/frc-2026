@@ -757,7 +757,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           dyeRotor.scoreRequest(scoringParameters.distance());
         }
-        if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+        if (FeatureFlags.HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION.getAsBoolean()) {
           if (tryingToIntake) {
             if (drivingToIntake) {
               deploy.intakeRequest();
@@ -790,7 +790,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           dyeRotor.feedRequest(feedingParameters.distance());
         }
-        if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+        if (FeatureFlags.HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION.getAsBoolean()) {
           if (tryingToIntake) {
             if (drivingToIntake) {
               deploy.intakeRequest();
@@ -825,7 +825,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.normalDriveRequest();
         }
-        if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+        if (FeatureFlags.HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION.getAsBoolean()) {
           if (tryingToIntake) {
             if (drivingToIntake) {
               deploy.intakeRequest();
@@ -852,7 +852,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.normalDriveRequest();
         }
-        if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+        if (FeatureFlags.HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION.getAsBoolean()) {
           if (tryingToIntake) {
             if (drivingToIntake) {
               deploy.intakeRequest();
