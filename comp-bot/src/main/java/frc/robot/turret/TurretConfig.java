@@ -17,11 +17,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleSubscriber;
 
 public class TurretConfig {
-  public static final double MIN_ANGLE_HOMING = -270;
-  public static final double MAX_ANGLE_HOMING = 270;
   // TODO: adjust after bringup
-  public static final double MIN_ANGLE = -318.0;
-  public static final double MAX_ANGLE = -16.6;
+  public static final double MIN_ANGLE = -300;
+  public static final double MAX_ANGLE = 60;
   public static final double OUT_OF_BOUNDS_THRESHOLD = 1.0;
   public static final double HOMING_END_POSITION = MIN_ANGLE;
   public static final DoubleSubscriber TOLERANCE = DogLog.tunable("Turret/Tolerance", 1.0);
@@ -29,7 +27,7 @@ public class TurretConfig {
   public static final double MOTOR_TO_TURRET = ((220.0 / 14.0) * (36.0 / 10.0));
 
   // CAL NUMBER
-  public static final double ROTOR_CAL_OFFSET = 0.13720703125;
+  public static final double ROTOR_CAL_OFFSET = -0.249267578125;
 
   public static final double MOTOR_ROTATION_RESOLUTION = 1 / MOTOR_TO_TURRET;
   public static final double ENCODER_TO_TURRET =
