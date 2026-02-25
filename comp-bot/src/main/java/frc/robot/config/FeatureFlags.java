@@ -29,7 +29,7 @@ public class FeatureFlags {
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
 
   public static final BooleanSupplier STOP_SHOOTING_STATE =
-      FeatureFlag.of("UseStopShootingState", true);
+      FeatureFlag.of("UseStopShootingState", false);
 
   public static final BooleanSupplier IGNORE_TURRET = FeatureFlag.of("IgnoreTurret", false);
 
@@ -41,7 +41,7 @@ public class FeatureFlags {
   public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
 
   public static final BooleanSupplier HOPPER_SHUFFLE_WHILE_INTAKE =
-      FeatureFlag.of("HopperShuffleWhileIntaking", false);
+      FeatureFlag.of("HopperShuffleWhileIntaking", true);
 
   public static final BooleanSupplier HOOD_ALWAYS_IDLE = FeatureFlag.of("HoodAlwaysIdle", true);
   public static final BooleanSupplier DYE_ROTOR_CLEANUP_MODE =
