@@ -757,6 +757,15 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           dyeRotor.scoreRequest(scoringParameters.distance());
         }
+        if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+          if (tryingToIntake) {
+            if (drivingToIntake) {
+              deploy.intakeRequest();
+            } else {
+              deploy.shuffleRequest();
+            }
+          }
+        }
       }
       case PREPARE_FEED -> {
         smartTurretHoodPrepareFeedRequest();
@@ -780,6 +789,15 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           dyeRotor.feedCleanupRequest(feedingParameters.distance());
         } else {
           dyeRotor.feedRequest(feedingParameters.distance());
+        }
+        if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+          if (tryingToIntake) {
+            if (drivingToIntake) {
+              deploy.intakeRequest();
+            } else {
+              deploy.shuffleRequest();
+            }
+          }
         }
       }
 
@@ -807,6 +825,15 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.normalDriveRequest();
         }
+        if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+          if (tryingToIntake) {
+            if (drivingToIntake) {
+              deploy.intakeRequest();
+            } else {
+              deploy.shuffleRequest();
+            }
+          }
+        }
       }
       case PREPARE_PRESET_FEED -> {
         // TODO: Get turret feed angle
@@ -824,6 +851,15 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           swerve.intakeDriveRequest();
         } else {
           swerve.normalDriveRequest();
+        }
+        if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
+          if (tryingToIntake) {
+            if (drivingToIntake) {
+              deploy.intakeRequest();
+            } else {
+              deploy.shuffleRequest();
+            }
+          }
         }
       }
       case AUTOMATIC_CLIMB_1_APPROACH_L1, AUTOMATIC_CLIMB_2_LINEUP_L1 -> {
@@ -848,15 +884,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.climbRequest(robotPose);
       }
       default -> {}
-    }
-    if (FeatureFlags.HOPPER_SHUFFLE_WHILE_INTAKE.getAsBoolean()) {
-      if (tryingToIntake) {
-        if (drivingToIntake) {
-          deploy.intakeRequest();
-        } else {
-          deploy.shuffleRequest();
-        }
-      }
     }
 
     DogLog.log("RobotManager/Feeding/FeedLocation", feedLocation);
