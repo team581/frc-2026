@@ -6,7 +6,6 @@ import com.team581.trailblazer.AutoPoint;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.segments.AutoSegment;
 import com.team581.util.FieldUtil;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -24,7 +23,11 @@ public class RightPullSwoopShootAuto extends BaseImperativeAuto<RightPullSwoopSh
 
   private final AutoSegment intakeAcrossMidlineOne =
       Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(10.235, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.fromDegrees(-140.0)))
+              AutoPoint.ofRed(
+                      new Pose2d(
+                          10.235,
+                          FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(),
+                          Rotation2d.fromDegrees(-140.0)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 10)),
               AutoPoint.ofRed(new Pose2d(8.85, 7.15, Rotation2d.fromDegrees(-140.0))),
               AutoPoint.ofRed(new Pose2d(7.778, 5.665, Rotation2d.kCW_90deg))
@@ -37,17 +40,17 @@ public class RightPullSwoopShootAuto extends BaseImperativeAuto<RightPullSwoopSh
 
   private final AutoSegment intakeAcrossMidlineTwo =
       Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(11.2, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(
+                  new Pose2d(11.2, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
               AutoPoint.ofRed(new Pose2d(9.9, 6.865, Rotation2d.kCW_90deg))
-              .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
+                  .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.of(
                       () ->
                           Point.ofRed(
                               robotManager
                                   .clusterMap
-                                 .getBestClusterPose()
-                                  .orElseGet(() -> 
-                                  new Pose2d(9.9, 4.5, Rotation2d.kCW_90deg))))
+                                  .getBestClusterPose()
+                                  .orElseGet(() -> new Pose2d(9.9, 4.5, Rotation2d.kCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(2, 30)))
           .withLinearConstraints(3.0, 10)
           .untilFinished(new PoseErrorTolerance(0.1, 3));
@@ -85,32 +88,37 @@ public class RightPullSwoopShootAuto extends BaseImperativeAuto<RightPullSwoopSh
               AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
-              AutoPoint.ofRed(new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
-              AutoPoint.ofRed(new Pose2d(13.0, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)))
+              AutoPoint.ofRed(
+                  new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(
+                  new Pose2d(13.0, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)))
           .withLinearConstraints(3.0, 10)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
           .untilFinished(new PoseErrorTolerance(0.5, 3));
 
-   private final AutoSegment driveBackAndShootTwo =
+  private final AutoSegment driveBackAndShootTwo =
       Trailblazer.segment(
               AutoPoint.ofRed(new Pose2d(9.9, 5.8, Rotation2d.kCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.5, 3)),
               AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
-              AutoPoint.ofRed(new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
-              AutoPoint.ofRed(new Pose2d(13.0, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)))
+              AutoPoint.ofRed(
+                  new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(
+                  new Pose2d(13.0, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)))
           .withLinearConstraints(3.0, 10)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
           .untilFinished(new PoseErrorTolerance(0.5, 3));
-          
+
   public RightPullSwoopShootAuto(RobotManager robotManager, Trailblazer trailblazer) {
     super(RightPullSwoopShootAutoState.INTAKE_ACROSS_MIDLINE_1, robotManager, trailblazer);
   }
 
   @Override
   public Point getStartingPoint() {
-    return Point.ofRed(new Pose2d(12.1, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg));
+    return Point.ofRed(
+        new Pose2d(12.1, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg));
   }
 
   @Override
@@ -130,7 +138,7 @@ public class RightPullSwoopShootAuto extends BaseImperativeAuto<RightPullSwoopSh
           yield currentState;
         }
       }
-        case SHOOT_1 -> {
+      case SHOOT_1 -> {
         if (trailblazer.atGoal(robotManager.localization.getPose()) && timeout(3.0)) {
           yield RightPullSwoopShootAutoState.INTAKE_ACROSS_MIDLINE_2;
         } else {
