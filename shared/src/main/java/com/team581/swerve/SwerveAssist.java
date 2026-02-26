@@ -298,27 +298,24 @@ public class SwerveAssist {
   }
 
   public static Rotation2d getWallSnapAngle(
-      Translation2d robotTranslation, ChassisSpeeds fieldRelativeSpeeds) {
+      Translation2d robotTranslation, ChassisSpeeds fieldRelativeSpeeds, boolean inCorner) {
     // get direction toward wall, then apply offset of snap round angle in that direction
     var closestWallTranslation =
         MathHelpers.getClosestPointOnRectanglePerimeter(robotTranslation, FieldUtil.FIELD_BOUNDS);
+    // If the closest wall is a driver station wall, the y component will be equal to the robot's
     var closestWallIsADriverStationWall = robotTranslation.getY() == closestWallTranslation.getY();
     var angleToWall = robotTranslation.minus(closestWallTranslation).getAngle();
-    var roundedSnapAngle =
-        getRoundedSnapAngle(
-            MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
+    var roundedSnapAngle = inCorner ? getRoundedSnapAngle(angleToWall.plus(Rotation2d.fromDegrees(180.0)), WALL_SNAP_ROUND_ANGLE) : getRoundedSnapAngle(MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
     var direction = 0;
-    // TODO: check what to do in corners
+
     if (closestWallIsADriverStationWall) {
       if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
         direction = 1;
       } else {
         direction = -1;
       }
-
-      // Still snapping to 180, but rotated by 90 to be oriented parallel with the driverstation
-      // wall
-      roundedSnapAngle = roundedSnapAngle.plus(Rotation2d.fromDegrees(-90.0).times(direction));
+      // Still snapping to 180, but rotated by 90 to be parallel with the driverstation wall
+      roundedSnapAngle = roundedSnapAngle.plus(Rotation2d.fromDegrees(90.0));
     } else {
       if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
         direction = -1;
