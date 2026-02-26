@@ -18,6 +18,7 @@ import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -40,6 +41,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   public static final double MAX_SPEED = 4.75;
 
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
+  private static final double MAX_ANGULAR_RATE_SHOOTING = Units.rotationsToRadians(0.5);
   public static final Rotation2d TELEOP_MAX_ANGULAR_RATE = Rotation2d.fromRotations(2);
 
   private static final double SIM_LOOP_PERIOD = Units.millisecondsToSeconds(5);
@@ -269,10 +271,15 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             scoringXLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vxMetersPerSecond);
         var rateLimitedYVelocity =
             scoringYLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vyMetersPerSecond);
+        var rateLimitedRotationalRate =
+            MathUtil.clamp(
+                requestedSpeeds.omegaRadiansPerSecond,
+                -MAX_ANGULAR_RATE_SHOOTING,
+                MAX_ANGULAR_RATE_SHOOTING);
 
         rateLimitedSpeeds =
             new ChassisSpeeds(
-                rateLimitedXVelocity, rateLimitedYVelocity, requestedSpeeds.omegaRadiansPerSecond);
+                rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedRotationalRate);
       } else {
         rateLimitedSpeeds = requestedSpeeds;
       }
