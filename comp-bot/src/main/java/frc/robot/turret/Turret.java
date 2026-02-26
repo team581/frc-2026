@@ -240,15 +240,17 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     robotRotationFeedForward = -rateDegrees;
   }
 
-  public boolean atGoal() {
+  public boolean atGoal(double tolerance) {
     return switch (getState()) {
       case UNHOMED -> false;
       case STUCK -> true;
       // TODO: Reconsider for turret wrapping
-      default ->
-          MathUtil.isNear(
-              goalAngle, MathHelpers.angleModulus(currentAngle), TurretConfig.TOLERANCE.get());
+      default -> MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), tolerance);
     };
+  }
+
+  public boolean atGoal() {
+    return atGoal(TurretConfig.TOLERANCE.get());
   }
 
   public void stuckRequest() {
