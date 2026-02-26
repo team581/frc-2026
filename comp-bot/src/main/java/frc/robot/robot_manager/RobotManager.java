@@ -65,7 +65,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       DogLog.tunable("RobotManager/DistanceToHubThreshold", 4.0);
   private boolean isMoving = false;
   private boolean drivingToIntake = false;
-  private boolean tryingToIntake = false;
 
   private double timeSinceMatchStart = 0.0;
   private double timeUntilNextShift = 0.0;
@@ -340,6 +339,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         // Set hood behavior separately while idling
         dyeRotor.idleRequest();
         // Set turret behavior separately while idling
+        deploy.intakeRequest();
         swerve.normalDriveRequest();
         climber.stowRequest();
       }
@@ -762,12 +762,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           dyeRotor.scoreRequest(scoringParameters.distance());
         }
         if (FeatureFlags.HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION.getAsBoolean()) {
-          if (tryingToIntake) {
-            if (drivingToIntake) {
-              deploy.intakeRequest();
-            } else {
-              deploy.shuffleRequest();
-            }
+          if (drivingToIntake) {
+            deploy.intakeRequest();
+          } else {
+            deploy.shuffleRequest();
           }
         }
       }
@@ -795,12 +793,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           dyeRotor.feedRequest(feedingParameters.distance());
         }
         if (FeatureFlags.HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION.getAsBoolean()) {
-          if (tryingToIntake) {
-            if (drivingToIntake) {
-              deploy.intakeRequest();
-            } else {
-              deploy.shuffleRequest();
-            }
+          if (drivingToIntake) {
+            deploy.intakeRequest();
+          } else {
+            deploy.shuffleRequest();
           }
         }
       }
@@ -830,12 +826,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           swerve.normalDriveRequest();
         }
         if (FeatureFlags.HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION.getAsBoolean()) {
-          if (tryingToIntake) {
-            if (drivingToIntake) {
-              deploy.intakeRequest();
-            } else {
-              deploy.shuffleRequest();
-            }
+          if (drivingToIntake) {
+            deploy.intakeRequest();
+          } else {
+            deploy.shuffleRequest();
           }
         }
       }
@@ -857,12 +851,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           swerve.normalDriveRequest();
         }
         if (FeatureFlags.HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION.getAsBoolean()) {
-          if (tryingToIntake) {
-            if (drivingToIntake) {
-              deploy.intakeRequest();
-            } else {
-              deploy.shuffleRequest();
-            }
+          if (drivingToIntake) {
+            deploy.intakeRequest();
+          } else {
+            deploy.shuffleRequest();
           }
         }
       }
@@ -1047,13 +1039,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   public void intakeRequest() {
-    tryingToIntake = true;
     intake.intakeRequest();
     deploy.intakeRequest();
   }
 
   public void cancelIntakeRequest() {
-    tryingToIntake = false;
     intake.idleRequest();
 
     // If we are shooting while cancelling a previous intake request, send a new
@@ -1168,7 +1158,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   @Override
   protected void collectInputs() {
     robotPose = localization.getPose();
-    vision.setEstimatedPoseAngle(robotPose.getRotation().getDegrees());
+    double robotRotation = robotPose.getRotation().getDegrees();
+    vision.setEstimatedPoseAngle(robotRotation);
     turret.setRobotRotationRate(swerve.getFieldRelativeSpeeds().omegaRadiansPerSecond);
 
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
@@ -1218,8 +1209,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     isHubActive = getIsHubActiveOrNotUsingState();
     timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
     var swerveVector = MathHelpers.getDriveDirection(speeds);
+    double driveDirection = swerveVector.getDegrees();
     drivingToIntake =
-        MathUtil.isNear(robotPose.getRotation().getDegrees(), swerveVector.getDegrees(), 20);
+        intake.getState() == IntakeState.INTAKE
+            && MathUtil.isNear(robotRotation, driveDirection, 45, -180, 180)
+            && MathHelpers.getLinearVelocity(speeds) > 1e-5;
     isCloseEnoughToHub = getIsCloseEnoughToHub();
   }
 
