@@ -1272,4 +1272,36 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.atGoal(feedingParameters.turretTolerance()));
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterHoodAtGoal", shooterHood.atGoal());
   }
+
+  // TODO: Every time the driver/operator left/right trigger changes, run this function with the full state of their requested intake + deploy state
+  public void teleopDeployRequest(
+      boolean operatorWantsForceStow,
+      boolean driverWantsIntake,
+      boolean driverWantsHubScore,
+      boolean driverWantsFeed,
+      boolean operatorWantsHubScore,
+      boolean operatorWantsFeed) {
+    if (operatorWantsForceStow) {
+      deploy.stowRequest();
+      intake.idleRequest();
+      return;
+    }
+
+    if (driverWantsIntake) {
+      // TODO: This should check if driver also wants to score, and do smart shuffle stuff based on
+      // drive vector
+      deploy.intakeRequest();
+      intake.intakeRequest();
+      return;
+    }
+
+    if (driverWantsHubScore || operatorWantsHubScore || driverWantsFeed || operatorWantsFeed) {
+      deploy.shuffleRequest();
+      intake.shootRequest();
+      return;
+    }
+
+    deploy.intakeRequest();
+    intake.idleRequest();
+  }
 }
