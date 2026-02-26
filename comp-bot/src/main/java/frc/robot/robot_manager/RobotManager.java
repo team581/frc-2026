@@ -1273,7 +1273,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterHoodAtGoal", shooterHood.atGoal());
   }
 
-  // TODO: Every time the driver/operator left/right trigger changes, run this function with the full state of their requested intake + deploy state
+  // TODO: Every time the driver/operator left/right trigger changes, run this function with the
+  // full state of their requested intake + deploy state
   public void teleopDeployRequest(
       boolean operatorWantsForceStow,
       boolean driverWantsIntake,
