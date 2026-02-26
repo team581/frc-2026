@@ -24,8 +24,6 @@ public class FeatureFlags {
 
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
 
-  public static final BooleanSupplier SHOOT_ON_THE_MOVE = FeatureFlag.of("ShootOnTheMove", false);
-
   public static final BooleanSupplier STOP_SHOOTING_STATE =
       FeatureFlag.of("UseStopShootingState", false);
 

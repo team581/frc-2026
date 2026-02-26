@@ -37,7 +37,6 @@ public class ShooterConfig {
   public static final PolynomialRegression FEEDING_REGRESSION_MODEL =
       PolynomialRegression.quadratic("Shooter/FeedingRegression", DISTANCE_TO_FEEDING_RPM);
 
-  // TODO: Needs tuning, placeholder for SOTM sim
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToScoreToF",
@@ -45,7 +44,6 @@ public class ShooterConfig {
           Map.entry(1.25, 0.933),
           Map.entry(5.5, 1.0));
 
-  // TODO: Needs tuning, placeholder for SOTM sim
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToFeedToF",
