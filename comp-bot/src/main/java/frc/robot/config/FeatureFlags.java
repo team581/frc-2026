@@ -29,10 +29,8 @@ public class FeatureFlags {
 
   public static final BooleanSupplier IGNORE_TURRET = FeatureFlag.of("IgnoreTurret", false);
 
-  public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT_RPM_DIP =
-      FeatureFlag.of("StopScoringRPMDip", true);
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT =
-      FeatureFlag.of("CancelInProgressShot", false);
+      FeatureFlag.of("CancelInProgressShot", true);
 
   public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
 
