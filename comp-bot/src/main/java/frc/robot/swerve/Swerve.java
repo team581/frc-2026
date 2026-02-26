@@ -21,7 +21,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -33,7 +32,6 @@ import frc.robot.config.FeatureFlags;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
 import frc.robot.util.scheduling.SubsystemPriority;
-import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
@@ -244,9 +242,12 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && SwerveAssist.ableToWallSnap(drivetrainState.Pose, fieldRelativeSpeeds);
 
     // Wall logic if we are in a corner
-    inWallSnapCorner = FieldUtil.getCurrentWallSnapCornerZone(drivetrainState.Pose.getTranslation()).isPresent();
+    inWallSnapCorner =
+        FieldUtil.getCurrentWallSnapCornerZone(drivetrainState.Pose.getTranslation()).isPresent();
     if (inWallSnapCorner && !previouslyInWallSnapCorner) {
-      cornerSnapAngle = SwerveAssist.getWallSnapAngle(drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
+      cornerSnapAngle =
+          SwerveAssist.getWallSnapAngle(
+              drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
     }
     wallSnapAngle =
         inWallSnapCorner
@@ -526,7 +527,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     DogLog.log("Swerve/AbleToWallSnap", ableToWallSnap);
     DogLog.log(
         "SwerveAssist/WallSnaps/WallSnapAngle",
-        SwerveAssist.getWallSnapAngle(drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, false)
+        SwerveAssist.getWallSnapAngle(
+                drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, false)
             .getDegrees());
     DogLog.log(
         "SwerveAssist/WallSnaps/RobotHeading", drivetrainState.Pose.getRotation().getDegrees());

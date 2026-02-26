@@ -305,7 +305,12 @@ public class SwerveAssist {
     // If the closest wall is a driver station wall, the y component will be equal to the robot's
     var closestWallIsADriverStationWall = robotTranslation.getY() == closestWallTranslation.getY();
     var angleToWall = robotTranslation.minus(closestWallTranslation).getAngle();
-    var roundedSnapAngle = inCorner ? getRoundedSnapAngle(angleToWall.plus(Rotation2d.fromDegrees(180.0)), WALL_SNAP_ROUND_ANGLE) : getRoundedSnapAngle(MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
+    var roundedSnapAngle =
+        inCorner
+            ? getRoundedSnapAngle(
+                angleToWall.plus(Rotation2d.fromDegrees(180.0)), WALL_SNAP_ROUND_ANGLE)
+            : getRoundedSnapAngle(
+                MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
     var direction = 0;
 
     if (closestWallIsADriverStationWall) {
