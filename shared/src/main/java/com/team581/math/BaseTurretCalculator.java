@@ -172,4 +172,17 @@ public class BaseTurretCalculator {
 
     return target;
   }
+
+  public static double getGoalCentricTurretTolerance(
+      Translation2d goalTranslation,
+      Pose2d robotPose,
+      double goalCentricToleranceMeters,
+      Transform2d turretToRobot) {
+    var fieldRelativeTurretPose =
+        robotPose
+            .getTranslation()
+            .plus(turretToRobot.getTranslation().rotateBy(robotPose.getRotation()));
+    double distanceToGoal = fieldRelativeTurretPose.getDistance(goalTranslation);
+    return Math.toDegrees(Math.atan2(goalCentricToleranceMeters, distanceToGoal));
+  }
 }
