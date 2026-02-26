@@ -38,9 +38,11 @@ import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public class Swerve extends StateMachineSubsystem<SwerveState> {
+
   public static final double TRANSLATION_STD_DEV = 0.01;
 
-  public static final double MAX_SPEED = 4.75;
+  public static final double MAX_LINEAR_RATE = 4.75;
+  private static final int MAX_LINEAR_RATE_SHOOTING = 7;
 
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
   private static final double MAX_ANGULAR_RATE_SHOOTING = Units.rotationsToRadians(0.5);
@@ -48,8 +50,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   private static final double SIM_LOOP_PERIOD = Units.millisecondsToSeconds(5);
 
-  private final SlewRateLimiter scoringXLinearVelocitySlewRateLimiter = new SlewRateLimiter(7);
-  private final SlewRateLimiter scoringYLinearVelocitySlewRateLimiter = new SlewRateLimiter(7);
+  private final SlewRateLimiter scoringXLinearVelocitySlewRateLimiter = new SlewRateLimiter(MAX_LINEAR_RATE_SHOOTING);
+  private final SlewRateLimiter scoringYLinearVelocitySlewRateLimiter = new SlewRateLimiter(MAX_LINEAR_RATE_SHOOTING);
 
   private final CircularFilter lastDriveDirectionFilter = new CircularFilter(15);
 
@@ -172,7 +174,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
     this.teleopDriveSource =
         new XboxControllerDriveSource(
-            driverController, Swerve.MAX_SPEED, Swerve.TELEOP_MAX_ANGULAR_RATE);
+            driverController, Swerve.MAX_LINEAR_RATE, Swerve.TELEOP_MAX_ANGULAR_RATE);
     this.trailblazerDriveSource =
         new TrailblazerDriveSource(
             trailblazer, () -> drivetrainState.Pose, this::getFieldRelativeSpeeds);
