@@ -32,7 +32,7 @@ public class FeatureFlags {
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT =
       FeatureFlag.of("CancelInProgressShot", true);
 
-  public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
+  public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", true);
 
   public static final BooleanSupplier HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION =
       FeatureFlag.of("HopperShuffleWhileIntaking", true);
