@@ -132,7 +132,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       startSimThread();
     }
 
-    drivetrain.setStateStdDevs(new Matrix<>(VecBuilder.fill(TRANSLATION_STD_DEV, TRANSLATION_STD_DEV, 0.002)));
+    drivetrain.setStateStdDevs(
+        new Matrix<>(VecBuilder.fill(TRANSLATION_STD_DEV, TRANSLATION_STD_DEV, 0.002)));
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
