@@ -27,7 +27,7 @@ public class FeatureFlags {
   public static final BooleanSupplier STOP_SHOOTING_STATE =
       FeatureFlag.of("UseStopShootingState", false);
 
-  public static final BooleanSupplier IGNORE_TURRET = FeatureFlag.of("IgnoreTurret", false);
+  public static final BooleanSupplier IGNORE_TURRET_IN_FORCE_SCORE = FeatureFlag.of("IgnoreTurret", false);
 
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT =
       FeatureFlag.of("CancelInProgressShot", true);

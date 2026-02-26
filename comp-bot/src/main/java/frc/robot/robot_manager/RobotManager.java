@@ -140,7 +140,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           STOP_SHOOTING_FEED ->
           timeout(1) ? RobotState.IDLE : currentState;
       case PREPARE_FORCE_SCORE -> {
-        if ((FeatureFlags.IGNORE_TURRET.getAsBoolean()
+        if ((FeatureFlags.IGNORE_TURRET_IN_FORCE_SCORE.getAsBoolean()
                 || turret.atGoal(scoringParameters.turretTolerance()))
             && (shooter.atGoal() && !dyeRotor.isJammed() && shooterHood.atGoal())) {
           yield RobotState.FORCE_SCORE;
@@ -159,7 +159,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if (DSOptions.AUTO_SCORE.getAsBoolean() && !isHubActive) {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
-        if ((FeatureFlags.IGNORE_TURRET.getAsBoolean()
+        if ((FeatureFlags.IGNORE_TURRET_IN_FORCE_SCORE.getAsBoolean()
                 || turret.atGoal(scoringParameters.turretTolerance()))
             && (shooter.atGoal()
                 && localization.isTrustworthy()
