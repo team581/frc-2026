@@ -4,6 +4,7 @@ import com.team581.math.MathHelpers;
 import com.team581.math.ShootOnTheMove;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -22,35 +23,70 @@ public class AimParameterUtil {
   private static final double FEEDING_TURRET_TOLERANCE = Units.inchesToMeters(20);
 
   public static AimingParameters getFeedingParameters(
-      FeedLocation feedLocation, Pose2d robot, ChassisSpeeds fieldRelativeSpeeds) {
-    var feedTranslation =
-        FEEDING_SOTM.getVelocityCompensatedGoal(
-            robot.getTranslation(), feedLocation.getTranslation(robot), fieldRelativeSpeeds);
-    var turretAngle = TurretCalculator.calculateTurretAimingAngle(robot, feedTranslation);
-    var distanceToGoal = robot.getTranslation().getDistance(feedTranslation);
+      FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+    var robotTranslation = robotPose.getTranslation();
+    var separatedVelocityCompensatedGoal =
+        FEEDING_SOTM.getSeparatedVelocityCompensatedGoal(
+            robotTranslation, feedLocation.getTranslation(robotPose), fieldRelativeSpeeds);
+
+    DogLog.log(
+        "ShootOnTheMove/Feeding/RadialCompensatedGoal",
+        new Pose2d(separatedVelocityCompensatedGoal.radiallyCompensatedGoal(), Rotation2d.kZero));
+    DogLog.log(
+        "ShootOnTheMove/Feeding/TangentialCompensatedGoal",
+        new Pose2d(
+            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
+
+    var turretAngle =
+        TurretCalculator.calculateTurretAimingAngle(
+            robotPose, separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
+    var distanceToGoal =
+        robotPose
+            .getTranslation()
+            .getDistance(separatedVelocityCompensatedGoal.radiallyCompensatedGoal());
 
     var turretTolerance =
         TurretCalculator.getGoalCentricTurretTolerance(
-            feedTranslation, robot, FEEDING_TURRET_TOLERANCE);
+            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(),
+            robotPose,
+            FEEDING_TURRET_TOLERANCE);
 
     return new AimingParameters(turretAngle, distanceToGoal, turretTolerance);
   }
 
   public static AimingParameters getScoringParameters(
-      Pose2d robot, ChassisSpeeds fieldRelativeSpeeds) {
-    var hubTranslation =
-        SCORING_SOTM.getVelocityCompensatedGoal(
-            robot.getTranslation(),
-            FieldUtil.HUB_POSE.getPose().getTranslation(),
-            fieldRelativeSpeeds);
+      Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+    var robotTranslation = robotPose.getTranslation();
+    var separatedVelocityCompensatedGoal =
+        SCORING_SOTM.getSeparatedVelocityCompensatedGoal(
+            robotTranslation, FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
 
-    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robot);
-    double turretAngle =
-        TurretCalculator.calculateTurretAimingAngle(robotPoseInAllianceZone, hubTranslation);
-    double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
+    DogLog.log(
+        "ShootOnTheMove/Scoring/RadialCompensatedGoal",
+        new Pose2d(separatedVelocityCompensatedGoal.radiallyCompensatedGoal(), Rotation2d.kZero));
+    DogLog.log(
+        "ShootOnTheMove/Scoring/TangentialCompensatedGoal",
+        new Pose2d(
+            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
+
+    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robotPose);
+    var turretAngle =
+        TurretCalculator.calculateTurretAimingAngle(
+            robotPoseInAllianceZone,
+            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
+    var distanceToGoal =
+        robotPoseInAllianceZone
+            .getTranslation()
+            .getDistance(separatedVelocityCompensatedGoal.radiallyCompensatedGoal());
+
+    DogLog.log("AimParameterUtil/DistanceToGoal", distanceToGoal);
+    DogLog.log("AimParameterUtil/TurretAngle", turretAngle);
+
     var turretTolerance =
         TurretCalculator.getGoalCentricTurretTolerance(
-            hubTranslation, robot, SCORING_TURRET_TOLERANCE);
+            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(),
+            robotPose,
+            SCORING_TURRET_TOLERANCE);
 
     return new AimingParameters(turretAngle, distanceToGoal, turretTolerance);
   }
