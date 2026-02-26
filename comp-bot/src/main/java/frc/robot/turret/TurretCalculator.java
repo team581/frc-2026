@@ -49,4 +49,10 @@ public class TurretCalculator {
     return BaseTurretCalculator.getSmartUnwrapAngle(
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE, 80);
   }
+
+  public static double getGoalCentricTurretTolerance(
+      Translation2d goalTranslation, Pose2d robotPose, double goalCentricToleranceMeters) {
+    return BaseTurretCalculator.getGoalCentricTurretTolerance(
+        goalTranslation, robotPose, goalCentricToleranceMeters, TurretConfig.TURRET_TO_ROBOT);
+  }
 }
