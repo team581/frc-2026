@@ -40,6 +40,12 @@ public class TurretCalculator {
         SPACE_FROM_HARDSTOP_TOLERANCE);
   }
 
+  public static double getGoalCentricTurretTolerance(
+      Translation2d goalTranslation, Pose2d robotPose, double goalCentricToleranceMeters) {
+    return BaseTurretCalculator.getGoalCentricTurretTolerance(
+        goalTranslation, robotPose, goalCentricToleranceMeters, TurretConfig.TURRET_TO_ROBOT);
+  }
+
   public static double getOptimalAngle(double target, double current) {
     return BaseTurretCalculator.getOptimalAngle(
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE);
@@ -48,11 +54,5 @@ public class TurretCalculator {
   public static double getSmartUnwrapAngle(double target, double current) {
     return BaseTurretCalculator.getSmartUnwrapAngle(
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE, 80);
-  }
-
-  public static double getGoalCentricTurretTolerance(
-      Translation2d goalTranslation, Pose2d robotPose, double goalCentricToleranceMeters) {
-    return BaseTurretCalculator.getGoalCentricTurretTolerance(
-        goalTranslation, robotPose, goalCentricToleranceMeters, TurretConfig.TURRET_TO_ROBOT);
   }
 }

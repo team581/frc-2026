@@ -140,7 +140,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           STOP_SHOOTING_FEED ->
           timeout(1) ? RobotState.IDLE : currentState;
       case PREPARE_FORCE_SCORE -> {
-        if ((FeatureFlags.IGNORE_TURRET.getAsBoolean() || turret.atGoal(scoringParameters.turretTolerance()))
+        if ((FeatureFlags.IGNORE_TURRET.getAsBoolean()
+                || turret.atGoal(scoringParameters.turretTolerance()))
             && (shooter.atGoal() && !dyeRotor.isJammed() && shooterHood.atGoal())) {
           yield RobotState.FORCE_SCORE;
         }
@@ -158,7 +159,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if (DSOptions.AUTO_SCORE.getAsBoolean() && !isHubActive) {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
-        if ((FeatureFlags.IGNORE_TURRET.getAsBoolean() || turret.atGoal(scoringParameters.turretTolerance()))
+        if ((FeatureFlags.IGNORE_TURRET.getAsBoolean()
+                || turret.atGoal(scoringParameters.turretTolerance()))
             && (shooter.atGoal()
                 && localization.isTrustworthy()
                 && FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
@@ -1254,13 +1256,15 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         "RobotManager/Scoring/ScoreTransition/InAllianceZone",
         FieldUtil.isRobotInAllianceZone(robotPose.getTranslation()));
     DogLog.log("RobotManager/Scoring/ScoreTransition/DyeRotorNotJammed", !dyeRotor.isJammed());
-    DogLog.log("RobotManager/Scoring/ScoreTransition/TurretAtGoal", turret.atGoal(scoringParameters.turretTolerance()));
+    DogLog.log(
+        "RobotManager/Scoring/ScoreTransition/TurretAtGoal",
+        turret.atGoal(scoringParameters.turretTolerance()));
     DogLog.log("RobotManager/Scoring/ScoreTransition/ShooterHoodAtGoal", shooterHood.atGoal());
     DogLog.log("RobotManager/Scoring/ScoreTransition/CloseEnoughToHub", isCloseEnoughToHub);
   }
 
   private void logFeedTransition() {
-        DogLog.log("Debug/TurretFeedTolerance", feedingParameters.turretTolerance());
+    DogLog.log("Debug/TurretFeedTolerance", feedingParameters.turretTolerance());
 
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterAtGoal", shooter.atGoal());
     DogLog.log(
@@ -1269,7 +1273,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         "RobotManager/Feeding/FeedTransition/InNoFeedZone",
         !FieldUtil.isRobotInNoFeedZone(robotPose));
     DogLog.log("RobotManager/Feeding/FeedTransition/DyeRotorNotJammed", !dyeRotor.isJammed());
-    DogLog.log("RobotManager/Feeding/FeedTransition/TurretAtGoal", turret.atGoal(feedingParameters.turretTolerance()));
+    DogLog.log(
+        "RobotManager/Feeding/FeedTransition/TurretAtGoal",
+        turret.atGoal(feedingParameters.turretTolerance()));
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterHoodAtGoal", shooterHood.atGoal());
   }
 }
