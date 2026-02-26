@@ -12,7 +12,8 @@ final class GamePieceDetectionCalculatorTest {
   @Test
   void centeredDistanceCalculation() {
     var cameraConfig =
-        new CameraConfig(LimelightModel.THREE, false, 0, 0, Units.inchesToMeters(10), 0, 0, 0);
+        new CameraConfig(
+            LimelightModel.THREE, false, false, 0, 0, Units.inchesToMeters(10), 0, 0, 0);
 
     // Calculated from
     // https://www.calculator.net/triangle-calculator.html?vc=60&vx=10&vy=&va=90&vz=&vb=&angleunits=d&x=Calculate

@@ -30,8 +30,7 @@ public class AutoSegmentCustomEnd extends AutoSegment {
       return false;
     }
 
-    return finishedTolerance.atPose(
-        points.get(points.size() - 1).poseSupplier().get().getPose(), robotPose);
+    return finishedTolerance.atPose(points.get(points.size() - 1).getPose(), robotPose);
   }
 
   @Override
@@ -46,7 +45,6 @@ public class AutoSegmentCustomEnd extends AutoSegment {
     }
 
     return finishedTolerance.atTranslation(
-        points.get(points.size() - 1).poseSupplier().get().getPose().getTranslation(),
-        robotTranslation);
+        points.get(points.size() - 1).getPose().getTranslation(), robotTranslation);
   }
 }

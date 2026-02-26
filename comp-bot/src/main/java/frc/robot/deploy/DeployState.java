@@ -4,13 +4,14 @@ import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum DeployState {
-  INTAKE(0.0),
-  STOWED(0),
-  SHOOTING(0.0),
-  HOMING(0),
-  UNHOMED(0),
-  CATCHUP_TO_LEFT(0),
-  CATCHUP_TO_RIGHT(0);
+  INTAKE(DeployConfig.MAX_LENGTH - 0.25),
+  STOW(1.0),
+  HOPPER_SHUFFLING_OUT(INTAKE.getLength()),
+  HOPPER_SHUFFLING_IN(HOPPER_SHUFFLING_OUT.getLength() - 4.0),
+  HOPPER_SHUFFLING_FINISH(6.0),
+  HOME_INWARD(0),
+  HOME_OUTWARD(DeployConfig.MAX_LENGTH),
+  UNHOMED(0);
 
   private final DoubleSubscriber tunableLength;
 

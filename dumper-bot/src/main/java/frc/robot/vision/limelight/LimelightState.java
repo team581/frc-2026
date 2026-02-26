@@ -4,8 +4,7 @@ public enum LimelightState {
   OFF(1),
   TAGS(1),
   HUB_TAGS(1),
-  CLUSTER_MAP(2),
-  HANDOFF(5);
+  CLUSTER_MAP(2);
 
   final int pipelineIndex;
 

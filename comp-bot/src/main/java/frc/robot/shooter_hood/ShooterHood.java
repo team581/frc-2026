@@ -31,10 +31,10 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
 
   private double scoreDistance = 0;
   private double feedDistance = 0;
-  private double measuredAngle = 0;
-  private double scoreAngle = 0;
-  private double feedAngle = 0;
-  private double statorCurrent = 0;
+  private double currentAngle = 0;
+  private double statorCurrent = 0.0;
+  private double climbScoreAngle = 0;
+  private double voltage = 0.0;
 
   public ShooterHood(TalonFX motor) {
     super(SubsystemPriority.SHOOTER_HOOD, ShooterHoodState.UNHOMED);
@@ -57,7 +57,7 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
   }
 
   public double getAngle() {
-    return measuredAngle;
+    return currentAngle;
   }
 
   public void feedRequest(double distance) {
@@ -68,6 +68,11 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
       }
       default -> setStateFromRequest(ShooterHoodState.FEEDING);
     }
+  }
+
+  public void climbScoreRequest(boolean isLeft) {
+    climbScoreAngle = 0.0;
+    setStateFromRequest(ShooterHoodState.CLIMB_SCORING);
   }
 
   public void idleRequest() {
@@ -86,30 +91,25 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
   public boolean atGoal() {
     return switch (getState()) {
       case UNHOMED, HOMING -> false;
-      case IDLE ->
-          MathUtil.isNear(ShooterHoodConfig.IDLE_ANGLE, measuredAngle, ShooterHoodConfig.TOLERANCE);
-      case SCORING -> MathUtil.isNear(scoreAngle, measuredAngle, ShooterHoodConfig.TOLERANCE);
-      case FEEDING -> MathUtil.isNear(feedAngle, measuredAngle, ShooterHoodConfig.TOLERANCE);
+      default -> MathUtil.isNear(getGoalAngle(), currentAngle, ShooterHoodConfig.TOLERANCE);
     };
   }
 
   @Override
   protected void collectInputs() {
-    measuredAngle = Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
+    currentAngle = Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
     statorCurrent = motor.getStatorCurrent().getValueAsDouble();
-    scoreAngle = clamp(distanceToScoringAngle(scoreDistance));
-    feedAngle = clamp(distanceToFeedingAngle(feedDistance));
+    voltage = motor.getMotorVoltage().getValueAsDouble();
+  }
 
-    DogLog.log("ShooterHood/MeasuredAngle", measuredAngle);
-    DogLog.log("ShooterHood/ScoreAngle", scoreAngle);
-    DogLog.log("ShooterHood/FeedingAngle", feedAngle);
-    DogLog.log("ShooterHood/StatorCurrent", statorCurrent);
-    switch (getState()) {
-      case UNHOMED, HOMING -> {
-        statorCurrent = motor.getStatorCurrent().getValueAsDouble();
-      }
-      default -> {}
-    }
+  private double getGoalAngle() {
+    return switch (getState()) {
+      case UNHOMED, HOMING -> -1;
+      case IDLE -> ShooterHoodConfig.IDLE_ANGLE;
+      case SCORING -> distanceToScoringAngle(scoreDistance);
+      case FEEDING -> distanceToFeedingAngle(feedDistance);
+      case CLIMB_SCORING -> climbScoreAngle;
+    };
   }
 
   @Override
@@ -117,7 +117,7 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
     return switch (currentState) {
       case HOMING -> {
         if (statorCurrent >= ShooterHoodConfig.HOMING_CURRENT_THRESHOLD) {
-          motor.setPosition(ShooterHoodConfig.HOMING_END_POSITION);
+          motor.setPosition(Units.degreesToRotations(ShooterHoodConfig.HOMING_END_POSITION));
           yield ShooterHoodState.IDLE;
         }
         yield currentState;
@@ -137,36 +137,36 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
 
       case UNHOMED -> motor.disable();
 
-      case IDLE -> {
+      default -> {
         motor.setControl(
-            positionVoltageRequest.withPosition(
-                Units.degreesToRotations(clamp(ShooterHoodConfig.IDLE_ANGLE))));
-        DogLog.log("ShooterHood/CurrentSetpoint", ShooterHoodConfig.IDLE_ANGLE);
+            positionVoltageRequest.withPosition(Units.degreesToRotations(clamp(getGoalAngle()))));
       }
-
-      default -> {}
     }
   }
 
   @Override
   protected void whileInState(ShooterHoodState state) {
+    var goalAngle = getGoalAngle();
+
     switch (state) {
-      case SCORING -> {
+      case SCORING, FEEDING -> {
         motor.setControl(
-            positionVoltageRequest.withPosition(Units.degreesToRotations(clamp(scoreAngle))));
-        DogLog.log("ShooterHood/CurrentSetpoint", scoreAngle);
+            positionVoltageRequest.withPosition(Units.degreesToRotations(clamp(goalAngle))));
       }
-
-      case FEEDING -> {
+      case CLIMB_SCORING -> {
         motor.setControl(
-            positionVoltageRequest.withPosition(Units.degreesToRotations(clamp(feedAngle))));
-        DogLog.log("ShooterHood/CurrentSetpoint", feedAngle);
+            positionVoltageRequest.withPosition(Units.degreesToRotations(clamp(climbScoreAngle))));
+        DogLog.log("ShooterHood/CurrentSetpoint", climbScoreAngle);
       }
-
+      // Do nothing in the other states, they have static setpoints
       default -> {}
     }
 
     DogLog.log("ShooterHood/AtGoal", atGoal());
+    DogLog.log("ShooterHood/Angle", currentAngle);
+    DogLog.log("ShooterHood/GoalAngle", goalAngle);
+    DogLog.log("ShooterHood/Motor/StatorCurrent", statorCurrent);
+    DogLog.log("ShooterHood/Motor/Voltage", voltage);
   }
 
   @Override
@@ -178,10 +178,11 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
                 mechanism
                     .addMotor(motor, ChassisReference.CounterClockwise_Positive)
                     .withMaxPosition(Units.degreesToRotations(ShooterHoodConfig.MAX_ANGLE))
-                    .withMinPosition(Units.degreesToRotations(ShooterHoodConfig.MIN_ANGLE)));
+                    .withMinPosition(
+                        Units.degreesToRotations(ShooterHoodConfig.HOMING_END_POSITION)));
 
     if (getState() == ShooterHoodState.HOMING) {
-      motor.setPosition(0);
+      motor.setPosition(Units.degreesToRotations(ShooterHoodConfig.HOMING_END_POSITION));
       setStateFromRequest(ShooterHoodState.IDLE);
     }
 

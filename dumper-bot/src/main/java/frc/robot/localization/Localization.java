@@ -77,7 +77,7 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
 
   private void ingestTagResult(TagResult result) {
     var visionPose = result.pose();
-    trustFactor.tagSeen();
+    // trustFactor.tagSeen();
     if (!vision.seenTagRecentlyForReset()) {
       resetPose(visionPose);
     }

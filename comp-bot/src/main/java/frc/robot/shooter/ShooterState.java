@@ -3,5 +3,6 @@ package frc.robot.shooter;
 public enum ShooterState {
   IDLE,
   SCORE,
-  FEEDING;
+  FEEDING,
+  CLIMB_SCORE;
 }

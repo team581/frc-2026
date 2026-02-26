@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.generated.RobotTunerConstants.TunerSwerveDrivetrain;
+import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.imu.Imu;
 import frc.robot.swerve.Swerve;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -63,12 +63,17 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
     return trustFactor.get();
   }
 
+  public boolean isLost() {
+    return trustFactor.isLost();
+  }
+
   public boolean isTrustworthy() {
     return trustFactor.isTrustworthy();
   }
 
   public void resetPose(Pose2d estimatedPose) {
     drivetrain.resetPose(estimatedPose);
+    trustFactor.seededPose();
   }
 
   @Override
@@ -80,11 +85,12 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
 
   public void zeroGyro() {
     drivetrain.seedFieldCentric();
+    trustFactor.reset();
   }
 
   private void ingestTagResult(TagResult result) {
     DogLog.timestamp("Localization/IngestTagResult");
-    trustFactor.tagSeen();
+    trustFactor.tagSeen(result.standardDevs().getData()[0]);
     var visionPose = result.pose();
 
     if (!vision.seenTagRecentlyForReset()) {

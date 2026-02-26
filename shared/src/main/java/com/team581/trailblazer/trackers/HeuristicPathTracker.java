@@ -27,7 +27,7 @@ public class HeuristicPathTracker implements PathTracker {
   @Override
   public Pose2d getTargetPose(@Nullable Rotation2d trackerRotationOverride) {
     var currentPoint = points.get(getCurrentPointIndex());
-    var currentTargetPose = currentPoint.poseSupplier().get().getPose();
+    var currentTargetPose = currentPoint.getPose();
 
     if (trackerRotationOverride != null) {
       currentTargetPose = new Pose2d(currentTargetPose.getTranslation(), trackerRotationOverride);
@@ -41,7 +41,7 @@ public class HeuristicPathTracker implements PathTracker {
       currentPointIndex++;
     }
 
-    return points.get(currentPointIndex).poseSupplier().get().getPose();
+    return points.get(currentPointIndex).getPose();
   }
 
   @Override

@@ -8,21 +8,27 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class ShootOnTheMove {
-	private static final int MAX_ITERATIONS = 5;
-	private final InterpolatingDoubleTreeMap distanceToTimeOfFlight;
+  private static final int MAX_ITERATIONS = 5;
+  // TODO: find drag constant. Currently eyeballed
+  // https://frc-docs--3242.org.readthedocs.build/en/3242/docs/software/advanced-controls/fire-control/linear-drag.html
+  public static final double DRAG_CONSTANT = 0.9523;
+  private final InterpolatingDoubleTreeMap distanceToTimeOfFlight;
 
-	public ShootOnTheMove(InterpolatingDoubleTreeMap distanceToTimeOfFlight) {
-		this.distanceToTimeOfFlight = distanceToTimeOfFlight;
-	}
+  public ShootOnTheMove(InterpolatingDoubleTreeMap distanceToTimeOfFlight) {
+    this.distanceToTimeOfFlight = distanceToTimeOfFlight;
+  }
 
-	public record SeparatedVelocityCompensatedGoal(Translation2d radiallyCompensatedGoal,
-			Translation2d tangentiallyCompensatedGoal) {
-	}
+  public record SeparatedVelocityCompensatedGoal(
+      Translation2d radiallyCompensatedGoal, Translation2d tangentiallyCompensatedGoal) {}
 
-	public SeparatedVelocityCompensatedGoal getSeparatedVelocityCompensatedGoal(
+  public double getEffectiveTimeOfFlight(double tof) {
+    return (1 - Math.pow(Math.E, (-ShootOnTheMove.DRAG_CONSTANT * tof)))
+        / ShootOnTheMove.DRAG_CONSTANT;
+  }
+
+  public SeparatedVelocityCompensatedGoal getSeparatedVelocityCompensatedGoal(
       Translation2d robot, Translation2d goal, ChassisSpeeds robotVelocity) {
-    
-    
+
     var compensatedGoal = goal;
     var timeOfFlight = 0.0;
 
@@ -49,11 +55,11 @@ public class ShootOnTheMove {
     }
 
     // Apply time of flight to get radially and tangentially compensated goals
-    null radiallyCompensatedGoal =
+    var radiallyCompensatedGoal =
         new Translation2d(
             goal.getX() - (radialVelocity.getX() * timeOfFlight),
             goal.getY() - (radialVelocity.getY() * timeOfFlight));
-    null tangentiallyCompensatedGoal =
+    var tangentiallyCompensatedGoal =
         new Translation2d(
             goal.getX() - (tangentialVelocity.getX() * timeOfFlight),
             goal.getY() - (tangentialVelocity.getY() * timeOfFlight));
@@ -64,25 +70,39 @@ public class ShootOnTheMove {
         radiallyCompensatedGoal, tangentiallyCompensatedGoal);
   }
 
-	/**
-	 * @deprecated Use {@link #getSeparatedVelocityCompensatedGoal(Translation2d, Translation2d,
-	 *     ChassisSpeeds)}
-	 */
-	@Deprecated
-	public Translation2d getVelocityCompensatedGoal(Translation2d robot, Translation2d goal,
-			ChassisSpeeds robotVelocity) {
-		var timeOfFlight = 0.0;
-		var result = goal;
+  public Translation2d getVelocityCompensatedGoal(
+      Translation2d robot, Translation2d target, ChassisSpeeds robotVelocity) {
+    var timeOfFlight = 0.0;
+    var result = target;
 
-		for (int i = 0; i < MAX_ITERATIONS; i++) {
-			timeOfFlight = distanceToTimeOfFlight.get(robot.getDistance(result));
-			// Compensated goal = real goal - (robot velocity * time of flight of ball)
-			result = new Translation2d(goal.getX() - (robotVelocity.vxMetersPerSecond * timeOfFlight),
-					goal.getY() - (robotVelocity.vyMetersPerSecond * timeOfFlight));
-		}
+    for (int i = 0; i < MAX_ITERATIONS; i++) {
+      timeOfFlight = distanceToTimeOfFlight.get(robot.getDistance(result));
+      // Compensated goal = real goal - (robot velocity * time of flight of ball)
+      result =
+          new Translation2d(
+              target.getX() - (robotVelocity.vxMetersPerSecond * timeOfFlight),
+              target.getY() - (robotVelocity.vyMetersPerSecond * timeOfFlight));
+    }
 
-		DogLog.log("ShootOnTheMove/CompensatedGoal", new Pose2d(result, Rotation2d.kZero));
+    return result;
+  }
 
-		return result;
-	}
+  public Translation2d getVelocityCompensatedGoalWithEffectiveTof(
+      Translation2d robot, Translation2d target, ChassisSpeeds robotVelocity) {
+    var timeOfFlight = 0.0;
+    var effectiveTimeOfFlight = 0.0;
+    var result = target;
+
+    for (int i = 0; i < MAX_ITERATIONS; i++) {
+      timeOfFlight = distanceToTimeOfFlight.get(robot.getDistance(result));
+      effectiveTimeOfFlight = getEffectiveTimeOfFlight(timeOfFlight);
+      // Compensated goal = real goal - (robot velocity * time of flight of ball)
+      result =
+          new Translation2d(
+              target.getX() - (robotVelocity.vxMetersPerSecond * effectiveTimeOfFlight),
+              target.getY() - (robotVelocity.vyMetersPerSecond * effectiveTimeOfFlight));
+    }
+
+    return result;
+  }
 }

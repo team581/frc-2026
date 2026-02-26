@@ -15,12 +15,9 @@ public class TurretCalculator {
     return BaseTurretCalculator.calculateHomedPositionFromMotorAndEncoder(
         turretMotorPosition,
         turretEncoderPosition,
-        TurretConfig.ROTOR_CAL_OFFSET,
         TurretConfig.MOTOR_TO_TURRET,
         TurretConfig.ENCODER_TO_TURRET,
-        TurretConfig.MOTOR_ROTATION_RESOLUTION,
-        TurretConfig.MIN_ANGLE_HOMING,
-        TurretConfig.MAX_ANGLE_HOMING);
+        TurretConfig.MOTOR_ROTATION_RESOLUTION);
   }
 
   public static double calculateSwerveTurretCompensationAngle(
@@ -41,6 +38,12 @@ public class TurretCalculator {
         TurretConfig.MAX_ANGLE,
         SPACE_FROM_HARDSTOP,
         SPACE_FROM_HARDSTOP_TOLERANCE);
+  }
+
+  public static double getGoalCentricTurretTolerance(
+      Translation2d goalTranslation, Pose2d robotPose, double goalCentricToleranceMeters) {
+    return BaseTurretCalculator.getGoalCentricTurretTolerance(
+        goalTranslation, robotPose, goalCentricToleranceMeters, TurretConfig.TURRET_TO_ROBOT);
   }
 
   public static double getOptimalAngle(double target, double current) {

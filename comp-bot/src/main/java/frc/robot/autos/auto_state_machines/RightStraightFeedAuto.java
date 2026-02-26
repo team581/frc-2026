@@ -8,11 +8,11 @@ import com.team581.trailblazer.segments.AutoSegment;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.autos.BaseImperativeAuto;
-import frc.robot.autos.auto_state_machines.auto_state.TrenchRFeed2AutoState;
+import frc.robot.autos.auto_state_machines.auto_state.RightStraightFeedAutoState;
 import frc.robot.robot_manager.RobotManager;
 
 @SuppressWarnings("unused")
-public class TrenchRFeed2Auto extends BaseImperativeAuto<TrenchRFeed2AutoState> {
+public class RightStraightFeedAuto extends BaseImperativeAuto<RightStraightFeedAutoState> {
 
   private final AutoSegment segment1DriveToMidline =
       // TODO: update poses
@@ -62,8 +62,8 @@ public class TrenchRFeed2Auto extends BaseImperativeAuto<TrenchRFeed2AutoState> 
       Trailblazer.segment(AutoPoint.ofRed(Pose2d.kZero))
           .untilFinished(new PoseErrorTolerance(0, null));
 
-  public TrenchRFeed2Auto(RobotManager robotManager, Trailblazer trailblazer) {
-    super(TrenchRFeed2AutoState.SEGMENT_1_DRIVE_TO_MIDLINE, robotManager, trailblazer);
+  public RightStraightFeedAuto(RobotManager robotManager, Trailblazer trailblazer) {
+    super(RightStraightFeedAutoState.SEGMENT_1_DRIVE_TO_MIDLINE, robotManager, trailblazer);
   }
 
   @Override
@@ -73,28 +73,28 @@ public class TrenchRFeed2Auto extends BaseImperativeAuto<TrenchRFeed2AutoState> 
   }
 
   @Override
-  protected TrenchRFeed2AutoState getNextState(TrenchRFeed2AutoState currentState) {
+  protected RightStraightFeedAutoState getNextState(RightStraightFeedAutoState currentState) {
     if (trailblazer.atGoal(robotManager.localization.getPose())) {
       return switch (currentState) {
-        case SEGMENT_1_DRIVE_TO_MIDLINE -> TrenchRFeed2AutoState.INTAKE_ACROSS_MIDLINE_1;
-        case INTAKE_ACROSS_MIDLINE_1 -> TrenchRFeed2AutoState.SEGMENT_2_DRIVE_TO_FEED_1;
-        case SEGMENT_2_DRIVE_TO_FEED_1 -> TrenchRFeed2AutoState.FEED_1;
-        case FEED_1 -> TrenchRFeed2AutoState.INTAKE_ACROSS_MIDLINE_2;
-        case INTAKE_ACROSS_MIDLINE_2 -> TrenchRFeed2AutoState.SEGMENT_3_DRIVE_TO_FEED_2;
-        case SEGMENT_3_DRIVE_TO_FEED_2 -> TrenchRFeed2AutoState.FEED_2;
-        case FEED_2 -> TrenchRFeed2AutoState.SEGMENT_4_DRIVE_BACK;
-        case SEGMENT_4_DRIVE_BACK -> TrenchRFeed2AutoState.SEGMENT_5_INTAKE_ALLIANCE_SIDE;
-        case SEGMENT_5_INTAKE_ALLIANCE_SIDE -> TrenchRFeed2AutoState.SEGMENT_6_DRIVE_TO_SHOOT;
-        case SEGMENT_6_DRIVE_TO_SHOOT -> TrenchRFeed2AutoState.SHOOT;
-        case SHOOT -> TrenchRFeed2AutoState.DONE;
-        case DONE -> TrenchRFeed2AutoState.DONE;
+        case SEGMENT_1_DRIVE_TO_MIDLINE -> RightStraightFeedAutoState.INTAKE_ACROSS_MIDLINE_1;
+        case INTAKE_ACROSS_MIDLINE_1 -> RightStraightFeedAutoState.SEGMENT_2_DRIVE_TO_FEED_1;
+        case SEGMENT_2_DRIVE_TO_FEED_1 -> RightStraightFeedAutoState.FEED_1;
+        case FEED_1 -> RightStraightFeedAutoState.INTAKE_ACROSS_MIDLINE_2;
+        case INTAKE_ACROSS_MIDLINE_2 -> RightStraightFeedAutoState.SEGMENT_3_DRIVE_TO_FEED_2;
+        case SEGMENT_3_DRIVE_TO_FEED_2 -> RightStraightFeedAutoState.FEED_2;
+        case FEED_2 -> RightStraightFeedAutoState.SEGMENT_4_DRIVE_BACK;
+        case SEGMENT_4_DRIVE_BACK -> RightStraightFeedAutoState.SEGMENT_5_INTAKE_ALLIANCE_SIDE;
+        case SEGMENT_5_INTAKE_ALLIANCE_SIDE -> RightStraightFeedAutoState.SEGMENT_6_DRIVE_TO_SHOOT;
+        case SEGMENT_6_DRIVE_TO_SHOOT -> RightStraightFeedAutoState.SHOOT;
+        case SHOOT -> RightStraightFeedAutoState.DONE;
+        case DONE -> RightStraightFeedAutoState.DONE;
       };
     }
     return currentState;
   }
 
   @Override
-  protected void whileInState(TrenchRFeed2AutoState newState) {
+  protected void whileInState(RightStraightFeedAutoState newState) {
     switch (newState) {
       // TODO: update state actions
       case SEGMENT_1_DRIVE_TO_MIDLINE -> {}

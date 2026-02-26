@@ -12,10 +12,7 @@
     "fileFormat": "json",
     "matchStrings": ["jsonUrl ? { \"depName\": name, \"currentValue\": version, \"registryUrl\": jsonUrl }"]
   }],
-  "packageRules": [{
-    "groupName": "error-prone",
-    "matchSourceUrls": ["https://github.com/google/error-prone"]
-  }],
+  "timezone": "America/Los_Angeles",
   "semanticCommits": "disabled",
   "labels": ["dependencies"],
   "customDatasources": {"wpilib-vendordep": {

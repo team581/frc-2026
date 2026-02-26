@@ -124,8 +124,6 @@ public class Trailblazer {
 
     DogLog.log(
         "Trailblazer/Tracker/InitialSegmentPoints",
-        segment.points.stream()
-            .map(point -> point.poseSupplier().get().getPose())
-            .toArray(Pose2d[]::new));
+        segment.points.stream().map(point -> point.getPose()).toArray(Pose2d[]::new));
   }
 }

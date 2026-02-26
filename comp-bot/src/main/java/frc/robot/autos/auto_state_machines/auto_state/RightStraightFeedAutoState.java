@@ -1,6 +1,6 @@
 package frc.robot.autos.auto_state_machines.auto_state;
 
-public enum TrenchRFeed2AutoState {
+public enum RightStraightFeedAutoState {
   SEGMENT_1_DRIVE_TO_MIDLINE,
   INTAKE_ACROSS_MIDLINE_1,
   INTAKE_ACROSS_MIDLINE_2,

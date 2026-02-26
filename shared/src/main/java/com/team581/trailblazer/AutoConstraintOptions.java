@@ -14,7 +14,7 @@ public record AutoConstraintOptions(
     double maxAngularAcceleration) {
   /** Default constraint options to use if no point or segment specific options are set. */
   public AutoConstraintOptions() {
-    this(4.75, Units.rotationsToRadians(2), 4, Units.rotationsToRadians(2));
+    this(4.75, Units.rotationsToRadians(4), 4, Units.rotationsToRadians(4));
   }
 
   public AutoConstraintOptions withLinearConstraints(

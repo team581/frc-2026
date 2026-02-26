@@ -20,7 +20,7 @@ public class ClimberConfig {
           .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
           .withCurrentLimits(
               new CurrentLimitsConfigs().withStatorCurrentLimit(30).withStatorCurrentLimit(30))
-          .withSlot0(new Slot0Configs().withKP(150.0).withKV(0.0).withKG(0.0));
+          .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0).withKG(0.0));
 
   // TODO: UPDATE WITH REAL GOAL LOCATIONS FROM CAD
   public static final Point CLIMB_LEFT_LOCATION =
@@ -29,4 +29,6 @@ public class ClimberConfig {
       Point.ofRed(new Pose2d(14.968, 4.748, Rotation2d.k180deg));
 
   public static final double TOLERANCE = 0.1;
+
+  private ClimberConfig() {}
 }

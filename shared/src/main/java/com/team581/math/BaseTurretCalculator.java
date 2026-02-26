@@ -1,28 +1,31 @@
 package com.team581.math;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 
 public class BaseTurretCalculator {
 
   public static double calculateHomedPositionFromMotorAndEncoder(
       double turretMotorPosition,
       double turretEncoderPosition,
-      double rotorCalibratedOffset,
       double motorToTurretRatio,
       double encoderToTurretRatio,
-      double motorRotationResolution,
-      double minTurretAngle,
-      double maxTurretAngle) {
-    double rotor_position = (turretMotorPosition - rotorCalibratedOffset) % 1;
+      double motorRotationResolution) {
+    double rotor_position = turretMotorPosition % 1;
+    DogLog.log("Turret/Calculator/motor_mod", rotor_position);
     double rotorRotationsRelativeToTurret = rotor_position / motorToTurretRatio;
-    double roughAbsolutePosition = turretEncoderPosition * encoderToTurretRatio;
+    double roughAbsolutePosition = turretEncoderPosition / encoderToTurretRatio;
+    DogLog.log("Turret/Calculator/rough_abs_pos", roughAbsolutePosition);
 
     int potentialMotorWrapA =
         (int) (roughAbsolutePosition / motorRotationResolution); // motor_rotation_resolution;
+    DogLog.log("Turret/Calculator/potentialA", potentialMotorWrapA);
+
     double potentialMotorWrapB = potentialMotorWrapA - 1;
     double potentialMotorWrapC = potentialMotorWrapA + 1;
 
@@ -46,8 +49,10 @@ public class BaseTurretCalculator {
         && potentialMotorPositionErrB < potentialMotorPosErrC) {
       turretPos = potentialMotorPosB;
     }
+    DogLog.log("Turret/Calculator/turretPos", turretPos);
+    DogLog.log("Turret/Calculator/turretPosDegrees", Units.rotationsToDegrees(turretPos));
 
-    return MathUtil.inputModulus(turretPos, minTurretAngle, maxTurretAngle);
+    return turretPos;
   }
 
   public static double calculateSwerveTurretCompensationAngle(
@@ -101,6 +106,19 @@ public class BaseTurretCalculator {
       }
     }
     return false;
+  }
+
+  public static double getGoalCentricTurretTolerance(
+      Translation2d goalTranslation,
+      Pose2d robotPose,
+      double goalCentricToleranceMeters,
+      Transform2d turretToRobot) {
+    var fieldRelativeTurretPose =
+        robotPose
+            .getTranslation()
+            .plus(turretToRobot.getTranslation().rotateBy(robotPose.getRotation()));
+    double distanceToGoal = fieldRelativeTurretPose.getDistance(goalTranslation);
+    return Math.toDegrees(Math.atan2(goalCentricToleranceMeters, distanceToGoal));
   }
 
   public static double getOptimalAngle(

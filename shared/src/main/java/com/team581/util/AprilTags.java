@@ -8,7 +8,7 @@ import org.jspecify.annotations.Nullable;
 
 public class AprilTags {
   public static final AprilTagFieldLayout FIELD_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
   public static final Pose3d TAG_1 = FIELD_LAYOUT.getTagPose(1).orElseThrow();
   public static final Pose3d TAG_2 = FIELD_LAYOUT.getTagPose(2).orElseThrow();
