@@ -14,6 +14,8 @@ import frc.robot.imu.Imu;
 import frc.robot.swerve.Swerve;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.Vision;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Localization extends StateMachineSubsystem<LocalizationState> {
   private static final double LATENCY_CONSTANT = 0.0;
@@ -88,26 +90,32 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
     trustFactor.reset();
   }
 
-  private void ingestTagResult(TagResult result) {
+  private void ingestTagResult(List<TagResult> results) {
     DogLog.timestamp("Localization/IngestTagResult");
-    trustFactor.tagSeen(result.standardDevs().getData()[0]);
-    var visionPose = result.pose();
+    trustFactor.ingestTagResult(robotPose, results);
+    for (TagResult result : results) {
+      var visionPose = result.pose();
 
-    if (!vision.seenTagRecentlyForReset()) {
-      resetPose(visionPose);
+      if (!vision.seenTagRecentlyForReset()) {
+        resetPose(visionPose);
+      }
+      swerve.drivetrain.addVisionMeasurement(
+          visionPose,
+          Utils.fpgaToCurrentTime(result.timestamp() - (LATENCY_CONSTANT / 1000)),
+          result.standardDevs());
     }
-    swerve.drivetrain.addVisionMeasurement(
-        visionPose,
-        Utils.fpgaToCurrentTime(result.timestamp() - (LATENCY_CONSTANT / 1000)),
-        result.standardDevs());
   }
 
   @Override
   protected void collectInputs() {
-    vision.getAdjustedTurretLimelighTagResult().ifPresent(this::ingestTagResult);
-    vision.getBackLimelightTagResult().ifPresent(this::ingestTagResult);
+    List<TagResult> presentList = new ArrayList<>(2);
+    vision.getAdjustedTurretLimelighTagResult().ifPresent(presentList::add);
+    vision.getBackLimelightTagResult().ifPresent(presentList::add);
+
+    ingestTagResult(presentList);
+
     robotPose = drivetrain.getState().Pose;
 
-    trustFactor.update(robotPose, imu.collisionDetected());
+    trustFactor.update(robotPose, Swerve.TRANSLATION_STD_DEV, imu.collisionDetected());
   }
 }
