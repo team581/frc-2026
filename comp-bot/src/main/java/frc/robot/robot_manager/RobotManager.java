@@ -61,6 +61,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private AimingParameters scoringParameters = new AimingParameters(0, 0);
   private AimingParameters feedingParameters = new AimingParameters(0, 0);
   private static final double PRESET_FEED_DISTANCE = 0.0;
+  private static final DoubleSubscriber DISTANCE_TO_HUB_THRESHOLD =
+      DogLog.tunable("RobotManager/DistanceToHubThreshold", 4.0);
   private boolean isMoving = false;
   private boolean drivingToIntake = false;
   private boolean tryingToIntake = false;
@@ -68,6 +70,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private double timeSinceMatchStart = 0.0;
   private double timeUntilNextShift = 0.0;
   private boolean isHubActive = true;
+  private boolean isCloseEnoughToHub = false;
   private final DoubleSubscriber tunableHubStateOffset =
       DogLog.tunable("RobotManager/MatchTimeOffset", 0.0);
   private final Timer teleopTimer = new Timer();
@@ -161,7 +164,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 && FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
                 && !dyeRotor.isJammed()
                 && shooterHood.atGoal()
-                && isHubActive)) {
+                && isHubActive
+                && isCloseEnoughToHub)) {
           yield RobotState.SCORE;
         }
         yield currentState;
@@ -225,7 +229,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 && !dyeRotor.isJammed()
                 && turret.atGoal()
                 && shooterHood.atGoal()
-                && isHubActive)) {
+                && isCloseEnoughToHub)) {
           yield currentState;
         }
 
@@ -1214,6 +1218,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     var swerveVector = MathHelpers.getDriveDirection(speeds);
     drivingToIntake =
         MathUtil.isNear(robotPose.getRotation().getDegrees(), swerveVector.getDegrees(), 20);
+    isCloseEnoughToHub = getIsCloseEnoughToHub();
   }
 
   private boolean getIsHubActiveOrNotUsingState() {
@@ -1235,6 +1240,10 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     return FmsUtil.isHubActive(timeSinceMatchStart + tunableHubStateOffset.get());
   }
 
+  private boolean getIsCloseEnoughToHub() {
+    return scoringParameters.distance() < DISTANCE_TO_HUB_THRESHOLD.get();
+  }
+
   private void logScoringTransition() {
     DogLog.log("RobotManager/Scoring/ScoreTransition/ShooterAtGoal", shooter.atGoal());
     DogLog.log(
@@ -1246,6 +1255,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/Scoring/ScoreTransition/DyeRotorNotJammed", !dyeRotor.isJammed());
     DogLog.log("RobotManager/Scoring/ScoreTransition/TurretAtGoal", turret.atGoal());
     DogLog.log("RobotManager/Scoring/ScoreTransition/ShooterHoodAtGoal", shooterHood.atGoal());
+    DogLog.log("RobotManager/Scoring/ScoreTransition/CloseEnoughToHub", isCloseEnoughToHub);
   }
 
   private void logFeedTransition() {
