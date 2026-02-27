@@ -22,7 +22,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -35,7 +34,6 @@ import frc.robot.config.FeatureFlags;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
 import frc.robot.util.scheduling.SubsystemPriority;
-import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
@@ -157,7 +155,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private boolean ableToTrenchAssist = false;
   private boolean ableToWallSnap = false;
   private boolean ableToDirectionSnap = false;
-  private Optional<Rectangle2d> maybeCurrentWallSnapCorner = Optional.empty();
   private boolean inWallSnapCorner = false;
   private boolean previouslyInWallSnapCorner = false;
   private Rotation2d cornerSnapAngle = Rotation2d.kZero;
@@ -252,22 +249,19 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToWallSnap(drivetrainState.Pose, fieldRelativeSpeeds);
 
-    // Wall snap angle calculation if we are in a corner
-    inWallSnapCorner = maybeCurrentWallSnapCorner.isPresent();
+    // Wall logic if we are in a corner
+    inWallSnapCorner =
+        FieldUtil.getCurrentWallSnapCornerZone(drivetrainState.Pose.getTranslation()).isPresent();
     if (inWallSnapCorner && !previouslyInWallSnapCorner) {
-      maybeCurrentWallSnapCorner =
-          FieldUtil.getCurrentWallSnapCornerZone(drivetrainState.Pose.getTranslation());
       cornerSnapAngle =
           SwerveAssist.getWallSnapAngle(
-              MathHelpers.getClosestPointOnRectanglePerimeter(
-                  drivetrainState.Pose.getTranslation(), maybeCurrentWallSnapCorner.orElseThrow()),
-              fieldRelativeSpeeds);
+              drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
     }
     wallSnapAngle =
         inWallSnapCorner
             ? cornerSnapAngle
             : SwerveAssist.getWallSnapAngle(
-                drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds);
+                drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
     previouslyInWallSnapCorner = inWallSnapCorner;
 
     if (getState() == SwerveState.INTAKE) {
@@ -545,8 +539,9 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     DogLog.log("Swerve/AbleToTrenchAssist", ableToTrenchAssist);
     DogLog.log("Swerve/AbleToWallSnap", ableToWallSnap);
     DogLog.log(
-        "SwerveAssist/WallSnaps/WallSnapWallAngle",
-        SwerveAssist.getWallSnapAngle(drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds)
+        "SwerveAssist/WallSnaps/WallSnapAngle",
+        SwerveAssist.getWallSnapAngle(
+                drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, false)
             .getDegrees());
     DogLog.log(
         "SwerveAssist/WallSnaps/RobotHeading", drivetrainState.Pose.getRotation().getDegrees());
