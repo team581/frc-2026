@@ -761,13 +761,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           dyeRotor.scoreRequest(scoringParameters.distance());
         }
-        if (FeatureFlags.STOP_HOPPER_SHUFFLE_DURING_INTAKE.getAsBoolean()) {
+
           if (drivingToIntake) {
             deploy.intakeRequest();
           } else {
             deploy.shuffleRequest();
           }
-        }
       }
       case PREPARE_FEED -> {
         smartTurretHoodPrepareFeedRequest();
@@ -792,14 +791,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           dyeRotor.feedRequest(feedingParameters.distance());
         }
-        if (FeatureFlags.STOP_HOPPER_SHUFFLE_DURING_INTAKE.getAsBoolean()) {
           if (drivingToIntake) {
             deploy.intakeRequest();
           } else {
             deploy.shuffleRequest();
           }
         }
-      }
 
       // Fallback states
       case PREPARE_PRESET_SCORE -> {
@@ -825,14 +822,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.normalDriveRequest();
         }
-        if (FeatureFlags.STOP_HOPPER_SHUFFLE_DURING_INTAKE.getAsBoolean()) {
           if (drivingToIntake) {
             deploy.intakeRequest();
           } else {
             deploy.shuffleRequest();
           }
         }
-      }
       case PREPARE_PRESET_FEED -> {
         // TODO: Get turret feed angle
         turret.feedRequest(0);
@@ -850,14 +845,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.normalDriveRequest();
         }
-        if (FeatureFlags.STOP_HOPPER_SHUFFLE_DURING_INTAKE.getAsBoolean()) {
           if (drivingToIntake) {
             deploy.intakeRequest();
           } else {
             deploy.shuffleRequest();
           }
         }
-      }
       case AUTOMATIC_CLIMB_1_APPROACH_L1, AUTOMATIC_CLIMB_2_LINEUP_L1 -> {
         turret.climbRequest(robotPose);
         swerve.climbAssistDriveRequest();
@@ -881,7 +874,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       default -> {}
     }
-
     DogLog.log("RobotManager/Feeding/FeedLocation", feedLocation);
     DogLog.log("RobotManager/Feeding/FeedParameters", feedingParameters);
     DogLog.log("RobotManager/Scoring/ScoringParameters", scoringParameters);

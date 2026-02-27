@@ -18,9 +18,6 @@ public class FeatureFlags {
   public static final BooleanSupplier LOOKAHEAD_SCORING =
       FeatureFlag.of("TimeOfFlightInHubActivity", true);
 
-  public static final BooleanSupplier RATE_LIMITED_DRIVING =
-      FeatureFlag.of("RateLimitedDriving", true);
-
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
 
   public static final BooleanSupplier STOP_SHOOTING_STATE =
@@ -30,11 +27,6 @@ public class FeatureFlags {
 
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT =
       FeatureFlag.of("CancelInProgressShot", true);
-
-  public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", true);
-
-  public static final BooleanSupplier STOP_HOPPER_SHUFFLE_DURING_INTAKE =
-      FeatureFlag.of("StopHopperShuffleDuringIntake", true);
 
   public static final BooleanSupplier HOOD_ALWAYS_IDLE = FeatureFlag.of("HoodAlwaysIdle", true);
   public static final BooleanSupplier DYE_ROTOR_CLEANUP_MODE =
