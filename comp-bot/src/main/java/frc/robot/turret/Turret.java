@@ -95,13 +95,9 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
     DogLog.log("Turret/Angle", currentAngle);
     DogLog.log("Turret/Motor/LatencyCompensatedAngle", latencyCompensatedAngle);
-    double encoderAbs = encoder.getAbsolutePosition().getValueAsDouble();
-    double motorPosition = motor.getRotorPosition().getValueAsDouble();
-
-    var turretPos =
-        TurretCalculator.calculateHomedPositionFromMotorAndEncoder(motorPosition, encoderAbs);
-    DogLog.log("Turret/HomedAngle", Units.rotationsToDegrees(turretPos));
-    DogLog.log("Turret/Encoder/EncoderAngle", Units.rotationsToDegrees(encoderAbs));
+    DogLog.log(
+        "Turret/Encoder/EncoderAngle",
+        Units.rotationsToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
   }
 
   @Override
@@ -174,8 +170,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     }
     if (DriverStation.isDisabled() && getState() != TurretState.UNHOMED) {
       if (!MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
-        DogLog.logFault("Turret is not homed", AlertType.kWarning);
-        DogLog.clearFault("Turret is not homed");
+        DogLog.logFault("Turret is misaligned", AlertType.kWarning);
+        DogLog.clearFault("Turret is misaligned");
       }
     }
   }
