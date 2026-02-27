@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.Slot2Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
 import com.ctre.phoenix6.signals.GainSchedKpBehaviorValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -42,6 +43,7 @@ public class DeployConfig {
           .withKA(0);
   private static final Slot2Configs GAINSCHED_GAINS =
       new Slot2Configs()
+      .withGainSchedBehavior(GainSchedBehaviorValue.UseSlot2)
           .withKP(1.5)
           .withKI(0)
           .withKD(0.0)
