@@ -112,7 +112,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
                 .withPosition(
                     Units.degreesToRotations(
                         clamp(TurretCalculator.getOptimalAngle(goalAngle, currentAngle))))
-                .withVelocity(Units.degreesToRotations(robotRotationFeedForward)));
+                .withVelocity(Units.radiansToRotations(robotRotationFeedForward)));
       }
       case IDLE_SCORE, IDLE_FEED -> {
         motor.setControl(
@@ -120,7 +120,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
                 .withPosition(
                     Units.degreesToRotations(
                         clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle))))
-                .withVelocity(Units.degreesToRotations(robotRotationFeedForward)));
+                .withVelocity(Units.radiansToRotations(robotRotationFeedForward)));
       }
       case CLIMB_SCORE -> {
         motor.setControl(
@@ -232,8 +232,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     setState(TurretState.IDLE_FEED);
   }
 
-  public void setRobotRotationRate(double rateDegrees) {
-    robotRotationFeedForward = -rateDegrees;
+  public void setRobotRotationRate(double rateRadians) {
+    robotRotationFeedForward = -rateRadians;
   }
 
   public boolean atGoal(double tolerance) {
