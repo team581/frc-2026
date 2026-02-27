@@ -21,7 +21,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -277,9 +276,15 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
       if (driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP) {
         var rateLimitedXVelocity =
-            MathUtil.clamp(requestedSpeeds.vxMetersPerSecond, - MAX_LINEAR_RATE_SHOOTING, MAX_LINEAR_RATE_SHOOTING);
+            MathUtil.clamp(
+                requestedSpeeds.vxMetersPerSecond,
+                -MAX_LINEAR_RATE_SHOOTING,
+                MAX_LINEAR_RATE_SHOOTING);
         var rateLimitedYVelocity =
-            MathUtil.clamp(requestedSpeeds.vyMetersPerSecond, - MAX_LINEAR_RATE_SHOOTING, MAX_LINEAR_RATE_SHOOTING);
+            MathUtil.clamp(
+                requestedSpeeds.vyMetersPerSecond,
+                -MAX_LINEAR_RATE_SHOOTING,
+                MAX_LINEAR_RATE_SHOOTING);
 
         var maxAngularRate = Units.rotationsToRadians(MAX_ANGULAR_RATE_SHOOTING.get());
         var rateLimitedThetaVelocity =
