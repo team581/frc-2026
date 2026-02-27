@@ -168,11 +168,17 @@ public class Turret extends StateMachineSubsystem<TurretState> {
         DogLog.clearFault("Turret is not homed");
       }
     }
-    if (DriverStation.isDisabled() && getState() != TurretState.UNHOMED) {
-      if (!MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
-        DogLog.logFault("Turret is misaligned", AlertType.kWarning);
-        DogLog.clearFault("Turret is misaligned");
+    if (DriverStation.isDisabled()) {
+      if (getState() != TurretState.UNHOMED) {
+        if (!MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
+          DogLog.logFault("Turret is misaligned", AlertType.kWarning);
+        } else {
+          DogLog.clearFault("Turret is misaligned");
+        }
       }
+    } else {
+      // Clear the misalignment fault once teleop starts
+      DogLog.clearFault("Turret is misaligned");
     }
   }
 
