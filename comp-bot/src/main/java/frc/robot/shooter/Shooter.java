@@ -3,7 +3,6 @@ package frc.robot.shooter;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
-import com.google.common.base.CaseFormat;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
@@ -87,8 +86,6 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
     DogLog.log("Shooter/Left/SupplyCurrent", leftMotor.getSupplyCurrent().getValueAsDouble());
     DogLog.log("Shooter/Right/SupplyCurrent", rightMotor.getSupplyCurrent().getValueAsDouble());
 
-
-
     switch (state) {
       case SCORE -> {
         var setpoint = shootingRpm / 60.0;
@@ -168,7 +165,7 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
               ShooterConfig.SELF_TEST_RIGHT_MOTOR_EXPECTED_CURRENT,
               rightMotor.getStatorCurrent().getValueAsDouble(),
               ShooterConfig.SELF_TEST_LEFT_MOTOR_CURRENT_TOLERANCE));
-          }
+    }
   }
 
   public boolean atGoal() {

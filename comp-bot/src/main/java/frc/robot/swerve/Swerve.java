@@ -51,7 +51,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private static final int MAX_LINEAR_ACCELERATION_SHOOTING = 5;
 
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
-  private static final DoubleSubscriber MAX_ANGULAR_RATE_SHOOTING = DogLog.tunable("MaxAngularRateShootingRot", 0.5);
+  private static final DoubleSubscriber MAX_ANGULAR_RATE_SHOOTING =
+      DogLog.tunable("MaxAngularRateShootingRot", 0.5);
   public static final Rotation2d TELEOP_MAX_ANGULAR_RATE = Rotation2d.fromRotations(2);
 
   private static final double SIM_LOOP_PERIOD = Units.millisecondsToSeconds(5);
@@ -285,16 +286,12 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
         var rateLimitedYVelocity =
             scoringYLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vyMetersPerSecond);
 
-            var maxAngularRate = Units.rotationsToRadians(MAX_ANGULAR_RATE_SHOOTING.get());
-            var rateLimitedThetaVelocity =
-            MathUtil.clamp(
-                requestedSpeeds.omegaRadiansPerSecond,
-                -maxAngularRate,
-                maxAngularRate);
+        var maxAngularRate = Units.rotationsToRadians(MAX_ANGULAR_RATE_SHOOTING.get());
+        var rateLimitedThetaVelocity =
+            MathUtil.clamp(requestedSpeeds.omegaRadiansPerSecond, -maxAngularRate, maxAngularRate);
 
         rateLimitedSpeeds =
-            new ChassisSpeeds(
-                rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedThetaVelocity);
+            new ChassisSpeeds(rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedThetaVelocity);
       } else {
         rateLimitedSpeeds = requestedSpeeds;
       }
