@@ -43,7 +43,7 @@ public class DeployConfig {
           .withKA(0);
   private static final Slot2Configs GAINSCHED_GAINS =
       new Slot2Configs()
-      .withGainSchedBehavior(GainSchedBehaviorValue.UseSlot2)
+          .withGainSchedBehavior(GainSchedBehaviorValue.UseSlot2)
           .withKP(1.5)
           .withKI(0)
           .withKD(0.0)

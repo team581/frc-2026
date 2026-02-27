@@ -179,7 +179,8 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         differentialMechanism.setControl(
             differentialPositionVoltageRequest
                 .withAveragePosition(clamp(newState.getLength()))
-                .withDifferentialPosition(0).withAverageSlot(0));
+                .withDifferentialPosition(0)
+                .withAverageSlot(0));
       }
     }
   }
