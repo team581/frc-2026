@@ -26,6 +26,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
@@ -50,7 +51,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private static final int MAX_LINEAR_RATE_SHOOTING = 7;
 
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
-  private static final double MAX_ANGULAR_RATE_SHOOTING = Units.rotationsToRadians(0.5);
+  private static final DoubleSubscriber MAX_ANGULAR_RATE_SHOOTING = DogLog.tunable("MaxAngularRateShootingRot", 0.5);
   public static final Rotation2d TELEOP_MAX_ANGULAR_RATE = Rotation2d.fromRotations(2);
 
   private static final double SIM_LOOP_PERIOD = Units.millisecondsToSeconds(5);
@@ -281,15 +282,17 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             scoringXLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vxMetersPerSecond);
         var rateLimitedYVelocity =
             scoringYLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vyMetersPerSecond);
-        var rateLimitedRotationalRate =
+
+            var maxAngularRate = Units.rotationsToRadians(MAX_ANGULAR_RATE_SHOOTING.get());
+            var rateLimitedThetaVelocity =
             MathUtil.clamp(
                 requestedSpeeds.omegaRadiansPerSecond,
-                -MAX_ANGULAR_RATE_SHOOTING,
-                MAX_ANGULAR_RATE_SHOOTING);
+                -maxAngularRate,
+                maxAngularRate);
 
         rateLimitedSpeeds =
             new ChassisSpeeds(
-                rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedRotationalRate);
+                rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedThetaVelocity);
       } else {
         rateLimitedSpeeds = requestedSpeeds;
       }
