@@ -8,8 +8,8 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.configs.Slot2Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
 import com.ctre.phoenix6.signals.GainSchedKpBehaviorValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -33,9 +33,16 @@ public class DeployConfig {
 
   private static final Slot0Configs AVERAGE_GAINS =
       new Slot0Configs()
-          .withKP(2)
-          .withGainSchedBehavior(GainSchedBehaviorValue.UseSlot0)
           .withKP(3)
+          .withKI(0)
+          .withKD(0.0)
+          .withKG(0.0)
+          .withKS(0.0)
+          .withKV(0.0)
+          .withKA(0);
+  private static final Slot2Configs GAINSCHED_GAINS =
+      new Slot2Configs()
+          .withKP(1.5)
           .withKI(0)
           .withKD(0.0)
           .withKG(0.0)
@@ -65,7 +72,8 @@ public class DeployConfig {
                   .withGainSchedErrorThreshold(1)
                   .withGainSchedKpBehavior(GainSchedKpBehaviorValue.Discontinuous))
           .withSlot0(AVERAGE_GAINS)
-          .withSlot1(DIFFERENCE_GAINS);
+          .withSlot1(DIFFERENCE_GAINS)
+          .withSlot2(GAINSCHED_GAINS);
   public static final TalonFXConfiguration RIGHT_MOTOR_CONFIG =
       new TalonFXConfiguration()
           .withFeedback(
@@ -86,7 +94,8 @@ public class DeployConfig {
                   .withGainSchedErrorThreshold(1)
                   .withGainSchedKpBehavior(GainSchedKpBehaviorValue.Discontinuous))
           .withSlot0(AVERAGE_GAINS)
-          .withSlot1(DIFFERENCE_GAINS);
+          .withSlot1(DIFFERENCE_GAINS)
+          .withSlot2(GAINSCHED_GAINS);
   // TODO: Discuss/set CANrange config during bringup
   public static final CANrangeConfiguration CAN_RANGE_CONFIG = new CANrangeConfiguration();
 
