@@ -6,12 +6,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.DoubleSubscriber;
 
 public class ShootOnTheMove {
   private static final int MAX_ITERATIONS = 5;
   // TODO: find drag constant. Currently eyeballed
   // https://frc-docs--3242.org.readthedocs.build/en/3242/docs/software/advanced-controls/fire-control/linear-drag.html
-  public static final double DRAG_CONSTANT = 0.9523;
+  public static final DoubleSubscriber DRAG_CONSTANT =
+      DogLog.tunable("ShootOnTheMoove/DragCoeff", 0.5);
   private final InterpolatingDoubleTreeMap distanceToTimeOfFlight;
 
   public ShootOnTheMove(InterpolatingDoubleTreeMap distanceToTimeOfFlight) {
@@ -22,8 +24,8 @@ public class ShootOnTheMove {
       Translation2d radiallyCompensatedGoal, Translation2d tangentiallyCompensatedGoal) {}
 
   public double getEffectiveTimeOfFlight(double tof) {
-    return (1 - Math.pow(Math.E, (-ShootOnTheMove.DRAG_CONSTANT * tof)))
-        / ShootOnTheMove.DRAG_CONSTANT;
+    return (1 - Math.pow(Math.E, (-DRAG_CONSTANT.getAsDouble() * tof)))
+        / DRAG_CONSTANT.getAsDouble();
   }
 
   public SeparatedVelocityCompensatedGoal getSeparatedVelocityCompensatedGoal(
