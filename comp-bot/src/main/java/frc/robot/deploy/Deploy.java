@@ -40,7 +40,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   private double hopperCANRangeDistance = 0.0;
   private double previousCanRangeDistance = 0.0;
   private double filteredHopperCANRangeDistance;
-  private boolean ableToHopperShuffle = false;
+  private boolean hopperCapacityNotHigh = false;
 
   private final Timer hopperShuffleTimer = new Timer();
   private final Timer canRangeUpdateTimer = new Timer();
@@ -86,7 +86,10 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         // Do nothing, we aren't homed
       }
       default -> {
-        if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()) {
+        if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()
+            && getState() != DeployState.HOPPER_SHUFFLING_FINISH
+            && getState() != DeployState.HOPPER_SHUFFLING_OUT
+            && getState() != DeployState.HOPPER_SHUFFLING_IN) {
           hopperShuffleTimer.reset();
           setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
           hopperShuffleTimer.restart();
@@ -106,7 +109,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   protected DeployState getNextState(DeployState currentState) {
     return switch (currentState) {
       // Do nothing
-      case UNHOMED, INTAKE, STOW, HOPPER_SHUFFLING_FINISH -> currentState;
+      case UNHOMED, INTAKE, STOW -> currentState;
 
       case HOME_INWARD -> {
         if (leftMotor.getStatorCurrent().getValueAsDouble() > DeployConfig.HOMING_CURRENT
@@ -127,21 +130,31 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         }
       }
       case HOPPER_SHUFFLING_OUT -> {
-        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION)) {
+        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
           yield DeployState.HOPPER_SHUFFLING_FINISH;
         }
-        if (atGoal() && ableToHopperShuffle) {
+        if ((atGoal() || timeout(2.0)) && hopperCapacityNotHigh) {
           yield DeployState.HOPPER_SHUFFLING_IN;
         }
         yield currentState;
       }
 
       case HOPPER_SHUFFLING_IN -> {
-        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION)) {
+        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
           yield DeployState.HOPPER_SHUFFLING_FINISH;
         }
-        if (atGoal() && ableToHopperShuffle) {
+        if ((atGoal() || timeout(2.0)) && hopperCapacityNotHigh) {
           yield DeployState.HOPPER_SHUFFLING_OUT;
+        }
+        yield currentState;
+      }
+      case HOPPER_SHUFFLING_FINISH -> {
+        if (atGoal()) {
+          hopperShuffleTimer.reset();
+          if (timeout(2.0)) {
+
+            yield DeployState.HOPPER_SHUFFLING_OUT;
+          }
         }
         yield currentState;
       }
@@ -182,7 +195,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     DogLog.log("Deploy/RightMotor/Position", rightMotorPosition);
     DogLog.log("Deploy/GoalPosition", getState().getLength());
     DogLog.log("Deploy/DifferentialPosition", differentialMechanismPosition);
-    DogLog.log("Deploy/AbleToHopperShuffle", ableToHopperShuffle);
+    DogLog.log("Deploy/AbleToHopperShuffle", hopperCapacityNotHigh);
     DogLog.log("Deploy/Capacity", hopperCapacity);
     DogLog.log("Hopper/RawDistance", hopperCANRangeDistance);
     DogLog.log("Hopper/FilteredDistance", filteredHopperCANRangeDistance);
@@ -241,9 +254,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     }
 
     if (RobotBase.isSimulation()) {
-      ableToHopperShuffle = true;
+      hopperCapacityNotHigh = true;
     } else {
-      ableToHopperShuffle =
+      hopperCapacityNotHigh =
           !DSOptions.USE_CANRANGE.getAsBoolean() || hopperCapacity != HopperCapacity.HIGH;
     }
   }

@@ -18,6 +18,7 @@ import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -29,6 +30,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.config.DSOptions;
 import frc.robot.config.FeatureFlags;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
@@ -40,15 +42,21 @@ import org.jspecify.annotations.Nullable;
 public class Swerve extends StateMachineSubsystem<SwerveState> {
   public static final double MAX_SPEED = 4.75;
 
+  public static final double TRANSLATION_STD_DEV = 0.01;
+
+  public static final double MAX_LINEAR_RATE = 4.75;
+  private static final int MAX_LINEAR_RATE_SHOOTING = 7;
+
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
+  private static final double MAX_ANGULAR_RATE_SHOOTING = Units.rotationsToRadians(0.5);
   public static final Rotation2d TELEOP_MAX_ANGULAR_RATE = Rotation2d.fromRotations(2);
 
   private static final double SIM_LOOP_PERIOD = Units.millisecondsToSeconds(5);
 
-  private final SlewRateLimiter scoringXLinearVelocitySlewRateLimiter = new SlewRateLimiter(7);
-  private final SlewRateLimiter scoringYLinearVelocitySlewRateLimiter = new SlewRateLimiter(7);
-
-  private final SlewRateLimiter scoringAngularVelocitySlewRateLimiter = new SlewRateLimiter(20);
+  private final SlewRateLimiter scoringXLinearVelocitySlewRateLimiter =
+      new SlewRateLimiter(MAX_LINEAR_RATE_SHOOTING);
+  private final SlewRateLimiter scoringYLinearVelocitySlewRateLimiter =
+      new SlewRateLimiter(MAX_LINEAR_RATE_SHOOTING);
 
   private final CircularFilter lastDriveDirectionFilter = new CircularFilter(15);
 
@@ -173,7 +181,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
     this.teleopDriveSource =
         new XboxControllerDriveSource(
-            driverController, Swerve.MAX_SPEED, Swerve.TELEOP_MAX_ANGULAR_RATE);
+            driverController, Swerve.MAX_LINEAR_RATE, Swerve.TELEOP_MAX_ANGULAR_RATE);
     this.trailblazerDriveSource =
         new TrailblazerDriveSource(
             trailblazer, () -> drivetrainState.Pose, this::getFieldRelativeSpeeds);
@@ -229,12 +237,12 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             robotRelativeSpeeds, drivetrainState.Pose.getRotation());
 
     ableToTrenchAssist =
-        FeatureFlags.TRENCH_ASSIST.getAsBoolean()
+        DSOptions.USE_SWERVE_ASSIST.get()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToTrenchAssist(drivetrainState.Pose, fieldRelativeSpeeds);
     ableToBumpAssist =
-        FeatureFlags.BUMP_ASSIST.getAsBoolean()
+        DSOptions.USE_SWERVE_ASSIST.get()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToBumpAssist(drivetrainState.Pose, fieldRelativeSpeeds);
@@ -284,10 +292,15 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             scoringXLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vxMetersPerSecond);
         var rateLimitedYVelocity =
             scoringYLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vyMetersPerSecond);
-        var rateLimitedAngularRate =
-            scoringAngularVelocitySlewRateLimiter.calculate(requestedSpeeds.omegaRadiansPerSecond);
+        var rateLimitedRotationalRate =
+            MathUtil.clamp(
+                requestedSpeeds.omegaRadiansPerSecond,
+                -MAX_ANGULAR_RATE_SHOOTING,
+                MAX_ANGULAR_RATE_SHOOTING);
+
         rateLimitedSpeeds =
-            new ChassisSpeeds(rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedAngularRate);
+            new ChassisSpeeds(
+                rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedRotationalRate);
       } else {
         rateLimitedSpeeds = requestedSpeeds;
       }
@@ -550,7 +563,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       if (driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP) {
         scoringXLinearVelocitySlewRateLimiter.reset(requestedSpeeds.vxMetersPerSecond);
         scoringYLinearVelocitySlewRateLimiter.reset(requestedSpeeds.vyMetersPerSecond);
-        scoringAngularVelocitySlewRateLimiter.reset(requestedSpeeds.omegaRadiansPerSecond);
       }
     }
   }

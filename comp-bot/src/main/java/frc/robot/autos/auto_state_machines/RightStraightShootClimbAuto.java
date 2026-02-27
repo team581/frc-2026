@@ -32,7 +32,7 @@ public class RightStraightShootClimbAuto
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
           .untilFinished(new PoseErrorTolerance(0.2, 3));
 
-  private AutoSegment intakeAcrossMidlineTwo =
+  private final AutoSegment intakeAcrossMidlineTwo =
       Trailblazer.segment(
               AutoPoint.ofRed(new Pose2d(11.2, 7.45, Rotation2d.k180deg)),
               AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),

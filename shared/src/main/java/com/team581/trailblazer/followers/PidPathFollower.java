@@ -51,8 +51,7 @@ public class PidPathFollower implements PathFollower {
               .get()
               .getPose()
               .getTranslation()
-              .getDistance(
-                  segment.points.get(i + 1).poseSupplier().get().getPose().getTranslation());
+              .getDistance(segment.points.get(i + 1).getPose().getTranslation());
     }
 
     // Calculate velocities with PID controller

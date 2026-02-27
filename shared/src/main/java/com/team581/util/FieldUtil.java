@@ -54,13 +54,13 @@ public class FieldUtil {
   private static final double TRENCH_ASSIST_ZONE_LENGTH_X = TRENCH_LENGTH_X * 3;
   private static final double TRENCH_ASSIST_ZONE_LENGTH_Y = Units.inchesToMeters(68.0);
 
-  private static final Pose2d BLUE_OUTPOST_TRENCH_CENTER =
+  public static final Pose2d BLUE_OUTPOST_TRENCH_CENTER =
       new Pose2d(BLUE_OBSTACLE_X, AprilTags.TAG_7.getY(), Rotation2d.kZero);
   private static final Pose2d BLUE_DEPOT_TRENCH_CENTER =
       new Pose2d(BLUE_OBSTACLE_X, AprilTags.TAG_12.getY(), Rotation2d.kZero);
   private static final Pose2d RED_DEPOT_TRENCH_CENTER =
       new Pose2d(RED_OBSTACLE_X, AprilTags.TAG_17.getY(), Rotation2d.kZero);
-  private static final Pose2d RED_OUTPOST_TRENCH_CENTER =
+  public static final Pose2d RED_OUTPOST_TRENCH_CENTER =
       new Pose2d(RED_OBSTACLE_X, AprilTags.TAG_22.getY(), Rotation2d.kZero);
 
   private static final Rectangle2d BLUE_OUTPOST_TRENCH_ZONE =

@@ -17,8 +17,6 @@ public class FeatureFlags {
 
   public static final BooleanSupplier INTEGRATION_TEST = FeatureFlag.of("IntegrationTest", false);
 
-  public static final BooleanSupplier INTAKE_WALL_SNAPS = FeatureFlag.of("IntakeWallSnaps", false);
-
   public static final BooleanSupplier LOOKAHEAD_SCORING =
       FeatureFlag.of("TimeOfFlightInHubActivity", true);
 
@@ -28,14 +26,21 @@ public class FeatureFlags {
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
 
   public static final BooleanSupplier STOP_SHOOTING_STATE =
-      FeatureFlag.of("UseStopShootingState", true);
+      FeatureFlag.of("UseStopShootingState", false);
 
-  public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT_RPM_DIP =
-      FeatureFlag.of("StopScoringRPMDip", true);
+  public static final BooleanSupplier IGNORE_TURRET_AT_GOAL = FeatureFlag.of("IgnoreTurret", false);
+
   public static final BooleanSupplier CANCEL_IN_PROGRESS_SHOT =
       FeatureFlag.of("CancelInProgressShot", true);
 
-  public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
+  public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", true);
+
+  public static final BooleanSupplier HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION =
+      FeatureFlag.of("HopperShuffleWhileIntaking", true);
+
+  public static final BooleanSupplier HOOD_ALWAYS_IDLE = FeatureFlag.of("HoodAlwaysIdle", true);
+  public static final BooleanSupplier DYE_ROTOR_CLEANUP_MODE =
+      FeatureFlag.of("DyeRotorCleanup", false);
 
   public static final BooleanSupplier CLAMPED_AUTO_POINTS = Point.CLAMPED_POINTS_FEATURE_FLAG;
 

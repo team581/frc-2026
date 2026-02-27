@@ -260,7 +260,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
   @Override
   public void disabledInit() {
     if (config.model() == LimelightModel.FOUR) {
-      LimelightHelpers.triggerRewindCapture(name, 165.0);
+      LimelightHelpers.triggerRewindCapture(limelightTableName, 165.0);
     }
   }
 }

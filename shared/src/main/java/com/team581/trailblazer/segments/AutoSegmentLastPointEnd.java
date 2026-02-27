@@ -28,7 +28,7 @@ public class AutoSegmentLastPointEnd extends AutoSegment {
         .get(points.size() - 1)
         .transitionTolerance()
         .orElseThrow()
-        .atPose(points.get(points.size() - 1).poseSupplier().get().getPose(), robotPose);
+        .atPose(points.get(points.size() - 1).getPose(), robotPose);
   }
 
   @Override
@@ -46,8 +46,6 @@ public class AutoSegmentLastPointEnd extends AutoSegment {
         .get(points.size() - 1)
         .transitionTolerance()
         .orElseThrow()
-        .atTranslation(
-            points.get(points.size() - 1).poseSupplier().get().getPose().getTranslation(),
-            robotTranslation);
+        .atTranslation(points.get(points.size() - 1).getPose().getTranslation(), robotTranslation);
   }
 }

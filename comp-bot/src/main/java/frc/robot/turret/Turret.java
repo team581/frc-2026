@@ -14,6 +14,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.config.DSOptions;
@@ -94,9 +95,13 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
     DogLog.log("Turret/Angle", currentAngle);
     DogLog.log("Turret/Motor/LatencyCompensatedAngle", latencyCompensatedAngle);
-    DogLog.log(
-        "Turret/Encoder/EncoderAngle",
-        Units.rotationsToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
+    double encoderAbs = encoder.getAbsolutePosition().getValueAsDouble();
+    double motorPosition = motor.getRotorPosition().getValueAsDouble();
+
+    var turretPos =
+        TurretCalculator.calculateHomedPositionFromMotorAndEncoder(motorPosition, encoderAbs);
+    DogLog.log("Turret/HomedAngle", Units.rotationsToDegrees(turretPos));
+    DogLog.log("Turret/Encoder/EncoderAngle", Units.rotationsToDegrees(encoderAbs));
   }
 
   @Override
@@ -167,6 +172,12 @@ public class Turret extends StateMachineSubsystem<TurretState> {
         DogLog.clearFault("Turret is not homed");
       }
     }
+    if (DriverStation.isDisabled() && getState() != TurretState.UNHOMED) {
+      if (!MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
+        DogLog.logFault("Turret is not homed", AlertType.kWarning);
+        DogLog.clearFault("Turret is not homed");
+      }
+    }
   }
 
   public void scoreRequest(double goalAngle) {
@@ -229,15 +240,17 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     robotRotationFeedForward = -rateDegrees;
   }
 
-  public boolean atGoal() {
+  public boolean atGoal(double tolerance) {
     return switch (getState()) {
       case UNHOMED -> false;
       case STUCK -> true;
       // TODO: Reconsider for turret wrapping
-      default ->
-          MathUtil.isNear(
-              goalAngle, MathHelpers.angleModulus(currentAngle), TurretConfig.TOLERANCE.get());
+      default -> MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), tolerance);
     };
+  }
+
+  public boolean atGoal() {
+    return atGoal(TurretConfig.TOLERANCE.get());
   }
 
   public void stuckRequest() {
