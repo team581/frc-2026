@@ -5,6 +5,8 @@ import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.AutoPoint;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.segments.AutoSegment;
+import com.team581.util.FieldUtil;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -23,7 +25,7 @@ public class RightStraightShootClimbAuto
 
   private final AutoSegment intakeAcrossMidlineOne =
       Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(10.489, 7.45, Rotation2d.k180deg))
+              AutoPoint.ofRed(new Pose2d(10.489, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 30)),
               AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),
               AutoPoint.ofRed(new Pose2d(8.852, 5.4, Rotation2d.kCW_90deg))
@@ -34,7 +36,7 @@ public class RightStraightShootClimbAuto
 
   private final AutoSegment intakeAcrossMidlineTwo =
       Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(11.2, 7.45, Rotation2d.k180deg)),
+              AutoPoint.ofRed(new Pose2d(11.2, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
               AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),
               AutoPoint.of(
                       () ->
@@ -49,7 +51,7 @@ public class RightStraightShootClimbAuto
 
   private final AutoSegment intakeAcrossMidlineThree =
       Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(11.2, 7.45, Rotation2d.k180deg)),
+              AutoPoint.ofRed(new Pose2d(11.2, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
               AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),
               AutoPoint.of(
                       () ->
@@ -69,8 +71,8 @@ public class RightStraightShootClimbAuto
               AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
-              AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.k180deg)),
-              AutoPoint.ofRed(new Pose2d(13.0, 7.45, Rotation2d.k180deg))
+              AutoPoint.ofRed(new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(new Pose2d(13.0, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg))
                   .withLinearConstraints(3.0, 10))
           .untilFinished(new PoseErrorTolerance(0.3, 3));
 
@@ -81,8 +83,8 @@ public class RightStraightShootClimbAuto
               AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
-              AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.k180deg)),
-              AutoPoint.ofRed(new Pose2d(13.0, 7.45, Rotation2d.k180deg)))
+              AutoPoint.ofRed(new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(new Pose2d(13.0, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)))
           .withLinearConstraints(3.0, 10)
           .untilFinished(new PoseErrorTolerance(0.5, 3));
 
@@ -93,8 +95,8 @@ public class RightStraightShootClimbAuto
               AutoPoint.ofRed(new Pose2d(10.0, 6.9, Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
-              AutoPoint.ofRed(new Pose2d(11.3, 7.45, Rotation2d.k180deg)),
-              AutoPoint.ofRed(new Pose2d(13.5, 7.45, Rotation2d.k180deg)))
+              AutoPoint.ofRed(new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(new Pose2d(13.5, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)))
           .withLinearConstraints(3.0, 10)
           .untilFinished(new PoseErrorTolerance(0.5, 3));
 
