@@ -94,7 +94,7 @@ public class AimParameterUtil {
   public static AimingParameters getTurretStuckScoringParameters(
       Pose2d robot, double turretAngle, ChassisSpeeds fieldRelativeSpeeds) {
     var hubTranslation =
-        SCORING_SOTM.getVelocityCompensatedGoal(
+        SCORING_SOTM.getVelocityCompensatedGoalWithEffectiveTof(
             robot.getTranslation(),
             FieldUtil.HUB_POSE.getPose().getTranslation(),
             fieldRelativeSpeeds);
