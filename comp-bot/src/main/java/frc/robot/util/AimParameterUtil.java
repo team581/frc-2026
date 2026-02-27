@@ -1,7 +1,5 @@
 package frc.robot.util;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import com.team581.math.MathHelpers;
 import com.team581.math.ShootOnTheMove;
 import com.team581.util.FeedLocation;
@@ -25,6 +23,17 @@ public class AimParameterUtil {
   private static final double SCORING_TURRET_TOLERANCE = Units.inchesToMeters(10);
   private static final double FEEDING_TURRET_TOLERANCE = 1;
   private static final double FEEDING_FALLBACK_DISTANCE_TO_GOAL = 8.0;
+
+  public static AimingParameters getFallbackFeedingParameters(
+      FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+
+    var turretAngle =
+        TurretCalculator.calculateTurretAimingAngle(
+            robotPose, robotPose.plus(new Transform2d(-1, 0, Rotation2d.kZero)).getTranslation());
+
+    return new AimingParameters(
+        turretAngle, FEEDING_FALLBACK_DISTANCE_TO_GOAL, FEEDING_TURRET_TOLERANCE);
+  }
 
   public static AimingParameters getFeedingParameters(
       FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
@@ -58,16 +67,6 @@ public class AimParameterUtil {
     return new AimingParameters(turretAngle, distanceToGoal, turretTolerance);
   }
 
-   public static AimingParameters getFallbackFeedingParameters(
-      FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
-
-    var turretAngle =
-        TurretCalculator.calculateTurretAimingAngle(
-            robotPose,
-            robotPose.plus(new Transform2d(-1,0, Rotation2d.kZero)).getTranslation());
-
-    return new AimingParameters(turretAngle, FEEDING_FALLBACK_DISTANCE_TO_GOAL, FEEDING_TURRET_TOLERANCE);
-  }
   public static AimingParameters getScoringParameters(
       Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var robotTranslation = robotPose.getTranslation();
