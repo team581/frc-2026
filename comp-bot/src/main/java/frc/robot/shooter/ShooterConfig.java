@@ -50,16 +50,16 @@ public class ShooterConfig {
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToScoreToF",
-          Map.entry(3.57, 0.953),
-          Map.entry(1.25, 0.933),
-          Map.entry(5.5, 1.0));
+          Map.entry(3.57, 1.095833333),
+          Map.entry(1.25, 1.035897436),
+          Map.entry(5.5, 1.163333333));
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED_TOF =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToFeedToF",
-          Map.entry(3.57, 0.953),
-          Map.entry(1.25, 0.933),
-          Map.entry(5.5, 1.0));
+          Map.entry(3.57, 1.488888889),
+          Map.entry(1.25, 1.491666667),
+          Map.entry(5.5, 1.396666667));
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIGS =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(18.0 / 12.0))
