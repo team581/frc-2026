@@ -16,7 +16,17 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import java.util.Map;
 
 public class ShooterConfig {
+  public static final double SELF_TEST_LEFT_MOTOR_EXPECTED_RPM = 2500;
+  public static final double SELF_TEST_LEFT_MOTOR_RPM_TOLERANCE = 250;
+  public static final double SELF_TEST_LEFT_MOTOR_EXPECTED_CURRENT = 10.0;
+  public static final double SELF_TEST_LEFT_MOTOR_CURRENT_TOLERANCE = 5;
+
+  public static final double SELF_TEST_RIGHT_MOTOR_EXPECTED_RPM = 2500;
+  public static final double SELF_TEST_RIGHT_MOTOR_RPM_TOLERANCE = 250;
+  public static final double SELF_TEST_RIGHT_MOTOR_EXPECTED_CURRENT = 10.0;
+  public static final double SELF_TEST_RIGHT_MOTOR_CURRENT_TOLERANCE = 5;
   public static final int RPM_TOLERANCE_SHOOTER = 100;
+  public static final double TEST_VOLTAGE = 6.0;
 
   public static final double MAX_SAFE_RPM = 5000;
 

@@ -34,8 +34,8 @@ public class FeatureFlags {
 
   public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", true);
 
-  public static final BooleanSupplier HOPPER_SHUFFLE_CLEANUP_DRIVE_DIRECTION =
-      FeatureFlag.of("HopperShuffleWhileIntaking", true);
+  public static final BooleanSupplier STOP_HOPPER_SHUFFLE_DURING_INTAKE =
+      FeatureFlag.of("StopHopperShuffleDuringIntake", true);
 
   public static final BooleanSupplier HOOD_ALWAYS_IDLE = FeatureFlag.of("HoodAlwaysIdle", true);
   public static final BooleanSupplier DYE_ROTOR_CLEANUP_MODE =

@@ -205,6 +205,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     DogLog.log("Deploy/RightMotor/SupplyCurrent", rightSupplyCurrent);
     DogLog.log("Deploy/LeftMotor/Velocity", leftMotor.getVelocity().getValueAsDouble());
     DogLog.log("Deploy/RightMotor/Velocity", rightMotor.getVelocity().getValueAsDouble());
+
     // TODO: Remove after bringup
     afterTransition(state);
   }

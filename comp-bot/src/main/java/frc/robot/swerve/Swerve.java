@@ -26,6 +26,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
@@ -43,18 +44,19 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   public static final double TRANSLATION_STD_DEV = 0.01;
 
   public static final double MAX_LINEAR_RATE = 4.75;
-  private static final int MAX_LINEAR_RATE_SHOOTING = 7;
+  private static final int MAX_LINEAR_ACCELERATION_SHOOTING = 5;
 
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
-  private static final double MAX_ANGULAR_RATE_SHOOTING = Units.rotationsToRadians(0.5);
+  private static final DoubleSubscriber MAX_ANGULAR_RATE_SHOOTING =
+      DogLog.tunable("MaxAngularRateShootingRot", 0.5);
   public static final Rotation2d TELEOP_MAX_ANGULAR_RATE = Rotation2d.fromRotations(2);
 
   private static final double SIM_LOOP_PERIOD = Units.millisecondsToSeconds(5);
 
   private final SlewRateLimiter scoringXLinearVelocitySlewRateLimiter =
-      new SlewRateLimiter(MAX_LINEAR_RATE_SHOOTING);
+      new SlewRateLimiter(MAX_LINEAR_ACCELERATION_SHOOTING);
   private final SlewRateLimiter scoringYLinearVelocitySlewRateLimiter =
-      new SlewRateLimiter(MAX_LINEAR_RATE_SHOOTING);
+      new SlewRateLimiter(MAX_LINEAR_ACCELERATION_SHOOTING);
 
   private final CircularFilter lastDriveDirectionFilter = new CircularFilter(15);
 
@@ -278,15 +280,13 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             scoringXLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vxMetersPerSecond);
         var rateLimitedYVelocity =
             scoringYLinearVelocitySlewRateLimiter.calculate(requestedSpeeds.vyMetersPerSecond);
-        var rateLimitedRotationalRate =
-            MathUtil.clamp(
-                requestedSpeeds.omegaRadiansPerSecond,
-                -MAX_ANGULAR_RATE_SHOOTING,
-                MAX_ANGULAR_RATE_SHOOTING);
+
+        var maxAngularRate = Units.rotationsToRadians(MAX_ANGULAR_RATE_SHOOTING.get());
+        var rateLimitedThetaVelocity =
+            MathUtil.clamp(requestedSpeeds.omegaRadiansPerSecond, -maxAngularRate, maxAngularRate);
 
         rateLimitedSpeeds =
-            new ChassisSpeeds(
-                rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedRotationalRate);
+            new ChassisSpeeds(rateLimitedXVelocity, rateLimitedYVelocity, rateLimitedThetaVelocity);
       } else {
         rateLimitedSpeeds = requestedSpeeds;
       }

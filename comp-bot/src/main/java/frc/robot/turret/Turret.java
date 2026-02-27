@@ -174,8 +174,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     }
     if (DriverStation.isDisabled() && getState() != TurretState.UNHOMED) {
       if (!MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
-        DogLog.logFault("Turret is not homed", AlertType.kWarning);
-        DogLog.clearFault("Turret is not homed");
+        DogLog.logFault("Turret is misaligned", AlertType.kWarning);
+        DogLog.clearFault("Turret is misaligned");
       }
     }
   }
