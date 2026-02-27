@@ -10,7 +10,6 @@ public class FeatureFlags {
 
   public static final BooleanSupplier WALL_INTAKE_DRIVE_ASSIST =
       FeatureFlag.of("WallIntakeDriveAssist", false);
-  public static final BooleanSupplier HOPPER_SHUFFLING = FeatureFlag.of("HopperShuffling", true);
   public static final BooleanSupplier INTAKE_DIRECTIONAL_SNAPS =
       FeatureFlag.of("IntakeDirectionalSnaps", false);
 

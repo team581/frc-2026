@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.config.DSOptions;
-import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class Deploy extends StateMachineSubsystem<DeployState> {
@@ -82,18 +81,12 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   public void shuffleRequest() {
     switch (getState()) {
-      case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {
-        // Do nothing, we aren't homed
+      case UNHOMED, HOME_INWARD, HOME_OUTWARD, HOPPER_SHUFFLING_FINISH, HOPPER_SHUFFLING_IN, HOPPER_SHUFFLING_OUT-> {
+        // Do nothing, we aren't homed or are already shuffling
       }
       default -> {
-        if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()
-            && getState() != DeployState.HOPPER_SHUFFLING_FINISH
-            && getState() != DeployState.HOPPER_SHUFFLING_OUT
-            && getState() != DeployState.HOPPER_SHUFFLING_IN) {
-          hopperShuffleTimer.reset();
-          setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
-          hopperShuffleTimer.restart();
-        }
+        setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
+        hopperShuffleTimer.restart();
       }
     }
   }
@@ -149,12 +142,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         yield currentState;
       }
       case HOPPER_SHUFFLING_FINISH -> {
-        if (atGoal()) {
-          hopperShuffleTimer.reset();
-          if (timeout(2.0)) {
-
-            yield DeployState.HOPPER_SHUFFLING_OUT;
-          }
+        if (atGoal() || timeout(2.0)) {
+          hopperShuffleTimer.restart();
+          yield DeployState.HOPPER_SHUFFLING_OUT;
         }
         yield currentState;
       }
