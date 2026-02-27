@@ -39,7 +39,7 @@ public class AimParameterUtil {
       FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var robotTranslation = robotPose.getTranslation();
     var separatedVelocityCompensatedGoal =
-        FEEDING_SOTM.getSeparatedVelocityCompensatedGoal(
+        FEEDING_SOTM.getSeparatedVelocityCompensatedGoalWithEffectiveTof(
             robotTranslation, feedLocation.getTranslation(robotPose), fieldRelativeSpeeds);
 
     DogLog.log(
