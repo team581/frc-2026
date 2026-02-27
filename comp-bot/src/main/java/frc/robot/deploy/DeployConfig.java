@@ -30,16 +30,16 @@ public class DeployConfig {
 
   private static final Slot0Configs AVERAGE_GAINS =
       new Slot0Configs()
-          .withKP(3)
-          .withKI(0)
+          .withKP(0.0)
+          .withKI(0.0)
           .withKD(0.0)
           .withKG(0.0)
           .withKS(0.0)
           .withKV(0.0)
-          .withKA(0);
+          .withKA(0.0);
   // Difference axis gains typically go in Slot 1
   private static final Slot1Configs DIFFERENCE_GAINS =
-      new Slot1Configs().withKP(3).withKI(0).withKD(0.0).withKS(0.0).withKV(0.0);
+      new Slot1Configs().withKP(0.0).withKI(0).withKD(0.0).withKS(0.0).withKV(0.0);
 
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIG =
       new TalonFXConfiguration()
