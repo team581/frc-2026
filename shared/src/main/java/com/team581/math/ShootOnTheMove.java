@@ -10,8 +10,8 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 
 public class ShootOnTheMove {
   private static final int MAX_ITERATIONS = 5;
-  // TODO: find drag constant. Currently eyeballed
-  // https://frc-docs--3242.org.readthedocs.build/en/3242/docs/software/advanced-controls/fire-control/linear-drag.html
+  // TODO: Do more thorough tuning with integration test, this was quickly tuned
+
   public static final DoubleSubscriber DRAG_CONSTANT =
       DogLog.tunable("ShootOnTheMoove/DragCoeff", 0.5);
   private final InterpolatingDoubleTreeMap distanceToTimeOfFlight;
