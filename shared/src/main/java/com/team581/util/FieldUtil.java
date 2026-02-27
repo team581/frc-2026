@@ -210,7 +210,7 @@ public class FieldUtil {
 
   // Wall snap zone calculations
   public static final double ASSIST_POINT_THRESHOLD_FROM_PERPENDICULAR_WALL =
-      Units.inchesToMeters(60.0);
+      Units.inchesToMeters(72.0);
 
   private static final Rectangle2d BLUE_OUTPOST_WALL_SNAP_CORNER_ZONE =
       new Rectangle2d(

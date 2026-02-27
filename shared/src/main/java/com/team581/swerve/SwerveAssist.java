@@ -29,7 +29,7 @@ public class SwerveAssist {
   // Angles to round the snap to when swerve assisting
   public static final Rotation2d TRENCH_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
   public static final Rotation2d BUMP_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
-  private static final Rotation2d WALL_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
+  private static final Rotation2d WALL_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
 
   // Wall snap values
   private static final double WALL_PROXIMITY_THRESHOLD = Units.inchesToMeters(45.0);
@@ -82,7 +82,6 @@ public class SwerveAssist {
     }
   }
 
-  // COMP-BOT WALL SNAPS V2
   public static boolean ableToWallSnap(Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var closestWallTranslation =
         MathHelpers.getClosestPointOnRectanglePerimeter(
@@ -231,28 +230,26 @@ public class SwerveAssist {
         MathHelpers.getClosestPointOnRectanglePerimeter(robotTranslation, FieldUtil.FIELD_BOUNDS);
     // If the closest wall is a driver station wall, the y component will be equal to the robot's
     var closestWallIsADriverStationWall = robotTranslation.getY() == closestWallTranslation.getY();
-    var angleToWall = robotTranslation.minus(closestWallTranslation).getAngle();
+    var angleToWall = closestWallTranslation.minus(robotTranslation).getAngle();
     var roundedSnapAngle =
         inCorner
             ? getRoundedSnapAngle(
-                angleToWall.plus(Rotation2d.fromDegrees(180.0)), WALL_SNAP_ROUND_ANGLE)
+                angleToWall.minus(Rotation2d.fromDegrees(180.0)), WALL_SNAP_ROUND_ANGLE)
             : getRoundedSnapAngle(
                 MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
     var direction = 0;
 
     if (closestWallIsADriverStationWall) {
       if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
-        direction = 1;
-      } else {
         direction = -1;
+      } else {
+        direction = 1;
       }
-      // Still snapping to 180, but rotated by 90 to be parallel with the driverstation wall
-      roundedSnapAngle = roundedSnapAngle.plus(Rotation2d.fromDegrees(90.0));
     } else {
       if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
-        direction = -1;
-      } else {
         direction = 1;
+      } else {
+        direction = -1;
       }
     }
     return roundedSnapAngle.plus(WALL_SNAP_OFFSET.times(direction));
