@@ -81,7 +81,12 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   public void shuffleRequest() {
     switch (getState()) {
-      case UNHOMED, HOME_INWARD, HOME_OUTWARD, HOPPER_SHUFFLING_FINISH, HOPPER_SHUFFLING_IN, HOPPER_SHUFFLING_OUT-> {
+      case UNHOMED,
+          HOME_INWARD,
+          HOME_OUTWARD,
+          HOPPER_SHUFFLING_FINISH,
+          HOPPER_SHUFFLING_IN,
+          HOPPER_SHUFFLING_OUT -> {
         // Do nothing, we aren't homed or are already shuffling
       }
       default -> {
