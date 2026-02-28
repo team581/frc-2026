@@ -209,27 +209,22 @@ public class FieldUtil {
           RED_OUTPOST_TRENCH_SIDE_BUMP_POINT);
 
   // Wall snap zone calculations
-  private static final double WALL_SNAP_CORNER_ZONE_LENGTH =
-      Units.inchesToMeters(60.0);
+  private static final double WALL_SNAP_CORNER_ZONE_LENGTH = Units.inchesToMeters(60.0);
 
   private static final Rectangle2d BLUE_OUTPOST_WALL_SNAP_CORNER_ZONE =
       new Rectangle2d(
           new Translation2d(0.0, 0.0),
-          new Translation2d(
-              WALL_SNAP_CORNER_ZONE_LENGTH,
-              WALL_SNAP_CORNER_ZONE_LENGTH));
+          new Translation2d(WALL_SNAP_CORNER_ZONE_LENGTH, WALL_SNAP_CORNER_ZONE_LENGTH));
   private static final Rectangle2d BLUE_DEPOT_WALL_SNAP_CORNER_ZONE =
       new Rectangle2d(
           new Translation2d(0.0, FIELD_WIDTH_Y),
           new Translation2d(
-              WALL_SNAP_CORNER_ZONE_LENGTH,
-              FIELD_WIDTH_Y - WALL_SNAP_CORNER_ZONE_LENGTH));
+              WALL_SNAP_CORNER_ZONE_LENGTH, FIELD_WIDTH_Y - WALL_SNAP_CORNER_ZONE_LENGTH));
   private static final Rectangle2d RED_DEPOT_WALL_SNAP_CORNER_ZONE =
       new Rectangle2d(
           new Translation2d(FIELD_LENGTH_X, 0.0),
           new Translation2d(
-              FIELD_LENGTH_X - WALL_SNAP_CORNER_ZONE_LENGTH,
-              WALL_SNAP_CORNER_ZONE_LENGTH));
+              FIELD_LENGTH_X - WALL_SNAP_CORNER_ZONE_LENGTH, WALL_SNAP_CORNER_ZONE_LENGTH));
   private static final Rectangle2d RED_OUTPOST_WALL_SNAP_CORNER_ZONE =
       new Rectangle2d(
           new Translation2d(FIELD_LENGTH_X, FIELD_WIDTH_Y),

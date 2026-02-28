@@ -22,8 +22,7 @@ public class SwerveAssist {
   private static final double BUMP_ASSIST_VELOCITY_THRESHOLD = 0.5;
   private static final Rotation2d BUMP_ASSIST_VELOCITY_ANGLE_TOLERANCE =
       Rotation2d.fromDegrees(22.5);
-  private static final Rotation2d WALL_SNAP_VELOCITY_ANGLE_TOLERANCE =
-      Rotation2d.fromDegrees(30.0);
+  private static final Rotation2d WALL_SNAP_VELOCITY_ANGLE_TOLERANCE = Rotation2d.fromDegrees(30.0);
 
   // Wall snap values
   private static final Rotation2d WALL_SNAP_OFFSET = Rotation2d.fromDegrees(30.0);
@@ -84,7 +83,8 @@ public class SwerveAssist {
     // Check if we are in a corner and going fast enough for a conrner transition
     if (FieldUtil.getCurrentWallSnapCornerZone(robotPose.getTranslation()).isPresent()) {
       DogLog.log("SwerveAssist/WallSnaps/AbleToCornerTransition", true);
-      return MathHelpers.getLinearVelocity(fieldRelativeSpeeds) >= CORNER_TRANSITION_VELOCITY_THRESHOLD;
+      return MathHelpers.getLinearVelocity(fieldRelativeSpeeds)
+          >= CORNER_TRANSITION_VELOCITY_THRESHOLD;
     }
     DogLog.log("SwerveAssist/WallSnaps/AbleToCornerTransition", false);
 
@@ -116,14 +116,18 @@ public class SwerveAssist {
     }
 
     // Check if we are driving fast enough in the direction of the intake parallel to the wall
-    var roundedDriveDirection = getRoundedSnapAngle(MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
+    var roundedDriveDirection =
+        getRoundedSnapAngle(
+            MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
     if (closestWallIsADriverStationWall) {
       // TODO: FIX LOGIC HERE
-      // Still want to round drive direction to 180.0 degrees, but rotated 90.0 degrees to be parallel w/ DS wall
+      // Still want to round drive direction to 180.0 degrees, but rotated 90.0 degrees to be
+      // parallel w/ DS wall
       roundedDriveDirection = roundedDriveDirection.plus(Rotation2d.fromDegrees(-90.0));
     }
     DogLog.log("SwerveAssist/WallSnaps/Checks/RobotHeading", robotPose.getRotation().getDegrees());
-    DogLog.log("SwerveAssist/WallSnaps/Checks/RoundedDriveDirection", roundedDriveDirection.getDegrees());
+    DogLog.log(
+        "SwerveAssist/WallSnaps/Checks/RoundedDriveDirection", roundedDriveDirection.getDegrees());
     if (!MathUtil.isNear(
         robotPose.getRotation().getDegrees(),
         roundedDriveDirection.getDegrees(),
@@ -134,6 +138,14 @@ public class SwerveAssist {
       DogLog.log("SwerveAssist/WallSnaps/IntakeDriveDirectionCheck", true);
       return true;
     }
+  }
+
+  public static boolean ableToWallSnapCornerTransition(
+      Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+    // Check if we are in a corner and going fast enough for a turn transitioning to the next wall
+    return FieldUtil.getCurrentWallSnapCornerZone(robotPose.getTranslation()).isPresent()
+        && MathHelpers.getLinearVelocity(fieldRelativeSpeeds)
+            >= CORNER_TRANSITION_VELOCITY_THRESHOLD;
   }
 
   public static Rotation2d getRoundedSnapAngle(Rotation2d robotHeading, Rotation2d roundingAngle) {
@@ -187,7 +199,8 @@ public class SwerveAssist {
     var direction = 0;
 
     if (closestWallIsADriverStationWall) {
-      // Still want to round snap to 180.0 degrees, but rotated 90.0 degrees to be parallel w/ DS wall
+      // Still want to round snap to 180.0 degrees, but rotated 90.0 degrees to be parallel w/ DS
+      // wall
       roundedSnapAngle = roundedSnapAngle.plus(Rotation2d.fromDegrees(90.0));
 
       if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
@@ -203,11 +216,6 @@ public class SwerveAssist {
       }
     }
     return roundedSnapAngle.plus(WALL_SNAP_OFFSET.times(direction));
-  }
-
-  public static boolean ableToWallSnapCornerTransition(Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
-    // Check if we are in a corner and going fast enough for a turn transitioning to the next wall
-    return FieldUtil.getCurrentWallSnapCornerZone(robotPose.getTranslation()).isPresent() && MathHelpers.getLinearVelocity(fieldRelativeSpeeds) >= CORNER_TRANSITION_VELOCITY_THRESHOLD;
   }
 
   private static boolean ableToSwerveAssist(
