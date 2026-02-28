@@ -7,6 +7,7 @@ import com.team581.util.ReusableOptional;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.vision.limelight.LimelightHelpers;
 import com.team581.vision.limelight.LimelightHelpers.PoseEstimate;
+import com.team581.vision.limelight.LimelightHelpers.RawFiducial;
 import com.team581.vision.limelight.PoseEstimateValidator;
 import com.team581.vision.results.OptionalTagResult;
 import dev.doglog.DogLog;
@@ -50,6 +51,8 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
   private double angularVelocity = 0.0;
   private boolean updatedLimelightPos = false;
 
+  private PoseEstimate latestEstimate = new PoseEstimate();
+
   public Limelight(String name, LimelightState initialState, CameraConfig config) {
     super(SubsystemPriority.VISION, initialState);
     limelightTableName = "limelight-" + name;
@@ -82,6 +85,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     }
 
     PoseEstimate mT1Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightTableName);
+    latestEstimate = mT1Estimate;
 
     if (!poseEstimateValidator.shouldTrust(mT1Estimate, angularVelocity)) {
       return tagResult.empty();
@@ -255,6 +259,22 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
       case TAGS, HUB_TAGS, OFF -> getCameraHealth() != CameraHealth.OFFLINE;
       default -> false;
     };
+  }
+
+  public boolean seeingHubTag() {
+    if (!poseEstimateValidator.shouldTrust(latestEstimate, 0)) {
+      return false;
+    }
+
+    for (RawFiducial fiducial : latestEstimate.rawFiducials) {
+      for (int validHubTagID : HUB_TAGS) {
+        if (fiducial.id == validHubTagID) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   @Override
