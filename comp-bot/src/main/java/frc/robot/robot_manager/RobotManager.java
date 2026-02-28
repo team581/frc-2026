@@ -1208,6 +1208,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     isHubActive = getIsHubActiveOrNotUsingState();
     timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
+    DogLog.log("RobotManager/CurrentShift", FmsUtil.currentShift(timeSinceMatchStart));
     var swerveVector = MathHelpers.getDriveDirection(speeds);
     double driveDirection = swerveVector.getDegrees();
     drivingToIntake =

@@ -92,6 +92,33 @@ public class FmsUtil {
     return timeUntilSwitch;
   }
 
+  public static String currentShift(double timeSinceMatchStart) {
+    if (DriverStation.isDisabled() || !DriverStation.isTeleop()) {
+      return "";
+    }
+    var shift = "";
+
+    if (timeSinceMatchStart <= ENDGAME_DURATION) {
+      shift= "ENDGAME";
+    }
+    if (timeSinceMatchStart <= SHIFT4TIME_DURATION) {
+      shift = " SHIFT 4";
+    }
+    if (timeSinceMatchStart <= SHIFT3TIME_DURATION) {
+      shift = " SHIFT 3";
+    }
+    if (timeSinceMatchStart <= SHIFT2TIME_DURATION) {
+      shift = " SHIFT 2";
+    }
+    if (timeSinceMatchStart <= SHIFT1TIME_DURATION) {
+      shift = " SHIFT 1";
+    }
+    if (timeSinceMatchStart <= TRANSITION_DURATION) {
+      shift = "TRANSITION";
+    }
+    return shift;
+  }
+
   static Optional<Boolean> isAutoWinner() {
     if (RobotBase.isSimulation()) {
       return Optional.of(true);
