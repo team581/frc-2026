@@ -536,6 +536,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               break;
             }
           }
+
           if (isMisaligned) {
             DogLog.logFault("Swerve modules not pointed straight", AlertType.kError);
           } else {
