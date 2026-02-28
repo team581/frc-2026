@@ -264,7 +264,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
   }
 
   public boolean seeingHubTag() {
-    if (!poseEstimateValidator.shouldTrust(latestEstimate, 0)) {
+    if (!poseEstimateValidator.shouldTrust(latestEstimate, angularVelocity)) {
       return false;
     }
 
