@@ -98,7 +98,7 @@ public class FmsUtil {
     }
     var gameData = DriverStation.getGameSpecificMessage();
     if (gameData.isEmpty()) {
-      return Optional.empty();
+      return Optional.of(true);
     }
     var character = gameData.charAt(0);
     return switch (character) {
