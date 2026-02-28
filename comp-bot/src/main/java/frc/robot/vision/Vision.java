@@ -52,6 +52,7 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   private boolean seeingTag = false;
   private boolean seeingTagDebounced = false;
   private boolean seenTagRecentlyForReset = true;
+  private boolean seeingHubTags = false;
 
   public Vision(
       Imu imu, Limelight turretLimelight, Limelight backLimelight, Limelight groundLimelight) {
@@ -60,6 +61,19 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     this.turretLimelight = turretLimelight;
     this.backLimelight = backLimelight;
     this.groundLimelight = groundLimelight;
+  }
+
+  @Override
+  protected VisionState getNextState(VisionState currentState) {
+    return switch (currentState) {
+      case HUB_TAGS, WAITING_FOR_HUB_TAGS -> {
+        if (seeingHubTags) {
+          yield VisionState.HUB_TAGS;
+        }
+        yield VisionState.WAITING_FOR_HUB_TAGS;
+      }
+      default -> currentState;
+    };
   }
 
   @Override
@@ -83,6 +97,8 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     } else {
       seenTagRecentlyForReset = seeingTagForPoseResetDebouncer.calculate(seeingTag);
     }
+
+    seeingHubTags = turretLimelight.seeingHubTag() || backLimelight.seeingHubTag();
   }
 
   // Call this in turret's periodic() or a fast telemetry thread
@@ -174,6 +190,10 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     if (state == VisionState.HUB_TAGS && !FeatureFlags.VISION_HUB_TAGS_FILTER.getAsBoolean()) {
       state = VisionState.TAGS;
     }
+
+    if (state == VisionState.HUB_TAGS && getState() == VisionState.WAITING_FOR_HUB_TAGS) {
+      return;
+    }
     setStateFromRequest(state);
   }
 
@@ -201,6 +221,11 @@ public class Vision extends StateMachineSubsystem<VisionState> {
       case HUB_TAGS -> {
         turretLimelight.setState(LimelightState.HUB_TAGS);
         backLimelight.setState(LimelightState.HUB_TAGS);
+        groundLimelight.setState(LimelightState.CLUSTER_MAP);
+      }
+      case WAITING_FOR_HUB_TAGS -> {
+        turretLimelight.setState(LimelightState.TAGS);
+        backLimelight.setState(LimelightState.TAGS);
         groundLimelight.setState(LimelightState.CLUSTER_MAP);
       }
       case CALIBRATE_STATIC_TURRET -> {
