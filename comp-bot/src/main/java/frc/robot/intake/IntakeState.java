@@ -8,15 +8,15 @@ public enum IntakeState {
   IDLE(0),
   SHOOT(3);
 
-  public final double voltage;
+  public final double velocity;
   public final DoubleSubscriber intakeTunableVoltage;
 
-  IntakeState(double voltage) {
-    this.voltage = voltage;
-    this.intakeTunableVoltage = DogLog.tunable("Intake/" + this, voltage);
+  IntakeState(double velocity) {
+    this.velocity = velocity;
+    this.intakeTunableVoltage = DogLog.tunable("Intake/" + this, velocity);
   }
 
-  public double getIntakeVoltage() {
+  public double getIntakeVelocity() {
     return intakeTunableVoltage.get();
   }
 }
