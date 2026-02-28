@@ -179,8 +179,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         differentialMechanism.setControl(
             differentialPositionVoltageRequest
                 .withAveragePosition(clamp(newState.getLength()))
-                .withDifferentialPosition(0)
-                .withAverageSlot(0));
+                .withDifferentialPosition(0));
       }
     }
   }
@@ -201,17 +200,10 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     DogLog.log("Deploy/RightMotor/SupplyCurrent", rightSupplyCurrent);
     DogLog.log("Deploy/LeftMotor/Velocity", leftMotor.getVelocity().getValueAsDouble());
     DogLog.log("Deploy/RightMotor/Velocity", rightMotor.getVelocity().getValueAsDouble());
-    if (getState() != DeployState.UNHOMED
-        || getState() != DeployState.HOME_INWARD
-        || getState() != DeployState.HOME_OUTWARD) {
-      if (differentialMechanismPosition > 11) {
-        differentialMechanism.setControl(
-            differentialPositionVoltageRequest
-                .withAveragePosition(clamp(state.getLength()))
-                .withDifferentialPosition(0)
-                .withAverageSlot(2));
-      }
-    }
+    DogLog.log("Deploy/RightMotor/Voltage", rightMotor.getMotorVoltage().getValueAsDouble());
+    DogLog.log("Deploy/LeftMotor/Voltage", leftMotor.getMotorVoltage().getValueAsDouble());
+    DogLog.log("Deploy/LeftMotor/Slot", leftMotor.getClosedLoopSlot().getValueAsDouble());
+    DogLog.log("Deploy/RightMotor/Slot", rightMotor.getClosedLoopSlot().getValueAsDouble());
 
     // TODO: Remove after bringup
     afterTransition(state);

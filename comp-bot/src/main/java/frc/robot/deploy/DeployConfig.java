@@ -34,6 +34,7 @@ public class DeployConfig {
 
   private static final Slot0Configs AVERAGE_GAINS =
       new Slot0Configs()
+          .withGainSchedBehavior(GainSchedBehaviorValue.UseSlot2)
           .withKP(3)
           .withKI(0)
           .withKD(0.0)
