@@ -131,19 +131,18 @@ public class SwerveAssist {
         MathHelpers.getDriveDirection(fieldRelativeSpeeds).getDegrees());
     DogLog.log(
         "SwerveAssist/WallSnaps/Debug/RoundedDriveDirection", roundedDriveDirection.getDegrees());
-      if (!(MathUtil.isNear(
-          robotPose.getRotation().getDegrees(),
-          roundedDriveDirection.getDegrees(),
-          WALL_SNAP_VELOCITY_ANGLE_TOLERANCE.getDegrees(),
-          -180.0,
-          180.0)
-       &&
-          MathUtil.isNear(
-          robotPose.getRotation().getDegrees(),
-          snapAngle.getDegrees(),
-          WALL_SNAP_INTAKE_ANGLE_TOLERANCE.getDegrees(),
-          -180.0,
-          180.0))) {
+    if (!(MathUtil.isNear(
+            robotPose.getRotation().getDegrees(),
+            roundedDriveDirection.getDegrees(),
+            WALL_SNAP_VELOCITY_ANGLE_TOLERANCE.getDegrees(),
+            -180.0,
+            180.0)
+        && MathUtil.isNear(
+            robotPose.getRotation().getDegrees(),
+            snapAngle.getDegrees(),
+            WALL_SNAP_INTAKE_ANGLE_TOLERANCE.getDegrees(),
+            -180.0,
+            180.0))) {
       DogLog.log("SwerveAssist/WallSnaps/Checks/IntakeDriveDirectionCheck", false);
       return false;
     } else {
@@ -209,7 +208,7 @@ public class SwerveAssist {
               angleToWall.minus(Rotation2d.fromDegrees(180.0)), WALL_SNAP_ROUND_ANGLE);
     } else {
       if (closestWallIsADriverStationWall) {
-      // Still round snap to 180.0 degrees, but rotated 90.0 degrees to be parallel w/ DS wall
+        // Still round snap to 180.0 degrees, but rotated 90.0 degrees to be parallel w/ DS wall
         roundedSnapAngle =
             getRoundedSnapAngle(
                     MathHelpers.getDriveDirection(fieldRelativeSpeeds)

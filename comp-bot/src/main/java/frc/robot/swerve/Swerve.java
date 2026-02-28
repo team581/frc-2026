@@ -249,7 +249,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
         FeatureFlags.WALL_SNAPS.getAsBoolean()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
-            && SwerveAssist.ableToWallSnap(drivetrainState.Pose, fieldRelativeSpeeds, wallSnapAngle);
+            && SwerveAssist.ableToWallSnap(
+                drivetrainState.Pose, fieldRelativeSpeeds, wallSnapAngle);
 
     // Wall snap logic if we are in a corner
     inWallSnapCorner =
@@ -551,7 +552,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                 drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, false)
             .getDegrees());
     DogLog.log(
-        "SwerveAssist/WallSnaps/Main/RobotHeading", drivetrainState.Pose.getRotation().getDegrees());
+        "SwerveAssist/WallSnaps/Main/RobotHeading",
+        drivetrainState.Pose.getRotation().getDegrees());
     DogLog.log("SwerveAssist/WallSnaps/Main/CornerSnapAngle", cornerSnapAngle.getDegrees());
     DogLog.log("SwerveAssist/WallSnaps/Main/ChosenAngle", wallSnapAngle.getDegrees());
   }
