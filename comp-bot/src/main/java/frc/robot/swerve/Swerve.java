@@ -26,6 +26,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
@@ -517,6 +519,29 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                 .withVelocityX(speeds.vxMetersPerSecond)
                 .withVelocityY(speeds.vyMetersPerSecond)
                 .withRotationalRate(speeds.omegaRadiansPerSecond));
+
+        if (DriverStation.isAutonomous() && DriverStation.isDisabled()) {
+          var current = drivetrainState.ModuleStates;
+          var targets = drivetrainState.ModuleTargets;
+          boolean isMisaligned = false;
+
+          for (int i = 0; i < current.length; i++) {
+            var actual = current[i];
+            var target = targets[i];
+
+            if (MathUtil.isNear(actual.angle.getDegrees(), target.angle.getDegrees(), 5, -180, 180)) {
+              // it's within tolerance
+            } else {
+              isMisaligned = true;
+              break;
+            }
+          }
+          if (isMisaligned) {
+            DogLog.logFault("Swerve modules not pointed straight", AlertType.kError);
+          } else {
+            DogLog.clearFault("Swerve modules not pointed straight");
+          }
+        }
       }
     }
 
