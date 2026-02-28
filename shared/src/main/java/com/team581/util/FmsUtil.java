@@ -15,7 +15,7 @@ public class FmsUtil {
   private static final double SHIFT4TIME_STAMP = 105.0;
   private static final double END_GAME_TIME_STAMP = 130.0;
 
-  private static final double ENDGAME_DURATION = 155.0;
+  private static final double ENDGAME_DURATION = 160.0;
   private static final double SHIFT4TIME_DURATION = 130.0;
   private static final double SHIFT3TIME_DURATION = 105.0;
   private static final double SHIFT2TIME_DURATION = 80.0;
