@@ -1231,10 +1231,13 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       return FmsUtil.isHubActive(
           timeSinceMatchStart
               + shooter.getScoreTimeOfFlight(scoringParameters.distance())
-              + tunableHubStateOffset.get());
+              + tunableHubStateOffset.get(),
+          DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
     }
 
-    return FmsUtil.isHubActive(timeSinceMatchStart + tunableHubStateOffset.get());
+    return FmsUtil.isHubActive(
+        timeSinceMatchStart + tunableHubStateOffset.get(),
+        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
   }
 
   private boolean getIsCloseEnoughToHub() {

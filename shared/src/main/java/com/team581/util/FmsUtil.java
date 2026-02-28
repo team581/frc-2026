@@ -52,14 +52,14 @@ public class FmsUtil {
     return shift;
   }
 
-  public static boolean isHubActive(double timeSinceMatchStart) {
-    var maybeIsAutoWinner = isAutoWinner();
+  public static boolean isHubActive(double timeSinceMatchStart, boolean defaultValue) {
+    var maybeIsAutoWinner = isAutoWinner(defaultValue);
 
     if (maybeIsAutoWinner.isEmpty()) {
       return true;
     }
 
-    return isHubActive(timeSinceMatchStart, maybeIsAutoWinner.orElseThrow());
+    return isHubActive(timeSinceMatchStart, maybeIsAutoWinner.orElseThrow(), defaultValue);
   }
 
   public static boolean isRedAlliance() {
@@ -119,13 +119,13 @@ public class FmsUtil {
     return timeUntilSwitch;
   }
 
-  static Optional<Boolean> isAutoWinner() {
+  static Optional<Boolean> isAutoWinner(boolean defaultValue) {
     if (RobotBase.isSimulation()) {
-      return Optional.of(true);
+      return Optional.of(defaultValue);
     }
     var gameData = DriverStation.getGameSpecificMessage();
     if (gameData.isEmpty()) {
-      return Optional.of(true);
+      return Optional.of(defaultValue);
     }
     var character = gameData.charAt(0);
     return switch (character) {
@@ -135,7 +135,8 @@ public class FmsUtil {
     };
   }
 
-  static boolean isHubActive(double timeSinceMatchStart, boolean isAutoWinner) {
+  static boolean isHubActive(
+      double timeSinceMatchStart, boolean isAutoWinner, boolean defaultValue) {
     if (timeSinceMatchStart >= END_GAME_TIME_STAMP) {
       return true;
     }
