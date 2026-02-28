@@ -6,6 +6,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
+import com.team581.GlobalConfig;
 import com.team581.math.CircularFilter;
 import com.team581.math.MathHelpers;
 import com.team581.swerve.DriveSource;
@@ -550,6 +551,38 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     DogLog.log("Swerve/AbleToBumpAssist", ableToBumpAssist);
     DogLog.log("Swerve/AbleToTrenchAssist", ableToTrenchAssist);
     DogLog.log("Swerve/AbleToWallIntakeDriveAssist", ableToWallIntakeDriveAssist);
+
+    // TODO: Remove this after testing is done
+    if (GlobalConfig.IS_DEVELOPMENT) {
+      for (int i = 0; i < 4; i++) {
+        var control = drivetrain.getModule(i).getDriveMotor().getControlMode().getValue();
+        var usingFoc =
+            switch (control) {
+              case DutyCycleFOC,
+                  PositionDutyCycleFOC,
+                  VelocityDutyCycleFOC,
+                  MotionMagicDutyCycleFOC,
+                  VoltageFOC,
+                  PositionVoltageFOC,
+                  VelocityVoltageFOC,
+                  MotionMagicVoltageFOC,
+                  TorqueCurrentFOC,
+                  PositionTorqueCurrentFOC,
+                  VelocityTorqueCurrentFOC,
+                  MotionMagicTorqueCurrentFOC,
+                  MotionMagicVelocityDutyCycleFOC,
+                  MotionMagicVelocityVoltageFOC,
+                  MotionMagicVelocityTorqueCurrentFOC,
+                  MotionMagicExpoDutyCycleFOC,
+                  MotionMagicExpoVoltageFOC,
+                  MotionMagicExpoTorqueCurrentFOC ->
+                  true;
+              default -> false;
+            };
+
+        DogLog.log("Swerve/DriveMotor/" + i + "/UsingFOC", usingFoc);
+      }
+    }
   }
 
   private void startSimThread() {
