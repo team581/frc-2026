@@ -15,7 +15,7 @@ public class IntakeConfig {
               new MotorOutputConfigs()
                   .withInverted(InvertedValue.CounterClockwise_Positive)
                   .withNeutralMode(NeutralModeValue.Coast))
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(36.0/12.0))
+          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(36.0 / 12.0))
           .withSlot0(new Slot0Configs().withKP(10.0).withKV(4.65).withKS(0.0))
           .withCurrentLimits(
               new CurrentLimitsConfigs().withStatorCurrentLimit(80).withSupplyCurrentLimit(80));

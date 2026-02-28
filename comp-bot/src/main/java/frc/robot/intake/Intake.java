@@ -6,7 +6,6 @@ import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
-
 import dev.doglog.DogLog;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -20,7 +19,7 @@ public class Intake extends StateMachineSubsystem<IntakeState> {
 
     motor.getConfigurator().apply(IntakeConfig.MOTOR_CONFIG);
 
-        TunablePid.register("Shooter/LeftShooter", motor, IntakeConfig.MOTOR_CONFIG);
+    TunablePid.register("Shooter/LeftShooter", motor, IntakeConfig.MOTOR_CONFIG);
 
     this.motor = motor;
   }
@@ -63,17 +62,13 @@ public class Intake extends StateMachineSubsystem<IntakeState> {
     DogLog.log("Intake/RequestedVelocity", getState().getIntakeVelocity());
   }
 
-
   @Override
   public void simulationPeriodic() {
     var intakeSimulation =
         SimKit.velocityMechanism(
             "intake",
-            (mechanism) ->
-                mechanism
-                    .addMotor(motor, ChassisReference.CounterClockwise_Positive));
+            (mechanism) -> mechanism.addMotor(motor, ChassisReference.CounterClockwise_Positive));
 
     intakeSimulation.update();
   }
-
 }
