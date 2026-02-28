@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.SubsystemPriority;
 import java.util.Locale;
 import java.util.OptionalDouble;
+import java.util.Set;
 
 public class Limelight extends StateMachineSubsystem<LimelightState> {
   private static final double USE_MT1_ROTATION_THRESHOLD_INCHES = 40;
@@ -32,6 +33,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
       };
 
   private static final int[] HUB_TAGS = new int[] {2, 3, 4, 5, 8, 9, 10, 11};
+  private static final Set<Integer> HUB_TAGS_SET = Set.of(2, 3, 4, 5, 8, 9, 10, 11);
 
   private static final double IS_OFFLINE_TIMEOUT = 3;
 
@@ -261,16 +263,14 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     };
   }
 
-  public boolean seeingHubTag() {
+  public boolean seeingHubTags() {
     if (!poseEstimateValidator.shouldTrust(latestEstimate, 0)) {
       return false;
     }
 
     for (RawFiducial fiducial : latestEstimate.rawFiducials) {
-      for (int validHubTagID : HUB_TAGS) {
-        if (fiducial.id == validHubTagID) {
-          return true;
-        }
+      if (HUB_TAGS_SET.contains(Integer.valueOf(fiducial.id))) {
+        return true;
       }
     }
 
