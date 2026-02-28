@@ -66,17 +66,11 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   @Override
   protected VisionState getNextState(VisionState currentState) {
     return switch (currentState) {
-      case HUB_TAGS -> {
-        if (seeingHubTags) {
-          yield currentState;
-        }
-        yield VisionState.WAITING_FOR_HUB_TAGS;
-      }
-      case WAITING_FOR_HUB_TAGS -> {
+      case HUB_TAGS, WAITING_FOR_HUB_TAGS -> {
         if (seeingHubTags) {
           yield VisionState.HUB_TAGS;
         }
-        yield currentState;
+        yield VisionState.WAITING_FOR_HUB_TAGS;
       }
       default -> currentState;
     };

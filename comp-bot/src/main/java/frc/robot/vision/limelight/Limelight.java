@@ -263,7 +263,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     };
   }
 
-  public boolean seeingHubTags() {
+  public boolean seeingHubTag() {
     if (!poseEstimateValidator.shouldTrust(latestEstimate, 0)) {
       return false;
     }
