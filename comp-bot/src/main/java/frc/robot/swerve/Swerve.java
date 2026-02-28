@@ -251,7 +251,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToWallSnap(drivetrainState.Pose, fieldRelativeSpeeds);
 
-    // Wall logic if we are in a corner
+    // Wall snap logic if we are in a corner
     inWallSnapCorner =
         FieldUtil.getCurrentWallSnapCornerZone(drivetrainState.Pose.getTranslation()).isPresent();
     if (inWallSnapCorner && !previouslyInWallSnapCorner) {
@@ -260,7 +260,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
     }
     wallSnapAngle =
-        inWallSnapCorner
+        SwerveAssist.ableToWallSnapCornerTransition(drivetrainState.Pose, fieldRelativeSpeeds)
             ? cornerSnapAngle
             : SwerveAssist.getWallSnapAngle(
                 drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
