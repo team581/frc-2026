@@ -762,11 +762,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           dyeRotor.scoreRequest(scoringParameters.distance());
         }
 
-          if (drivingToIntake) {
-            deploy.intakeRequest();
-          } else {
-            deploy.shuffleRequest();
-          }
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
+        }
       }
       case PREPARE_FEED -> {
         smartTurretHoodPrepareFeedRequest();
@@ -791,12 +791,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           dyeRotor.feedRequest(feedingParameters.distance());
         }
-          if (drivingToIntake) {
-            deploy.intakeRequest();
-          } else {
-            deploy.shuffleRequest();
-          }
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
         }
+      }
 
       // Fallback states
       case PREPARE_PRESET_SCORE -> {
@@ -822,12 +822,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.normalDriveRequest();
         }
-          if (drivingToIntake) {
-            deploy.intakeRequest();
-          } else {
-            deploy.shuffleRequest();
-          }
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
         }
+      }
       case PREPARE_PRESET_FEED -> {
         // TODO: Get turret feed angle
         turret.feedRequest(0);
@@ -845,12 +845,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.normalDriveRequest();
         }
-          if (drivingToIntake) {
-            deploy.intakeRequest();
-          } else {
-            deploy.shuffleRequest();
-          }
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
         }
+      }
       case AUTOMATIC_CLIMB_1_APPROACH_L1, AUTOMATIC_CLIMB_2_LINEUP_L1 -> {
         turret.climbRequest(robotPose);
         swerve.climbAssistDriveRequest();

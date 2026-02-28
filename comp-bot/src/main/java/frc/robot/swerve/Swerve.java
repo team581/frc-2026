@@ -272,9 +272,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     }
 
     var requestedSpeeds = driveSource.getRequestedSpeeds();
-    if
-         (getState() == SwerveState.INTAKE_RATE_LIMITED
-            || getState() == SwerveState.MANUAL_RATE_LIMITED) {
+    if (getState() == SwerveState.INTAKE_RATE_LIMITED
+        || getState() == SwerveState.MANUAL_RATE_LIMITED) {
 
       if (driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP) {
         var rateLimitedXVelocity =
