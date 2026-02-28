@@ -13,7 +13,7 @@ public class ShootOnTheMove {
   // TODO: Do more thorough tuning with integration test, this was quickly tuned
 
   public static final DoubleSubscriber DRAG_CONSTANT =
-      DogLog.tunable("ShootOnTheMoove/DragCoeff", 0.5);
+      DogLog.tunable("ShootOnTheMoove/DragCoeff", 0.465);
   private final InterpolatingDoubleTreeMap distanceToTimeOfFlight;
 
   public ShootOnTheMove(InterpolatingDoubleTreeMap distanceToTimeOfFlight) {
