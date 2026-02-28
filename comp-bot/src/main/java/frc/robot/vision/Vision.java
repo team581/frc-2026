@@ -187,7 +187,7 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     if (getState() == VisionState.CALIBRATE_STATIC_TURRET) {
       return;
     }
-    if (state == VisionState.HUB_TAGS && !FeatureFlags.VISION_HUB_TAGS_FILTER.getAsBoolean()) {
+    if (state == VisionState.HUB_TAGS) {
       state = VisionState.TAGS;
     }
 

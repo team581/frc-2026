@@ -199,9 +199,6 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
 
   @Override
   protected void collectInputs() {
-    if (!FeatureFlags.CLUSTER_MAP.getAsBoolean()) {
-      return;
-    }
     swerveSpeeds = swerve.getRobotRelativeSpeeds();
     updateMap();
   }
