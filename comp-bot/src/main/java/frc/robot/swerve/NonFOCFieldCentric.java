@@ -24,7 +24,7 @@ public class NonFOCFieldCentric implements SwerveRequest {
   public double RotationalRate = 0;
   public double Deadband = 0;
   public double RotationalDeadband = 0;
-  public Translation2d CenterOfRotation = new Translation2d();
+  public Translation2d CenterOfRotation = Translation2d.kZero;
   public DriveRequestType DriveRequestType = SwerveModule.DriveRequestType.OpenLoopVoltage;
   public SteerRequestType SteerRequestType = SwerveModule.SteerRequestType.Position;
   public boolean DesaturateWheelSpeeds = true;

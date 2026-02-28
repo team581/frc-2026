@@ -19,12 +19,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 public class NonFOCFieldCentricFacingAngle implements SwerveRequest {
   public double VelocityX = 0;
   public double VelocityY = 0;
-  public Rotation2d TargetDirection = new Rotation2d();
+  public Rotation2d TargetDirection = Rotation2d.kZero;
   public double TargetRateFeedforward = 0;
   public double Deadband = 0;
   public double RotationalDeadband = 0;
   public double MaxAbsRotationalRate = 0;
-  public Translation2d CenterOfRotation = new Translation2d();
+  public Translation2d CenterOfRotation = Translation2d.kZero;
   public DriveRequestType DriveRequestType = SwerveModule.DriveRequestType.OpenLoopVoltage;
   public SteerRequestType SteerRequestType = SwerveModule.SteerRequestType.Position;
   public boolean DesaturateWheelSpeeds = true;
