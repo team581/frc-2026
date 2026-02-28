@@ -12,7 +12,6 @@ import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.config.FeatureFlags;
 import frc.robot.imu.Imu;
 import frc.robot.turret.TurretConfig;
 import frc.robot.util.scheduling.SubsystemPriority;
