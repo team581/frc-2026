@@ -71,23 +71,23 @@ public class FmsUtil {
     }
     double timeUntilSwitch = 0.0;
 
-    if (timeSinceMatchStart <= END_GAME_TIME_STAMP) {
-      timeUntilSwitch = END_GAME_TIME_STAMP - timeSinceMatchStart;
+    if (timeSinceMatchStart <= ENDGAME_DURATION) {
+      timeUntilSwitch = ENDGAME_DURATION - timeSinceMatchStart;
     }
-    if (timeSinceMatchStart <= SHIFT4TIME_STAMP) {
-      timeUntilSwitch = SHIFT4TIME_STAMP - timeSinceMatchStart;
+    if (timeSinceMatchStart <= SHIFT4TIME_DURATION) {
+      timeUntilSwitch = SHIFT4TIME_DURATION - timeSinceMatchStart;
     }
-    if (timeSinceMatchStart <= SHIFT3TIME_STAMP) {
-      timeUntilSwitch = SHIFT3TIME_STAMP - timeSinceMatchStart;
+    if (timeSinceMatchStart <= SHIFT3TIME_DURATION) {
+      timeUntilSwitch = SHIFT3TIME_DURATION - timeSinceMatchStart;
     }
-    if (timeSinceMatchStart <= SHIFT2TIME_STAMP) {
-      timeUntilSwitch = SHIFT2TIME_STAMP - timeSinceMatchStart;
+    if (timeSinceMatchStart <= SHIFT2TIME_DURATION) {
+      timeUntilSwitch = SHIFT2TIME_DURATION - timeSinceMatchStart;
     }
-    if (timeSinceMatchStart <= SHIFT1TIME_STAMP) {
-      timeUntilSwitch = SHIFT1TIME_STAMP - timeSinceMatchStart;
+    if (timeSinceMatchStart <= SHIFT1TIME_DURATION) {
+      timeUntilSwitch = SHIFT1TIME_DURATION - timeSinceMatchStart;
     }
-    if (timeSinceMatchStart <= TRANSITION_SHIFT_TIME_STAMP) {
-      timeUntilSwitch = TRANSITION_SHIFT_TIME_STAMP - timeSinceMatchStart;
+    if (timeSinceMatchStart <= TRANSITION_DURATION) {
+      timeUntilSwitch = TRANSITION_DURATION - timeSinceMatchStart;
     }
     return timeUntilSwitch;
   }
