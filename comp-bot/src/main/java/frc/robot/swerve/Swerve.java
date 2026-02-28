@@ -529,7 +529,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             var actual = current[i];
             var target = targets[i];
 
-            if (MathUtil.isNear(actual.angle.getDegrees(), target.angle.getDegrees(), 5, -180, 180)) {
+            if (MathUtil.isNear(
+                actual.angle.getDegrees(), target.angle.getDegrees(), 5, -180, 180)) {
               // it's within tolerance
             } else {
               isMisaligned = true;
