@@ -3,6 +3,7 @@ package com.team581.util;
 import com.google.common.collect.ImmutableList;
 import com.team581.autos.Point;
 import com.team581.math.MathHelpers;
+import com.team581.math.Triangle2d;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
@@ -23,9 +24,9 @@ public class FieldUtil {
   public static final Point HUB_POSE =
       Point.ofRed(new Pose2d(11.915394, 4.034663, Rotation2d.kZero));
   public static final double HUB_RADIUS_METERS = Units.inchesToMeters(48.106087 / 2);
-  public static final Point FEED_LEFT_POSE = Point.ofRed(new Pose2d(15.75, 0.75, Rotation2d.kZero));
+  public static final Point FEED_LEFT_POSE = Point.ofRed(new Pose2d(15.75, 1.5, Rotation2d.kZero));
   public static final Point FEED_RIGHT_POSE =
-      Point.ofRed(new Pose2d(15.75, 7.25, Rotation2d.kZero));
+      Point.ofRed(new Pose2d(15.75, FIELD_WIDTH_Y - 1.5, Rotation2d.kZero));
 
   private static final double BLUE_STARTING_LINE_X = Units.inchesToMeters(156.61);
   private static final double RED_STARTING_LINE_X = FIELD_LENGTH_X - BLUE_STARTING_LINE_X;
@@ -35,15 +36,6 @@ public class FieldUtil {
       MathHelpers.average(AprilTags.TAG_7.getX(), AprilTags.TAG_6.getX());
   private static final double BLUE_OBSTACLE_X =
       MathHelpers.average(AprilTags.TAG_17.getX(), AprilTags.TAG_28.getX());
-
-  private static final Rectangle2d RED_HUB_NO_FEED_ZONE =
-      new Rectangle2d(
-          new Translation2d(RED_STARTING_LINE_X - (HUB_RADIUS_METERS * 2), 3.034663),
-          new Translation2d(RED_STARTING_LINE_X - (HUB_RADIUS_METERS * 2) - 1.0, 5.034663));
-  private static final Rectangle2d BLUE_HUB_NO_FEED_ZONE =
-      new Rectangle2d(
-          new Translation2d(BLUE_STARTING_LINE_X + (HUB_RADIUS_METERS * 2), 3.034663),
-          new Translation2d(BLUE_STARTING_LINE_X + (HUB_RADIUS_METERS * 2) + 1.0, 5.034663));
 
   // Trench/assist zone calculations
   private static final double TRENCH_LENGTH_X = Units.inchesToMeters(47.0);
@@ -218,6 +210,25 @@ public class FieldUtil {
   private static final Pose2d RED_RIGHT_FALLBACK =
       new Pose2d(RED_OBSTACLE_X + TRENCH_LENGTH_X / 2.0, AprilTags.TAG_22.getY(), new Rotation2d());
 
+  private static final Triangle2d RED_HUB_NO_FEED_ZONE =
+      new Triangle2d(
+          FIELD_BOUNDS.getCenter().getTranslation(),
+          new Translation2d(
+              HUB_POSE.redPose().getX()- HUB_RADIUS_METERS - Units.inchesToMeters(6),
+              HUB_POSE.redPose().getY() + HUB_RADIUS_METERS +Units.inchesToMeters(8)),
+          new Translation2d(
+              HUB_POSE.redPose().getX()- HUB_RADIUS_METERS - Units.inchesToMeters(6),
+              HUB_POSE.redPose().getY() - HUB_RADIUS_METERS - Units.inchesToMeters(8)));
+  private static final Triangle2d BLUE_HUB_NO_FEED_ZONE =
+      new Triangle2d(
+          FIELD_BOUNDS.getCenter().getTranslation(),
+          new Translation2d(
+              HUB_POSE.bluePose().getX()+ HUB_RADIUS_METERS + Units.inchesToMeters(6),
+              HUB_POSE.bluePose().getY() + HUB_RADIUS_METERS + Units.inchesToMeters(8)),
+          new Translation2d(
+              HUB_POSE.bluePose().getX()+ HUB_RADIUS_METERS + Units.inchesToMeters(6),
+              HUB_POSE.bluePose().getY() - HUB_RADIUS_METERS - Units.inchesToMeters(8)));
+
   public static Pose2d clampPoseToAllianceZone(Pose2d robot) {
     if (isRobotInAllianceZone(robot.getTranslation())) {
       return robot;
@@ -372,6 +383,26 @@ public class FieldUtil {
     DogLog.log(
         "FieldUtil/RedOutpost/BumpAssistPoints/TrenchSideBumpPoint",
         new Pose2d(RED_OUTPOST_TRENCH_SIDE_BUMP_POINT, Rotation2d.kZero));
+
+    // No feed zones
+    DogLog.log(
+        "FieldUtil/BlueHubNoFeedZone/Corner1",
+        new Pose2d(BLUE_HUB_NO_FEED_ZONE.getVertexA(), Rotation2d.kZero));
+    DogLog.log(
+        "FieldUtil/BlueHubNoFeedZone/Corner2",
+        new Pose2d(BLUE_HUB_NO_FEED_ZONE.getVertexB(), Rotation2d.kZero));
+    DogLog.log(
+        "FieldUtil/BlueHubNoFeedZone/Corner3",
+        new Pose2d(BLUE_HUB_NO_FEED_ZONE.getVertexC(), Rotation2d.kZero));
+    DogLog.log(
+        "FieldUtil/RedHubNoFeedZone/Corner1",
+        new Pose2d(RED_HUB_NO_FEED_ZONE.getVertexA(), Rotation2d.kZero));
+    DogLog.log(
+        "FieldUtil/RedHubNoFeedZone/Corner2",
+        new Pose2d(RED_HUB_NO_FEED_ZONE.getVertexB(), Rotation2d.kZero));
+    DogLog.log(
+        "FieldUtil/RedHubNoFeedZone/Corner3",
+        new Pose2d(RED_HUB_NO_FEED_ZONE.getVertexC(), Rotation2d.kZero));
   }
 
   public static double getAllianceZoneX() {
