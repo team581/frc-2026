@@ -214,19 +214,19 @@ public class FieldUtil {
       new Triangle2d(
           FIELD_BOUNDS.getCenter().getTranslation(),
           new Translation2d(
-              HUB_POSE.redPose().getX()- HUB_RADIUS_METERS - Units.inchesToMeters(6),
-              HUB_POSE.redPose().getY() + HUB_RADIUS_METERS +Units.inchesToMeters(8)),
+              HUB_POSE.redPose().getX() - HUB_RADIUS_METERS - Units.inchesToMeters(6),
+              HUB_POSE.redPose().getY() + HUB_RADIUS_METERS + Units.inchesToMeters(8)),
           new Translation2d(
-              HUB_POSE.redPose().getX()- HUB_RADIUS_METERS - Units.inchesToMeters(6),
+              HUB_POSE.redPose().getX() - HUB_RADIUS_METERS - Units.inchesToMeters(6),
               HUB_POSE.redPose().getY() - HUB_RADIUS_METERS - Units.inchesToMeters(8)));
   private static final Triangle2d BLUE_HUB_NO_FEED_ZONE =
       new Triangle2d(
           FIELD_BOUNDS.getCenter().getTranslation(),
           new Translation2d(
-              HUB_POSE.bluePose().getX()+ HUB_RADIUS_METERS + Units.inchesToMeters(6),
+              HUB_POSE.bluePose().getX() + HUB_RADIUS_METERS + Units.inchesToMeters(6),
               HUB_POSE.bluePose().getY() + HUB_RADIUS_METERS + Units.inchesToMeters(8)),
           new Translation2d(
-              HUB_POSE.bluePose().getX()+ HUB_RADIUS_METERS + Units.inchesToMeters(6),
+              HUB_POSE.bluePose().getX() + HUB_RADIUS_METERS + Units.inchesToMeters(6),
               HUB_POSE.bluePose().getY() - HUB_RADIUS_METERS - Units.inchesToMeters(8)));
 
   public static Pose2d clampPoseToAllianceZone(Pose2d robot) {
