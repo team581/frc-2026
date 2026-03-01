@@ -108,6 +108,33 @@ public final class PositionMechanism {
 
   /** Recomputes the predicted state and pushes the result into each motor sim. */
   public void update() {
+    update(desiredMechanismState(devices));
+  }
+
+  /**
+   * Recomputes the predicted state using an explicit target position and pushes the result into
+   * each motor sim. Use this for differential mechanisms where CTRE's sim doesn't correctly
+   * populate ClosedLoopReference on individual motors.
+   */
+  public void update(double targetPosition) {
+    update(new TrapezoidProfile.State(targetPosition, 0.0));
+  }
+
+  private TrapezoidProfile.State applyBounds(TrapezoidProfile.State state) {
+    var clampedPosition =
+        MathUtil.clamp(
+            state.position,
+            minPosition.orElse(Double.NEGATIVE_INFINITY),
+            maxPosition.orElse(Double.POSITIVE_INFINITY));
+
+    if (clampedPosition == state.position) {
+      return state;
+    }
+
+    return new TrapezoidProfile.State(clampedPosition, 0.0);
+  }
+
+  private void update(TrapezoidProfile.State wantedState) {
     // Dynamic motion magic requests specify constraints per-request, so read them each update
     var constraints =
         getDynamicConstraints(devices)
@@ -123,7 +150,6 @@ public final class PositionMechanism {
 
     var currentState = currentMechanismState(devices);
 
-    var wantedState = desiredMechanismState(devices);
     var predictedState =
         new TrapezoidProfile(constraints).calculate(updateTimer.get(), currentState, wantedState);
 
@@ -139,19 +165,5 @@ public final class PositionMechanism {
     }
 
     updateTimer.restart();
-  }
-
-  private TrapezoidProfile.State applyBounds(TrapezoidProfile.State state) {
-    var clampedPosition =
-        MathUtil.clamp(
-            state.position,
-            minPosition.orElse(Double.NEGATIVE_INFINITY),
-            maxPosition.orElse(Double.POSITIVE_INFINITY));
-
-    if (clampedPosition == state.position) {
-      return state;
-    }
-
-    return new TrapezoidProfile.State(clampedPosition, 0.0);
   }
 }

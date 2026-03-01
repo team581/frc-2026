@@ -1,5 +1,6 @@
 package frc.robot.vision.limelight;
 
+import com.google.common.collect.ImmutableSet;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
 import com.team581.mechanisms.vision.CameraHealth;
@@ -7,6 +8,7 @@ import com.team581.util.ReusableOptional;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.vision.limelight.LimelightHelpers;
 import com.team581.vision.limelight.LimelightHelpers.PoseEstimate;
+import com.team581.vision.limelight.LimelightHelpers.RawFiducial;
 import com.team581.vision.limelight.PoseEstimateValidator;
 import com.team581.vision.results.OptionalTagResult;
 import dev.doglog.DogLog;
@@ -19,6 +21,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.SubsystemPriority;
 import java.util.Locale;
+import java.util.OptionalDouble;
+import java.util.Set;
 
 public class Limelight extends StateMachineSubsystem<LimelightState> {
   private static final double USE_MT1_ROTATION_THRESHOLD_INCHES = 40;
@@ -30,8 +34,20 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
       };
 
   private static final int[] HUB_TAGS = new int[] {2, 3, 4, 5, 8, 9, 10, 11};
-
+  private static final Set<Integer> HUB_TAGS_SET = Set.of(2, 3, 4, 5, 8, 9, 10, 11);
+  private static final Set<Integer> RED_HUB_TAGS = ImmutableSet.of(2, 3, 4, 5);
+  private static final Set<Integer> BLUE_HUB_TAGS = ImmutableSet.of(8, 9, 10, 11);
   private static final double IS_OFFLINE_TIMEOUT = 3;
+
+  public Set<Integer> getActiveHubTags() {
+    var alliance = edu.wpi.first.wpilibj.DriverStation.getAlliance();
+    if (alliance.isPresent()) {
+      return alliance.orElseThrow() == edu.wpi.first.wpilibj.DriverStation.Alliance.Red
+          ? RED_HUB_TAGS
+          : BLUE_HUB_TAGS;
+    }
+    return ImmutableSet.of();
+  }
 
   public final String limelightTableName;
   public final CameraConfig config;
@@ -48,6 +64,8 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
 
   private double angularVelocity = 0.0;
   private boolean updatedLimelightPos = false;
+
+  private PoseEstimate latestEstimate = new PoseEstimate();
 
   public Limelight(String name, LimelightState initialState, CameraConfig config) {
     super(SubsystemPriority.VISION, initialState);
@@ -81,6 +99,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     }
 
     PoseEstimate mT1Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightTableName);
+    latestEstimate = mT1Estimate;
 
     if (!poseEstimateValidator.shouldTrust(mT1Estimate, angularVelocity)) {
       return tagResult.empty();
@@ -116,6 +135,17 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     DogLog.log("Vision/" + name + "/Tags/MT2Timestamp", mTEstimateTimestamp);
     DogLog.log("Vision/" + name + "/Tags/DistanceFromTag", distance);
     return tagResult.update(mTPose, mTEstimateTimestamp, devs);
+  }
+
+  public OptionalDouble getLimelightRotation() {
+    if (RobotBase.isSimulation()) {
+      return OptionalDouble.of(90 - (Math.random() * 5));
+    }
+    var maybeResult = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightTableName);
+    if (poseEstimateValidator.shouldTrust(maybeResult, angularVelocity)) {
+      return OptionalDouble.of(maybeResult.pose.getRotation().getDegrees());
+    }
+    return OptionalDouble.empty();
   }
 
   @Override
@@ -245,10 +275,24 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     };
   }
 
+  public boolean seeingHubTag() {
+    if (!poseEstimateValidator.shouldTrust(latestEstimate, angularVelocity)) {
+      return false;
+    }
+
+    for (RawFiducial fiducial : latestEstimate.rawFiducials) {
+      if (HUB_TAGS_SET.contains(Integer.valueOf(fiducial.id))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   @Override
   public void disabledInit() {
     if (config.model() == LimelightModel.FOUR) {
-      LimelightHelpers.triggerRewindCapture(name, 165.0);
+      LimelightHelpers.triggerRewindCapture(limelightTableName, 165.0);
     }
   }
 }

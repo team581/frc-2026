@@ -16,16 +16,13 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.Hardware;
 import frc.robot.config.DSOptions;
-import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class Deploy extends StateMachineSubsystem<DeployState> {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
-  private final SimpleDifferentialMechanism<TalonFX> differentialMechanism =
-      new SimpleDifferentialMechanism<TalonFX>(TalonFX::new, Hardware.differentialConstants);
+  private final SimpleDifferentialMechanism<TalonFX> differentialMechanism;
   private final CANrange hopperCANRange;
   private final LinearFilter hopperFilter = LinearFilter.movingAverage(5);
   private final DifferentialMotionMagicVoltage differentialPositionVoltageRequest =
@@ -42,19 +39,22 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
   private double hopperCANRangeDistance = 0.0;
   private double previousCanRangeDistance = 0.0;
   private double filteredHopperCANRangeDistance;
-  private boolean ableToHopperShuffle = false;
+  private boolean hopperCapacityNotHigh = false;
 
+  private final Timer hopperShuffleTimer = new Timer();
   private final Timer canRangeUpdateTimer = new Timer();
 
-  public Deploy(TalonFX leftMotor, TalonFX rightMotor, CANrange hopperCANRange) {
+  public Deploy(
+      SimpleDifferentialMechanism<TalonFX> differentialMechanism, CANrange hopperCANRange) {
     super(SubsystemPriority.DEPLOY, DeployState.UNHOMED);
-    this.leftMotor = leftMotor;
-    this.rightMotor = rightMotor;
+    this.differentialMechanism = differentialMechanism;
+    this.leftMotor = differentialMechanism.getLeader();
+    this.rightMotor = differentialMechanism.getFollower();
     this.hopperCANRange = hopperCANRange;
+
+    hopperShuffleTimer.start();
     canRangeUpdateTimer.start();
 
-    leftMotor.getConfigurator().apply(DeployConfig.LEFT_MOTOR_CONFIG);
-    rightMotor.getConfigurator().apply(DeployConfig.RIGHT_MOTOR_CONFIG);
     hopperCANRange.getConfigurator().apply(DeployConfig.CAN_RANGE_CONFIG);
 
     TunablePid.register("Deploy/Left", leftMotor, DeployConfig.LEFT_MOTOR_CONFIG);
@@ -81,13 +81,17 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   public void shuffleRequest() {
     switch (getState()) {
-      case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {
-        // Do nothing, we aren't homed
+      case UNHOMED,
+          HOME_INWARD,
+          HOME_OUTWARD,
+          HOPPER_SHUFFLING_FINISH,
+          HOPPER_SHUFFLING_IN,
+          HOPPER_SHUFFLING_OUT -> {
+        // Do nothing, we aren't homed or are already shuffling
       }
       default -> {
-        if (FeatureFlags.HOPPER_SHUFFLING.getAsBoolean()) {
-          setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
-        }
+        setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
+        hopperShuffleTimer.restart();
       }
     }
   }
@@ -124,14 +128,27 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         }
       }
       case HOPPER_SHUFFLING_OUT -> {
-        if (atGoal() && ableToHopperShuffle) {
+        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
+          yield DeployState.HOPPER_SHUFFLING_FINISH;
+        }
+        if ((atGoal() || timeout(2.0)) && hopperCapacityNotHigh) {
           yield DeployState.HOPPER_SHUFFLING_IN;
         }
         yield currentState;
       }
 
       case HOPPER_SHUFFLING_IN -> {
-        if (atGoal() && ableToHopperShuffle) {
+        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
+          yield DeployState.HOPPER_SHUFFLING_FINISH;
+        }
+        if ((atGoal() || timeout(2.0)) && hopperCapacityNotHigh) {
+          yield DeployState.HOPPER_SHUFFLING_OUT;
+        }
+        yield currentState;
+      }
+      case HOPPER_SHUFFLING_FINISH -> {
+        if (atGoal() || timeout(2.0)) {
+          hopperShuffleTimer.restart();
           yield DeployState.HOPPER_SHUFFLING_OUT;
         }
         yield currentState;
@@ -169,22 +186,11 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   @Override
   protected void whileInState(DeployState state) {
-    switch (state) {
-      case HOME_INWARD -> {
-        leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_INWARD);
-        rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_INWARD);
-      }
-      case HOME_OUTWARD -> {
-        leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
-        rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
-      }
-    }
-
     DogLog.log("Deploy/LeftMotor/Position", leftMotorPosition);
     DogLog.log("Deploy/RightMotor/Position", rightMotorPosition);
     DogLog.log("Deploy/GoalPosition", getState().getLength());
     DogLog.log("Deploy/DifferentialPosition", differentialMechanismPosition);
-    DogLog.log("Deploy/AbleToHopperShuffle", ableToHopperShuffle);
+    DogLog.log("Deploy/AbleToHopperShuffle", hopperCapacityNotHigh);
     DogLog.log("Deploy/Capacity", hopperCapacity);
     DogLog.log("Hopper/RawDistance", hopperCANRangeDistance);
     DogLog.log("Hopper/FilteredDistance", filteredHopperCANRangeDistance);
@@ -192,6 +198,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     DogLog.log("Deploy/LeftMotor/SupplyCurrent", leftSupplyCurrent);
     DogLog.log("Deploy/RightMotor/StatorCurrent", rightStatorCurrent);
     DogLog.log("Deploy/RightMotor/SupplyCurrent", rightSupplyCurrent);
+
     // TODO: Remove after bringup
     afterTransition(state);
   }
@@ -242,9 +249,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     }
 
     if (RobotBase.isSimulation()) {
-      ableToHopperShuffle = true;
+      hopperCapacityNotHigh = true;
     } else {
-      ableToHopperShuffle =
+      hopperCapacityNotHigh =
           !DSOptions.USE_CANRANGE.getAsBoolean() || hopperCapacity != HopperCapacity.HIGH;
     }
   }
@@ -266,33 +273,28 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
 
   @Override
   public void simulationPeriodic() {
-    // Only add the leader motor to the sim mechanism. SimpleDifferentialMechanism only sets
-    // ClosedLoopReference on the leader, so averaging both motors would halve the target position.
     var deploySimulation =
         SimKit.positionMechanism(
             "Deploy",
             mechanism ->
                 mechanism
                     .addMotor(leftMotor, ChassisReference.Clockwise_Positive)
+                    .addMotor(rightMotor, ChassisReference.CounterClockwise_Positive)
                     .withMinPosition(DeployConfig.MIN_LENGTH)
                     .withMaxPosition(DeployConfig.MAX_LENGTH));
 
     if (getState() == DeployState.HOME_INWARD) {
-      leftMotor.setPosition(DeployConfig.HOMING_END_POSITION_INWARD);
-      rightMotor.setPosition(DeployConfig.HOMING_END_POSITION_INWARD);
+      // Use seedPosition instead of differentialMechanism.setPosition to avoid creating a
+      // firmware-level sensor offset that compounds with setRawRotorPosition in
+      // applyMechanismState.
+      deploySimulation.seedPosition(DeployConfig.HOMING_END_POSITION_INWARD);
       setStateFromRequest(DeployState.INTAKE);
     }
     if (getState() == DeployState.HOME_OUTWARD) {
-      leftMotor.setPosition(DeployConfig.HOMING_END_POSITION_OUTWARD);
-      rightMotor.setPosition(DeployConfig.HOMING_END_POSITION_OUTWARD);
+      deploySimulation.seedPosition(DeployConfig.HOMING_END_POSITION_OUTWARD);
       setStateFromRequest(DeployState.INTAKE);
     }
 
-    deploySimulation.update();
-
-    // Sync follower motor sim state. getRotorPosition() already accounts for the leader's
-    // inversion, so the value can be used directly as the raw rotor position for the follower.
-    rightMotor.getSimState().setRawRotorPosition(leftMotor.getRotorPosition().getValueAsDouble());
-    rightMotor.getSimState().setRotorVelocity(leftMotor.getRotorVelocity().getValueAsDouble());
+    deploySimulation.update(clamp(getState().getLength()));
   }
 }

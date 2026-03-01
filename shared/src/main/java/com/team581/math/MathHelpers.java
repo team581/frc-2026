@@ -93,6 +93,10 @@ public class MathHelpers {
   }
 
   public static Rotation2d getDriveDirection(ChassisSpeeds vector) {
+    if (getLinearVelocity(vector) < 1e-6) {
+      return Rotation2d.kZero;
+    }
+
     return new Translation2d(vector.vxMetersPerSecond, vector.vyMetersPerSecond).getAngle();
   }
 

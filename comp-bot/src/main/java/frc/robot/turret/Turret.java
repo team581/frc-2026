@@ -15,6 +15,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.config.DSOptions;
@@ -30,6 +31,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private double voltage = 0.0;
   private double statorCurrent = 0.0;
   private double robotRotationFeedForward = 0.0;
+  private double stuckAngle = 0.0;
 
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withEnableFOC(false);
   private final DynamicMotionMagicVoltage slowPositionRequest =
@@ -77,16 +79,22 @@ public class Turret extends StateMachineSubsystem<TurretState> {
 
   @Override
   protected void collectInputs() {
-    currentAngle = Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
+    currentAngle =
+        getState() == TurretState.STUCK
+            ? stuckAngle
+            : Units.rotationsToDegrees(motor.getPosition().getValueAsDouble());
+
     velocity = Units.rotationsToDegrees(motor.getVelocity().getValueAsDouble());
     voltage = motor.getMotorVoltage().getValueAsDouble();
     statorCurrent = motor.getStatorCurrent().getValueAsDouble();
 
     // Predict the turret's current angle to account for sensor latency
     double latencyCompensatedAngle =
-        Units.rotationsToDegrees(
-            BaseStatusSignal.getLatencyCompensatedValueAsDouble(
-                motor.getPosition(), motor.getVelocity()));
+        getState() == TurretState.STUCK
+            ? stuckAngle
+            : Units.rotationsToDegrees(
+                BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                    motor.getPosition(), motor.getVelocity()));
 
     // Add the predicted angle to the vision buffer at the current timestamp
     vision.addTurretObservation(Timer.getFPGATimestamp(), latencyCompensatedAngle, velocity);
@@ -95,7 +103,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     DogLog.log("Turret/Motor/LatencyCompensatedAngle", latencyCompensatedAngle);
     DogLog.log(
         "Turret/Encoder/EncoderAngle",
-        Units.rotationsToDegrees(encoder.getPosition().getValueAsDouble()));
+        Units.rotationsToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
   }
 
   @Override
@@ -120,7 +128,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
                 .withPosition(
                     Units.degreesToRotations(
                         clamp(TurretCalculator.getOptimalAngle(goalAngle, currentAngle))))
-                .withVelocity(Units.degreesToRotations(robotRotationFeedForward)));
+                .withVelocity(Units.radiansToRotations(robotRotationFeedForward)));
       }
       case IDLE_SCORE, IDLE_FEED -> {
         motor.setControl(
@@ -128,13 +136,16 @@ public class Turret extends StateMachineSubsystem<TurretState> {
                 .withPosition(
                     Units.degreesToRotations(
                         clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle))))
-                .withVelocity(Units.degreesToRotations(robotRotationFeedForward)));
+                .withVelocity(Units.radiansToRotations(robotRotationFeedForward)));
       }
       case CLIMB_SCORE -> {
         motor.setControl(
             positionRequest.withPosition(
                 Units.degreesToRotations(
                     clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle)))));
+      }
+      case STUCK -> {
+        motor.disable();
       }
       default -> {}
     }
@@ -181,6 +192,18 @@ public class Turret extends StateMachineSubsystem<TurretState> {
         DogLog.clearFault("Turret is not homed");
       }
     }
+    if (DriverStation.isDisabled()) {
+      if (getState() != TurretState.UNHOMED) {
+        if (!MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
+          DogLog.logFault("Turret is misaligned", AlertType.kWarning);
+        } else {
+          DogLog.clearFault("Turret is misaligned");
+        }
+      }
+    } else {
+      // Clear the misalignment fault once teleop starts
+      DogLog.clearFault("Turret is misaligned");
+    }
   }
 
   @Override
@@ -195,16 +218,28 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   }
 
   public void scoreRequest(double goalAngle) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = goalAngle;
     setState(TurretState.SCORE);
   }
 
   public void climbScoreRequest(boolean isLeft) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = 0.0;
     setState(TurretState.CLIMB_SCORE);
   }
 
   public void climbRequest(Pose2d robotPose) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     goalAngle =
         TurretCalculator.calculateTurretAimingAngle(
             robotPose, AprilTags.getClimbTagPose().getTranslation());
@@ -212,16 +247,28 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   }
 
   public void feedRequest(double goalAngle) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = goalAngle;
     setState(TurretState.FEED);
   }
 
   public void idleScoreRequest(double goalAngle) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = goalAngle;
     setState(TurretState.IDLE_SCORE);
   }
 
   public void idleFeedRequest(double goalAngle) {
+    if (!DSOptions.USE_TURRET.getAsBoolean()) {
+      stuckRequest();
+      return;
+    }
     this.goalAngle = goalAngle;
     setState(TurretState.IDLE_FEED);
   }
@@ -230,22 +277,36 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     setState(TurretState.TAG_SEARCH);
   }
 
-  public void setRobotRotationRate(double rateDegrees) {
-    robotRotationFeedForward = -rateDegrees;
+  public void setRobotRotationRate(double rateRadians) {
+    robotRotationFeedForward = -rateRadians;
   }
 
-  public boolean atGoal() {
+  public boolean atGoal(double tolerance) {
     return switch (getState()) {
       case UNHOMED -> false;
-
+      case STUCK -> true;
       // TODO: Reconsider for turret wrapping
-      default ->
-          MathUtil.isNear(
-              goalAngle, MathHelpers.angleModulus(currentAngle), TurretConfig.TOLERANCE.get());
+      default -> MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), tolerance);
     };
   }
 
+  public boolean atGoal() {
+    return atGoal(TurretConfig.TOLERANCE.get());
+  }
+
+  public void stuckRequest() {
+    setStateFromRequest(TurretState.STUCK);
+  }
+
+  public void setStuckAngle(double stuckAngle) {
+    this.stuckAngle = stuckAngle;
+    motor.setPosition(Units.degreesToRotations(stuckAngle));
+  }
+
   public double getAngle() {
+    if (getState() == TurretState.STUCK) {
+      return stuckAngle;
+    }
     return currentAngle;
   }
 

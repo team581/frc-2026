@@ -61,6 +61,7 @@
     "**/.settings": true,
     "bin/": true,
     "**/.factorypath": true,
+    "**/hs_err_pid*.log": true,
     "**/.DS_Store": true,
     "**/.git": true,
     "**/.hg": true

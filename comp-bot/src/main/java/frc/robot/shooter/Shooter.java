@@ -87,6 +87,13 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
     DogLog.log("Shooter/Right/SupplyCurrent", rightMotor.getSupplyCurrent().getValueAsDouble());
 
     switch (state) {
+      case IDLE -> {
+        var setpoint = ShooterConfig.IDLE_RPM / 60.0;
+        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
+        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
+
+        DogLog.log("Shooter/RpmSetpoint", shootingRpm);
+      }
       case SCORE -> {
         var setpoint = shootingRpm / 60.0;
         leftMotor.setControl(voltageRequest.withVelocity(setpoint));
@@ -108,11 +115,17 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
 
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
       }
-      case IDLE -> {
-        leftMotor.disable();
-        rightMotor.disable();
-
-        DogLog.log("Shooter/RpmSetpoint", -1.0);
+      case SELF_TEST_STOP_MOTORS -> {
+        leftMotor.stopMotor();
+        rightMotor.stopMotor();
+      }
+      case SELF_TEST_LEFT_MOTOR -> {
+        leftMotor.setVoltage(ShooterConfig.TEST_VOLTAGE);
+        rightMotor.stopMotor();
+      }
+      case SELF_TEST_RIGHT_MOTOR -> {
+        rightMotor.setVoltage(ShooterConfig.TEST_VOLTAGE);
+        leftMotor.stopMotor();
       }
     }
   }
@@ -124,21 +137,53 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
 
     leftMotorRpm = leftMotor.getVelocity().getValueAsDouble() * 60.0;
     rightMotorRpm = rightMotor.getVelocity().getValueAsDouble() * 60.0;
+
+    if (getState() == ShooterState.SELF_TEST_LEFT_MOTOR) {
+      DogLog.log(
+          "Shooter/SelfTest/LeftMotor/VelocityGood",
+          MathUtil.isNear(
+              ShooterConfig.SELF_TEST_LEFT_MOTOR_EXPECTED_RPM,
+              leftMotorRpm,
+              ShooterConfig.SELF_TEST_RIGHT_MOTOR_RPM_TOLERANCE));
+      DogLog.log(
+          "Shooter/SelfTest/LeftMotor/CurrentGood",
+          MathUtil.isNear(
+              ShooterConfig.SELF_TEST_LEFT_MOTOR_EXPECTED_CURRENT,
+              leftMotor.getStatorCurrent().getValueAsDouble(),
+              ShooterConfig.SELF_TEST_RIGHT_MOTOR_CURRENT_TOLERANCE));
+    }
+
+    if (getState() == ShooterState.SELF_TEST_RIGHT_MOTOR) {
+      DogLog.log(
+          "Shooter/SelfTest/RightMotor/VelocityGood",
+          MathUtil.isNear(
+              ShooterConfig.SELF_TEST_RIGHT_MOTOR_EXPECTED_RPM,
+              rightMotorRpm,
+              ShooterConfig.SELF_TEST_LEFT_MOTOR_RPM_TOLERANCE));
+      DogLog.log(
+          "Shooter/SelfTest/RightMotor/CurrentGood",
+          MathUtil.isNear(
+              ShooterConfig.SELF_TEST_RIGHT_MOTOR_EXPECTED_CURRENT,
+              rightMotor.getStatorCurrent().getValueAsDouble(),
+              ShooterConfig.SELF_TEST_LEFT_MOTOR_CURRENT_TOLERANCE));
+    }
   }
 
   public boolean atGoal() {
     return switch (getState()) {
       case IDLE -> true;
       case SCORE ->
-          MathUtil.isNear(leftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER)
-              && MathUtil.isNear(rightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER);
+          MathUtil.isNear(leftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE)
+              && MathUtil.isNear(rightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE);
       case CLIMB_SCORE ->
-          MathUtil.isNear(leftMotorRpm, climbScoreRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER)
-              && MathUtil.isNear(rightMotorRpm, climbScoreRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER);
+          MathUtil.isNear(leftMotorRpm, climbScoreRpm, ShooterConfig.RPM_TOLERANCE)
+              && MathUtil.isNear(rightMotorRpm, climbScoreRpm, ShooterConfig.RPM_TOLERANCE);
 
       case FEEDING ->
-          MathUtil.isNear(leftMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER)
-              && MathUtil.isNear(rightMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_SHOOTER);
+          MathUtil.isNear(leftMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING)
+              && MathUtil.isNear(rightMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING);
+
+      default -> true;
     };
   }
 

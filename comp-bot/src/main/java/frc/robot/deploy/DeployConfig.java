@@ -10,6 +10,8 @@ import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import dev.doglog.DogLog;
+import edu.wpi.first.networktables.DoubleSubscriber;
 
 public class DeployConfig {
 
@@ -22,7 +24,8 @@ public class DeployConfig {
   public static final double HOMING_CURRENT = 30.0;
   public static final double CAPACITY_DISTANCE_THRESHOLD = 0.0;
   public static final double POSITION_TOLERANCE = 0.25;
-  public static final double HOPPER_SHUFFLE_DISTANCE = 3.0;
+  public static DoubleSubscriber HOPPER_SHUFFLE_DURATION =
+      DogLog.tunable("Deploy/HopperShuffleDuration", 1.75);
   public static final double NOT_UPDATING_TIMEOUT = 3.0;
 
   private static final Slot0Configs AVERAGE_GAINS =
@@ -47,7 +50,8 @@ public class DeployConfig {
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.Clockwise_Positive))
-          .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(30))
+          .withCurrentLimits(
+              new CurrentLimitsConfigs().withStatorCurrentLimit(30).withSupplyCurrentLimit(18))
           .withMotionMagic(
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(200.0)
@@ -63,7 +67,8 @@ public class DeployConfig {
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.CounterClockwise_Positive))
-          .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(30))
+          .withCurrentLimits(
+              new CurrentLimitsConfigs().withStatorCurrentLimit(30).withSupplyCurrentLimit(18))
           .withMotionMagic(
               new MotionMagicConfigs()
                   .withMotionMagicCruiseVelocity(200.0)

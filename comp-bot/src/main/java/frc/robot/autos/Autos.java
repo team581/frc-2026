@@ -7,6 +7,7 @@ import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.config.DSOptions;
 import frc.robot.robot_manager.RobotManager;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -47,6 +48,7 @@ public class Autos extends StateMachineSubsystem<AutoSelection> {
   protected void whileInState(AutoSelection state) {
     if (DriverStation.isDisabled()) {
       if (!hasEnabledAuto
+          && DSOptions.RESET_POSE_FOR_AUTO.getAsBoolean()
           && (RobotBase.isSimulation()
               || DriverStation.isAutonomous()
               || DriverStation.isFMSAttached())) {

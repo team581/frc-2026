@@ -3,16 +3,20 @@ package frc.robot;
 import com.team581.Base581Robot;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
+import com.team581.controller.ControllerBindings;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.followers.PidPathFollower;
 import com.team581.trailblazer.trackers.HeuristicPathTracker;
 import com.team581.util.FieldUtil;
+import com.team581.util.FmsUtil;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import frc.robot.autos.Autos;
 import frc.robot.climber.Climber;
 import frc.robot.cluster_map.ClusterMap;
+import frc.robot.config.FeatureFlags;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.generated.BuildConstants;
@@ -47,7 +51,7 @@ public class Robot extends Base581Robot {
               false,
               Units.inchesToMeters(0.0),
               Units.inchesToMeters(0.0),
-              Units.inchesToMeters(20.432677 + 0.25),
+              Units.inchesToMeters(20.348),
               30.0,
               0.0,
               0.0));
@@ -58,7 +62,7 @@ public class Robot extends Base581Robot {
           new CameraConfig(
               LimelightModel.FOUR,
               true,
-              true,
+              false,
               // back
               Units.inchesToMeters(-13.389),
               // left
@@ -66,7 +70,7 @@ public class Robot extends Base581Robot {
               Units.inchesToMeters(19.7564),
               // TODO: get real number from cad
               10.00,
-              180.0 + 4.5,
+              -175.5,
               -0.83));
 
   // ground when stowed
@@ -99,7 +103,7 @@ public class Robot extends Base581Robot {
       new Shooter(hardware.shooterLeftMotor, hardware.shooterRightMotor);
   private final Intake intake = new Intake(hardware.intakeMotor);
   private final Deploy deploy =
-      new Deploy(hardware.leftDeployMotor, hardware.rightDeployMotor, hardware.hopperCANRange);
+      new Deploy(hardware.deployDifferentialMechanism, hardware.hopperCANRange);
   private final DyeRotor dyeRotor =
       new DyeRotor(hardware.rotorMotor, hardware.horizontalMotor, hardware.verticalMotor);
   private final Vision vision = new Vision(imu, turretLimelight, backLimelight, groundLimelight);
@@ -146,60 +150,77 @@ public class Robot extends Base581Robot {
   }
 
   @Override
+  public void robotPeriodic() {
+    super.robotPeriodic();
+
+    if (FeatureFlags.CLAMPED_AUTO_POINTS.getAsBoolean() && !FmsUtil.isRedAlliance()) {
+      DogLog.logFault("Clamped auto points are enabled but current alliance is blue");
+    } else {
+      DogLog.clearFault("Clamped auto points are enabled but current alliance is blue");
+    }
+  }
+
+  @Override
   protected void configureBindings() {
-    var driverStart = enabledEvent.and(hardware.driverController.start(buttonBindingsLoop));
-    driverStart.rising().ifHigh(robotManager::startTeleopAutoClimbSequence);
-    driverStart.falling().ifHigh(robotManager::stopTeleopAutoClimbAlignment);
+    var driver =
+        new ControllerBindings(buttonBindingsLoop, enabledEvent, hardware.driverController);
+    var operator =
+        new ControllerBindings(buttonBindingsLoop, enabledEvent, hardware.operatorController);
 
-    var driverBack = enabledEvent.and(hardware.driverController.back(buttonBindingsLoop));
-    driverBack.rising().ifHigh(localization::zeroGyro);
+    driver
+        .start()
+        .onPress(robotManager::startTeleopAutoClimbSequence)
+        .onRelease(robotManager::stopTeleopAutoClimbAlignment);
 
-    var driverLeftTrigger =
-        enabledEvent.and(hardware.driverController.leftTrigger(buttonBindingsLoop));
-    driverLeftTrigger.rising().ifHigh(robotManager::intakeRequest);
-    driverLeftTrigger.falling().ifHigh(robotManager::cancelIntakeRequest);
+    driver.back().onPress(localization::zeroGyro);
 
-    var driverRightTrigger =
-        enabledEvent.and(hardware.driverController.rightTrigger(buttonBindingsLoop));
-    driverRightTrigger.rising().ifHigh(robotManager::prepareScoreRequest);
-    driverRightTrigger.falling().ifHigh(robotManager::idleRequest);
+    driver
+        .leftTrigger()
+        .onPress(robotManager::intakeRequest)
+        .onRelease(robotManager::cancelIntakeRequest);
 
-    var driverRightBumper =
-        enabledEvent.and(hardware.driverController.rightBumper(buttonBindingsLoop));
-    driverRightBumper.rising().ifHigh(robotManager::prepareFeedRequest);
-    driverRightBumper.falling().ifHigh(robotManager::idleRequest);
+    driver
+        .rightTrigger()
+        .onPress(robotManager::prepareScoreRequest)
+        .onRelease(robotManager::idleRequest);
 
-    var operatorStart = enabledEvent.and(hardware.operatorController.start(buttonBindingsLoop));
-    operatorStart.rising().ifHigh(robotManager::homeDeployRequest);
+    driver
+        .rightBumper()
+        .onPress(robotManager::prepareFeedRequest)
+        .onRelease(robotManager::idleRequest);
 
-    var operatorBack = enabledEvent.and(hardware.operatorController.back(buttonBindingsLoop));
-    operatorBack.rising().ifHigh(robotManager::homeShooterHoodRequest);
+    operator.start().onPress(robotManager::homeDeployRequest);
 
-    var operatorX = enabledEvent.and(hardware.operatorController.x(buttonBindingsLoop));
-    operatorX.rising().ifHigh(robotManager::unjamRequest);
-    operatorX.falling().ifHigh(robotManager::idleRequest);
+    operator.back().onPress(robotManager::homeShooterHoodRequest);
 
-    var operatorY = enabledEvent.and(hardware.operatorController.y(buttonBindingsLoop));
-    operatorY.rising().ifHigh(robotManager::manualClimbSequenceForward);
+    operator.x().onPress(robotManager::unjamRequest).onRelease(robotManager::idleRequest);
+
+    operator.y().onPress(robotManager::manualClimbSequenceForward);
+
+    operator.b().onPress(robotManager::prepareFeedRequest).onRelease(robotManager::idleRequest);
+
+    operator
+        .rightTrigger()
+        .onPress(robotManager::prepareScoreRequest)
+        .onRelease(robotManager::idleRequest);
 
     // Use as idle button when not climbing, otherwise does sequence and eventually gets back to
     // idle
-    var operatorA = enabledEvent.and(hardware.operatorController.a(buttonBindingsLoop));
-    operatorA.rising().ifHigh(robotManager::manualClimbSequenceBackwardOrIdleRequest);
+    operator.a().onPress(robotManager::manualClimbSequenceBackwardOrIdleRequest);
 
-    var operatorLeftTrigger =
-        enabledEvent.and(hardware.operatorController.leftTrigger(buttonBindingsLoop));
-    operatorLeftTrigger.rising().ifHigh(robotManager::stowDeployRequest);
-    operatorLeftTrigger.falling().ifHigh(deploy::intakeRequest);
+    operator
+        .leftTrigger()
+        .onPress(robotManager::stowDeployRequest)
+        .onRelease(deploy::intakeRequest);
 
-    var operatorLeftBumper =
-        enabledEvent.and(hardware.operatorController.leftBumper(buttonBindingsLoop));
-    operatorLeftBumper.rising().ifHigh(robotManager::setFeedGoalLeftRequest);
-    operatorLeftBumper.falling().ifHigh(robotManager::setFeedGoalClosestRequest);
+    operator
+        .leftBumper()
+        .onPress(robotManager::setFeedGoalLeftRequest)
+        .onRelease(robotManager::setFeedGoalClosestRequest);
 
-    var operatorRightBumper =
-        enabledEvent.and(hardware.operatorController.rightBumper(buttonBindingsLoop));
-    operatorRightBumper.rising().ifHigh(robotManager::setFeedGoalRightRequest);
-    operatorRightBumper.falling().ifHigh(robotManager::setFeedGoalClosestRequest);
+    operator
+        .rightBumper()
+        .onPress(robotManager::setFeedGoalRightRequest)
+        .onRelease(robotManager::setFeedGoalClosestRequest);
   }
 }

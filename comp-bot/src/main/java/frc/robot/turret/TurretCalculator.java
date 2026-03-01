@@ -4,7 +4,7 @@ import com.team581.math.BaseTurretCalculator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class TurretCalculator {
 
@@ -18,9 +18,7 @@ public class TurretCalculator {
         turretEncoderPosition,
         TurretConfig.MOTOR_TO_TURRET,
         TurretConfig.ENCODER_TO_TURRET,
-        TurretConfig.MOTOR_ROTATION_RESOLUTION,
-        Units.degreesToRotations(TurretConfig.MIN_ANGLE_HOMING),
-        Units.degreesToRotations(TurretConfig.MAX_ANGLE_HOMING));
+        TurretConfig.MOTOR_ROTATION_RESOLUTION);
   }
 
   public static double calculateSwerveTurretCompensationAngle(
@@ -43,6 +41,12 @@ public class TurretCalculator {
         SPACE_FROM_HARDSTOP_TOLERANCE);
   }
 
+  public static double getGoalCentricTurretTolerance(
+      Translation2d goalTranslation, Pose2d robotPose, double goalCentricToleranceMeters) {
+    return BaseTurretCalculator.getGoalCentricTurretTolerance(
+        goalTranslation, robotPose, goalCentricToleranceMeters, TurretConfig.TURRET_TO_ROBOT);
+  }
+
   public static double getOptimalAngle(double target, double current) {
     return BaseTurretCalculator.getOptimalAngle(
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE);
@@ -51,5 +55,15 @@ public class TurretCalculator {
   public static double getSmartUnwrapAngle(double target, double current) {
     return BaseTurretCalculator.getSmartUnwrapAngle(
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE, 80);
+  }
+
+  public static ChassisSpeeds getTurretChassisSpeeds(
+      ChassisSpeeds robotSpeeds, double robotHeading) {
+    return BaseTurretCalculator.getTurretChassisSpeeds(
+        robotSpeeds, robotHeading, TurretConfig.TURRET_TO_ROBOT.getTranslation());
+  }
+
+  public static Pose2d getTurretPose(Pose2d robot) {
+    return BaseTurretCalculator.getTurretPose(robot, TurretConfig.TURRET_TO_ROBOT);
   }
 }
