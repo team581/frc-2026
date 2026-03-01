@@ -244,6 +244,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && SwerveAssist.ableToBumpAssist(drivetrainState.Pose, fieldRelativeSpeeds);
     ableToWallSnap =
         FeatureFlags.WALL_SNAPS.getAsBoolean()
+            && DriverStation.isAutonomous()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToWallSnap(
