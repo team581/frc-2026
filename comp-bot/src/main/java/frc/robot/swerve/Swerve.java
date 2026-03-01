@@ -35,6 +35,7 @@ import frc.robot.config.DSOptions;
 import frc.robot.config.FeatureFlags;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
+import frc.robot.turret.TurretConfig;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.jspecify.annotations.Nullable;
 
@@ -340,7 +341,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               withFieldRelativeTargetDirection(
                   drivePerspectiveSnapsOpenLoop
                       .withVelocityX(trenchAssistSpeeds.vxMetersPerSecond)
-                      .withVelocityY(trenchAssistSpeeds.vyMetersPerSecond),
+                      .withVelocityY(trenchAssistSpeeds.vyMetersPerSecond)
+                      .withCenterOfRotation(Translation2d.kZero),
                   SwerveAssist.getRoundedSnapAngle(
                       drivetrainState.Pose.getRotation(), SwerveAssist.TRENCH_SNAP_ROUND_ANGLE)));
         } else if (ableToBumpAssist) {
@@ -348,7 +350,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               withFieldRelativeTargetDirection(
                   drivePerspectiveSnapsOpenLoop
                       .withVelocityX(speeds.vxMetersPerSecond)
-                      .withVelocityY(speeds.vyMetersPerSecond),
+                      .withVelocityY(speeds.vyMetersPerSecond)
+                      .withCenterOfRotation(Translation2d.kZero),
                   SwerveAssist.getRoundedSnapAngle(
                       drivetrainState.Pose.getRotation(), SwerveAssist.BUMP_SNAP_ROUND_ANGLE)));
         } else {
@@ -361,6 +364,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               swerveRequest
                   .withVelocityX(speeds.vxMetersPerSecond)
                   .withVelocityY(speeds.vyMetersPerSecond)
+                  .withCenterOfRotation(Translation2d.kZero)
                   .withRotationalRate(speeds.omegaRadiansPerSecond));
         }
       }
@@ -393,13 +397,15 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               driverPerspectiveOpenLoop
                   .withVelocityX(rateLimitedSpeeds.vxMetersPerSecond)
                   .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond)
-                  .withRotationalRate(rateLimitedSpeeds.omegaRadiansPerSecond));
+                  .withRotationalRate(rateLimitedSpeeds.omegaRadiansPerSecond)
+                  .withCenterOfRotation(TurretConfig.TURRET_TO_ROBOT.getTranslation()));
         } else {
 
           drivetrain.setControl(
               fieldCentricClosedLoop
                   .withVelocityX(rateLimitedSpeeds.vxMetersPerSecond)
                   .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond)
+                  .withCenterOfRotation(TurretConfig.TURRET_TO_ROBOT.getTranslation())
                   .withRotationalRate(rateLimitedSpeeds.omegaRadiansPerSecond));
         }
       }
@@ -482,7 +488,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                   swerveSnapsRequest
                       .withVelocityX(rateLimitedSpeeds.vxMetersPerSecond)
                       .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond)
-                      .withCenterOfRotation(Translation2d.kZero),
+                      .withCenterOfRotation(TurretConfig.TURRET_TO_ROBOT.getTranslation()),
                   filteredLastDriveDirection));
         } else {
           var swerveRequest =
@@ -494,6 +500,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               swerveRequest
                   .withVelocityX(rateLimitedSpeeds.vxMetersPerSecond)
                   .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond)
+                  .withCenterOfRotation(TurretConfig.TURRET_TO_ROBOT.getTranslation())
                   .withRotationalRate(rateLimitedSpeeds.omegaRadiansPerSecond));
         }
       }
@@ -505,7 +512,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               withFieldRelativeTargetDirection(
                   drivePerspectiveIntakeSnapsOpenLoop
                       .withVelocityX(speeds.vxMetersPerSecond)
-                      .withVelocityY(speeds.vyMetersPerSecond),
+                      .withVelocityY(speeds.vyMetersPerSecond)
+                      .withCenterOfRotation(TurretConfig.TURRET_TO_ROBOT.getTranslation()),
                   Rotation2d.fromDegrees(turretStuckAimingAngle)));
         }
       }
