@@ -48,6 +48,11 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   public static final double MAX_LINEAR_RATE = 4.75;
   private static final int MAX_LINEAR_RATE_SHOOTING = 2;
 
+  public static final double TRANSLATION_STD_DEV = 0.01;
+
+  public static final double MAX_LINEAR_RATE = 4.75;
+  private static final int MAX_LINEAR_RATE_SHOOTING = 2;
+
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
   private static final DoubleSubscriber MAX_ANGULAR_RATE_SHOOTING =
       DogLog.tunable("Swerve/MaxAngularRateShootingRot", 0.4);
