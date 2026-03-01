@@ -547,15 +547,12 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     DogLog.log("Swerve/AbleToTrenchAssist", ableToTrenchAssist);
     DogLog.log("Swerve/AbleToWallSnap", ableToWallSnap);
     DogLog.log(
-        "SwerveAssist/WallSnaps/Main/WallSnapAngle",
+        "SwerveAssist/WallSnaps/WallSnapAngle",
         SwerveAssist.getWallSnapAngle(
                 drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, false)
             .getDegrees());
-    DogLog.log(
-        "SwerveAssist/WallSnaps/Main/RobotHeading",
-        drivetrainState.Pose.getRotation().getDegrees());
-    DogLog.log("SwerveAssist/WallSnaps/Main/CornerSnapAngle", cornerSnapAngle.getDegrees());
-    DogLog.log("SwerveAssist/WallSnaps/Main/ChosenAngle", wallSnapAngle.getDegrees());
+    DogLog.log("SwerveAssist/WallSnaps/CornerSnapAngle", cornerSnapAngle.getDegrees());
+    DogLog.log("SwerveAssist/WallSnaps/ChosenAngle", wallSnapAngle.getDegrees());
   }
 
   @Override
