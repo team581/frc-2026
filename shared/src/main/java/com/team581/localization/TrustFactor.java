@@ -13,9 +13,9 @@ import java.util.List;
 
 public class TrustFactor {
   private static final DoubleSubscriber POST_COLLISION_ADDITION =
-      DogLog.tunable("TrustFactor/PostCollisionAddition", 5.0);
+      DogLog.tunable("TrustFactor/PostCollisionAddition", 2.0);
   private static final DoubleSubscriber TRUSTWORTHY_THRESHOLD =
-      DogLog.tunable("TrustFactor/TrustworthyThreshold", Units.inchesToMeters(2));
+      DogLog.tunable("TrustFactor/TrustworthyThreshold", Units.inchesToMeters(5));
 
   private static final DoubleSubscriber LOST_TOLERANCE =
       DogLog.tunable("TrustFactor/LostThreshold", 1.0);

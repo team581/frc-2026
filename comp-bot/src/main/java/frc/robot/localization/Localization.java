@@ -92,18 +92,20 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
 
   private void ingestTagResult(List<TagResult> results) {
     DogLog.timestamp("Localization/IngestTagResult");
-    trustFactor.ingestTagResult(robotPose, results);
+    var averageTimestamp = 0.0;
     for (TagResult result : results) {
       var visionPose = result.pose();
-
+      averageTimestamp += result.timestamp();
       if (!vision.seenTagRecentlyForReset()) {
         resetPose(visionPose);
       }
       swerve.drivetrain.addVisionMeasurement(
-          visionPose,
-          Utils.fpgaToCurrentTime(result.timestamp() - (LATENCY_CONSTANT / 1000)),
+        visionPose,
+        Utils.fpgaToCurrentTime(result.timestamp() - (LATENCY_CONSTANT / 1000)),
           result.standardDevs());
-    }
+        }
+        averageTimestamp = averageTimestamp/results.size();
+        trustFactor.ingestTagResult(getPose(averageTimestamp), results);
   }
 
   @Override

@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
 @SuppressWarnings("unused")
 public class Swerve extends StateMachineSubsystem<SwerveState> {
 
-  public static final double TRANSLATION_STD_DEV = 0.003;
+  public static final double TRANSLATION_STD_DEV = 0.001;
 
 
   public static final double MAX_LINEAR_RATE = 4.75;
