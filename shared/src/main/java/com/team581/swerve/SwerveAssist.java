@@ -194,12 +194,9 @@ public class SwerveAssist {
       roundedSnapAngle =
           closestWallIsADriverStationWall
               ? getRoundedSnapAngle(
-                      driveDirection
-                          .minus(Rotation2d.fromDegrees(90.0)),
-                      WALL_SNAP_ROUND_ANGLE)
+                      driveDirection.minus(Rotation2d.fromDegrees(90.0)), WALL_SNAP_ROUND_ANGLE)
                   .plus(Rotation2d.fromDegrees(90.0))
-              : getRoundedSnapAngle(
-                  driveDirection, WALL_SNAP_ROUND_ANGLE);
+              : getRoundedSnapAngle(driveDirection, WALL_SNAP_ROUND_ANGLE);
     }
 
     // Check which direction we are going relative to the wall
