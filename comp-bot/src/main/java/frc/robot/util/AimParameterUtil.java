@@ -23,7 +23,6 @@ public class AimParameterUtil {
   private static final double SCORING_TURRET_TOLERANCE = Units.inchesToMeters(20);
   private static final double FEEDING_TURRET_TOLERANCE = Units.inchesToMeters(50);
 
-
   private static final double FALLBACK_FEEDING_TURRET_TOLERANCE = 1;
   private static final double FEEDING_FALLBACK_DISTANCE_TO_GOAL = 8.0;
 
@@ -87,8 +86,7 @@ public class AimParameterUtil {
 
     var turretAngle =
         TurretCalculator.calculateTurretAimingAngle(
-            robotPose,
-            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
+            robotPose, separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
     var distanceToGoal =
         robotPose
             .getTranslation()
@@ -115,7 +113,8 @@ public class AimParameterUtil {
             fieldRelativeSpeeds);
 
     var turretCompenstatedRobotPose = robot.plus(TurretConfig.TURRET_TO_ROBOT);
-    double distanceToGoal = turretCompenstatedRobotPose.getTranslation().getDistance(hubTranslation);
+    double distanceToGoal =
+        turretCompenstatedRobotPose.getTranslation().getDistance(hubTranslation);
     var angle =
         MathHelpers.getDriveDirection(turretCompenstatedRobotPose, hubTranslation)
             .minus(Rotation2d.fromDegrees(turretAngle));

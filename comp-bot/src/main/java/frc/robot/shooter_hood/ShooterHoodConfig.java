@@ -31,8 +31,7 @@ public class ShooterHoodConfig {
   public static final double HOMING_END_POSITION = ANGLE_FROM_HORIZONTAL;
 
   public static final double TOLERANCE = 1;
-    public static final double FEEDING_TOLERANCE = 5;
-
+  public static final double FEEDING_TOLERANCE = 5;
 
   public static final TalonFXConfiguration MOTOR_CONFIG =
       new TalonFXConfiguration()

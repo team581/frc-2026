@@ -11,7 +11,8 @@ public final class DSOptions {
   public static final BooleanSubscriber USE_CANRANGE = DSOption.of("UseCANRange", false);
   public static final BooleanSubscriber USE_TURRET = DSOption.of("UseTurret", true);
   public static final BooleanSubscriber DEFAULT_WON_AUTO = DSOption.of("DefaultWonAuto", true);
-  public static final BooleanSubscriber RESET_POSE_FOR_AUTO = DSOption.of("ResetPoseForAuto", false);
+  public static final BooleanSubscriber RESET_POSE_FOR_AUTO =
+      DSOption.of("ResetPoseForAuto", false);
 
   // TODO: This should be true when the CANrange is actually physically on the robot
   private DSOptions() {}

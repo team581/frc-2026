@@ -26,7 +26,7 @@ public class ShooterConfig {
   public static final double SELF_TEST_RIGHT_MOTOR_EXPECTED_CURRENT = 10.0;
   public static final double SELF_TEST_RIGHT_MOTOR_CURRENT_TOLERANCE = 5;
   public static final int RPM_TOLERANCE = 100;
-    public static final int RPM_TOLERANCE_FEEDING = 1000;
+  public static final int RPM_TOLERANCE_FEEDING = 1000;
 
   public static final double TEST_VOLTAGE = 6.0;
 

@@ -1,7 +1,6 @@
 package frc.robot.autos;
 
 import com.team581.autos.AutoChooser;
-import com.team581.config.DSOption;
 import com.team581.swerve.DriveSourceType;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.util.state_machines.StateMachineSubsystem;
@@ -48,7 +47,8 @@ public class Autos extends StateMachineSubsystem<AutoSelection> {
   @Override
   protected void whileInState(AutoSelection state) {
     if (DriverStation.isDisabled()) {
-      if (!hasEnabledAuto && DSOptions.RESET_POSE_FOR_AUTO.getAsBoolean()
+      if (!hasEnabledAuto
+          && DSOptions.RESET_POSE_FOR_AUTO.getAsBoolean()
           && (RobotBase.isSimulation()
               || DriverStation.isAutonomous()
               || DriverStation.isFMSAttached())) {

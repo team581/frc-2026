@@ -11,8 +11,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.autos.BaseImperativeAuto;
 import frc.robot.autos.auto_state_machines.auto_state.RightStraightShootClimbAutoState;
-import frc.robot.climber.ClimbLocation;
-import frc.robot.robot_manager.ClimbAssist;
 import frc.robot.robot_manager.RobotManager;
 
 public class RightStraightShootClimbAuto
@@ -50,7 +48,6 @@ public class RightStraightShootClimbAuto
                   .withTransitionTolerance(new PoseErrorTolerance(2, 30)))
           .withLinearConstraints(3.0, 8)
           .untilFinished(new PoseErrorTolerance(0.1, 3));
-
 
   private final AutoSegment intakeAcrossMidlineTwoB =
       Trailblazer.segment(
@@ -265,8 +262,8 @@ public class RightStraightShootClimbAuto
         robotManager.prepareScoreRequest();
       }
       case DRIVE_TO_CLIMB -> {
-   //     robotManager.startAutoClimbSequence();
-    //    robotManager.prepareScoreRequest();
+        //     robotManager.startAutoClimbSequence();
+        //    robotManager.prepareScoreRequest();
       }
       case CLIMB -> {}
       case DONE -> {}
@@ -289,9 +286,9 @@ public class RightStraightShootClimbAuto
       case DRIVE_BACK_3 -> {}
       case SHOOT_3 -> {}
       case DRIVE_TO_CLIMB -> {
-    //    trailblazer.setActiveSegment(
-    //        ClimbAssist.getLineupClimbAssistSegment(
-    //            robotManager.localization.getPose(), ClimbLocation.CLOSEST));
+        //    trailblazer.setActiveSegment(
+        //        ClimbAssist.getLineupClimbAssistSegment(
+        //            robotManager.localization.getPose(), ClimbLocation.CLOSEST));
       }
       case CLIMB -> {}
       case DONE -> {}

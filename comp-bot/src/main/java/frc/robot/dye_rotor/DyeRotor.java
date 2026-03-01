@@ -121,7 +121,7 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
       }
       case SCORE_CLEANUP_INTAKE_SCAN -> {
         if (isJammed() && timeout(1.0)) {
-          beforeUnjamState= currentState;
+          beforeUnjamState = currentState;
           yield DyeRotorState.UNJAM;
         }
         if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_WHIP_AROUND.rotorPosition
@@ -133,7 +133,7 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
       }
       case SCORE_CLEANUP_WHIP_AROUND -> {
         if (isJammed() && timeout(1.0)) {
-          beforeUnjamState= currentState;
+          beforeUnjamState = currentState;
           yield DyeRotorState.UNJAM;
         }
         if (rotorAngle >= DyeRotorState.SCORE_CLEANUP_INTAKE_SCAN.rotorPosition
@@ -152,14 +152,14 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
 
       case SCORE -> {
         if (isJammed() && timeout(1.0)) {
-          beforeUnjamState= currentState;
+          beforeUnjamState = currentState;
           yield DyeRotorState.UNJAM;
         }
         yield currentState;
       }
       case FEED_CLEANUP_INTAKE_SCAN -> {
         if (isJammed() && timeout(1.0)) {
-          beforeUnjamState= currentState;
+          beforeUnjamState = currentState;
           yield DyeRotorState.UNJAM;
         }
         if (rotorAngle >= DyeRotorState.FEED_CLEANUP_WHIP_AROUND.rotorPosition
@@ -171,7 +171,7 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
       }
       case FEED_CLEANUP_WHIP_AROUND -> {
         if (isJammed() && timeout(1.0)) {
-          beforeUnjamState= currentState;
+          beforeUnjamState = currentState;
           yield DyeRotorState.UNJAM;
         }
         if (rotorAngle >= DyeRotorState.FEED_CLEANUP_INTAKE_SCAN.rotorPosition
