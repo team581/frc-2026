@@ -260,10 +260,10 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
     }
     wallSnapAngle =
-        SwerveAssist.ableToWallSnapCornerTransition(drivetrainState.Pose, fieldRelativeSpeeds)
+        inWallSnapCorner
             ? cornerSnapAngle
             : SwerveAssist.getWallSnapAngle(
-                drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
+                drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, false);
     previouslyInWallSnapCorner = inWallSnapCorner;
 
     if (getState() == SwerveState.INTAKE) {

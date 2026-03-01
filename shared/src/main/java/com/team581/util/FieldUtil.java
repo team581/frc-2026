@@ -419,19 +419,19 @@ public class FieldUtil {
     DogLog.log(
         "FieldUtil/BlueDepot/WallSnapCornerZones/Corner1",
         new Pose2d(
-            MathHelpers.getCorners(BLUE_DEPOT_WALL_SNAP_CORNER_ZONE).get(0), Rotation2d.kCW_90deg));
+            MathHelpers.getCorners(BLUE_DEPOT_WALL_SNAP_CORNER_ZONE).get(1), Rotation2d.kCW_90deg));
     DogLog.log(
         "FieldUtil/BlueDepot/WallSnapCornerZones/Corner2",
         new Pose2d(
-            MathHelpers.getCorners(BLUE_DEPOT_WALL_SNAP_CORNER_ZONE).get(2), Rotation2d.kCW_90deg));
+            MathHelpers.getCorners(BLUE_DEPOT_WALL_SNAP_CORNER_ZONE).get(3), Rotation2d.kCW_90deg));
     DogLog.log(
         "FieldUtil/RedDepot/WallSnapCornerZones/Corner1",
         new Pose2d(
-            MathHelpers.getCorners(RED_DEPOT_WALL_SNAP_CORNER_ZONE).get(0), Rotation2d.kCW_90deg));
+            MathHelpers.getCorners(RED_DEPOT_WALL_SNAP_CORNER_ZONE).get(1), Rotation2d.kCW_90deg));
     DogLog.log(
         "FieldUtil/RedDepot/WallSnapCornerZones/Corner2",
         new Pose2d(
-            MathHelpers.getCorners(RED_DEPOT_WALL_SNAP_CORNER_ZONE).get(2), Rotation2d.kCW_90deg));
+            MathHelpers.getCorners(RED_DEPOT_WALL_SNAP_CORNER_ZONE).get(3), Rotation2d.kCW_90deg));
     DogLog.log(
         "FieldUtil/RedOutpost/WallSnapCornerZones/Corner1",
         new Pose2d(
