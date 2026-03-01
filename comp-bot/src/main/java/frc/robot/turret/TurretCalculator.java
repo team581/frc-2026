@@ -57,7 +57,9 @@ public class TurretCalculator {
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE, 80);
   }
 
-  public static ChassisSpeeds getTurretChassisSpeeds(ChassisSpeeds robotSpeeds, double robotHeading) {
-    return BaseTurretCalculator.getTurretChassisSpeeds(robotSpeeds,robotHeading,TurretConfig.TURRET_TO_ROBOT.getTranslation());
+  public static ChassisSpeeds getTurretChassisSpeeds(
+      ChassisSpeeds robotSpeeds, double robotHeading) {
+    return BaseTurretCalculator.getTurretChassisSpeeds(
+        robotSpeeds, robotHeading, TurretConfig.TURRET_TO_ROBOT.getTranslation());
   }
 }

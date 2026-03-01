@@ -187,14 +187,15 @@ public class BaseTurretCalculator {
     return target;
   }
 
-  public static ChassisSpeeds getTurretChassisSpeeds(ChassisSpeeds robotSpeeds, double robotHeading, Translation2d turretToRobot) {
+  public static ChassisSpeeds getTurretChassisSpeeds(
+      ChassisSpeeds robotSpeeds, double robotHeading, Translation2d turretToRobot) {
     var angularVelocity = robotSpeeds.omegaRadiansPerSecond;
-    Translation2d fieldRelativeOffset = turretToRobot.rotateBy(Rotation2d.fromDegrees(robotHeading));
-    var turretSwingX = -angularVelocity*fieldRelativeOffset.getY();
-    var turretSwingY = angularVelocity*fieldRelativeOffset.getX();
+    Translation2d fieldRelativeOffset =
+        turretToRobot.rotateBy(Rotation2d.fromDegrees(robotHeading));
+    var turretSwingX = -angularVelocity * fieldRelativeOffset.getY();
+    var turretSwingY = angularVelocity * fieldRelativeOffset.getX();
     var turretTotalVelocityX = robotSpeeds.vxMetersPerSecond + turretSwingX;
     var turretTotalVelocityY = robotSpeeds.vyMetersPerSecond + turretSwingY;
     return new ChassisSpeeds(turretTotalVelocityX, turretTotalVelocityY, angularVelocity);
-
   }
 }
