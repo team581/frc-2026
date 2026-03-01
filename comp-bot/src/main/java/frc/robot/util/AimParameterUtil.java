@@ -7,11 +7,11 @@ import com.team581.util.FieldUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import frc.robot.shooter.ShooterConfig;
 import frc.robot.turret.TurretCalculator;
-import frc.robot.turret.TurretConfig;
 
 public class AimParameterUtil {
   private static final ShootOnTheMove FEEDING_SOTM =
@@ -19,15 +19,32 @@ public class AimParameterUtil {
   private static final ShootOnTheMove SCORING_SOTM =
       new ShootOnTheMove(ShooterConfig.DISTANCE_TO_SCORE_TOF);
 
-  private static final double SCORING_TURRET_TOLERANCE = Units.inchesToMeters(10);
-  private static final double FEEDING_TURRET_TOLERANCE = Units.inchesToMeters(20);
+  private static final double SCORING_TURRET_TOLERANCE = Units.inchesToMeters(20);
+  private static final double FEEDING_TURRET_TOLERANCE = Units.inchesToMeters(50);
+
+  private static final double FALLBACK_FEEDING_TURRET_TOLERANCE = 1;
+  private static final double FEEDING_FALLBACK_DISTANCE_TO_GOAL = 8.0;
+
+  public static AimingParameters getFallbackFeedingParameters(
+      FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+
+    var turretAngle =
+        TurretCalculator.calculateTurretAimingAngle(
+            robotPose, robotPose.plus(new Transform2d(-1, 0, Rotation2d.kZero)).getTranslation());
+
+    return new AimingParameters(
+        turretAngle, FEEDING_FALLBACK_DISTANCE_TO_GOAL, FALLBACK_FEEDING_TURRET_TOLERANCE);
+  }
 
   public static AimingParameters getFeedingParameters(
       FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var robotTranslation = robotPose.getTranslation();
+    var turretFieldRelativeSpeeds =
+        TurretCalculator.getTurretChassisSpeeds(
+            fieldRelativeSpeeds, robotPose.getRotation().getDegrees());
     var separatedVelocityCompensatedGoal =
-        FEEDING_SOTM.getSeparatedVelocityCompensatedGoal(
-            robotTranslation, feedLocation.getTranslation(robotPose), fieldRelativeSpeeds);
+        FEEDING_SOTM.getSeparatedVelocityCompensatedGoalWithEffectiveTof(
+            robotTranslation, feedLocation.getTranslation(robotPose), turretFieldRelativeSpeeds);
 
     DogLog.log(
         "ShootOnTheMove/Feeding/RadialCompensatedGoal",
@@ -57,9 +74,12 @@ public class AimParameterUtil {
   public static AimingParameters getScoringParameters(
       Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var robotTranslation = robotPose.getTranslation();
+    var turretFieldRelativeSpeeds =
+        TurretCalculator.getTurretChassisSpeeds(
+            fieldRelativeSpeeds, robotPose.getRotation().getDegrees());
     var separatedVelocityCompensatedGoal =
-        SCORING_SOTM.getSeparatedVelocityCompensatedGoal(
-            robotTranslation, FieldUtil.HUB_POSE.getTranslation(), fieldRelativeSpeeds);
+        SCORING_SOTM.getSeparatedVelocityCompensatedGoalWithEffectiveTof(
+            robotTranslation, FieldUtil.HUB_POSE.getTranslation(), turretFieldRelativeSpeeds);
 
     DogLog.log(
         "ShootOnTheMove/Scoring/RadialCompensatedGoal",
@@ -69,13 +89,11 @@ public class AimParameterUtil {
         new Pose2d(
             separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
 
-    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robotPose);
     var turretAngle =
         TurretCalculator.calculateTurretAimingAngle(
-            robotPoseInAllianceZone,
-            separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
+            robotPose, separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
     var distanceToGoal =
-        robotPoseInAllianceZone
+        robotPose
             .getTranslation()
             .getDistance(separatedVelocityCompensatedGoal.radiallyCompensatedGoal());
 
@@ -93,17 +111,20 @@ public class AimParameterUtil {
 
   public static AimingParameters getTurretStuckScoringParameters(
       Pose2d robot, double turretAngle, ChassisSpeeds fieldRelativeSpeeds) {
+    var turretFieldRelativeSpeeds =
+        TurretCalculator.getTurretChassisSpeeds(
+            fieldRelativeSpeeds, robot.getRotation().getDegrees());
     var hubTranslation =
         SCORING_SOTM.getVelocityCompensatedGoal(
             robot.getTranslation(),
             FieldUtil.HUB_POSE.getPose().getTranslation(),
-            fieldRelativeSpeeds);
+            turretFieldRelativeSpeeds);
 
-    var turretCompenstatedRobotPose = robot.plus(TurretConfig.TURRET_TO_ROBOT);
-    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(turretCompenstatedRobotPose);
-    double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
+    var turretCompenstatedRobotPose = TurretCalculator.getTurretPose(robot);
+    double distanceToGoal =
+        turretCompenstatedRobotPose.getTranslation().getDistance(hubTranslation);
     var angle =
-        MathHelpers.getDriveDirection(robotPoseInAllianceZone, hubTranslation)
+        MathHelpers.getDriveDirection(turretCompenstatedRobotPose, hubTranslation)
             .minus(Rotation2d.fromDegrees(turretAngle));
 
     var turretTolerance =

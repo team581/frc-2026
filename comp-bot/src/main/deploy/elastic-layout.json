@@ -6,9 +6,9 @@
       "grid_layout": {
         "containers": [
           {
-            "x": 384,
+            "x": 640,
             "width": 512,
-            "y": 0,
+            "y": 128,
             "title": "Alerts",
             "type": "Alerts",
             "properties": {
@@ -18,8 +18,8 @@
             "height": 384
           },
           {
-            "x": 0,
-            "width": 384,
+            "x": 640,
+            "width": 512,
             "y": 0,
             "title": "SelectedAuto",
             "type": "ComboBox Chooser",
@@ -33,7 +33,7 @@
           {
             "x": 896,
             "width": 256,
-            "y": 0,
+            "y": 512,
             "title": "LocalizationHealthy",
             "type": "Boolean Box",
             "properties": {
@@ -48,9 +48,9 @@
             "height": 128
           },
           {
-            "x": 896,
+            "x": 1152,
             "width": 256,
-            "y": 128,
+            "y": 512,
             "title": "AllCamerasHealthy",
             "type": "Boolean Box",
             "properties": {
@@ -65,9 +65,9 @@
             "height": 128
           },
           {
-            "x": 896,
+            "x": 640,
             "width": 256,
-            "y": 256,
+            "y": 512,
             "title": "FuelDetectionHealthy",
             "type": "Boolean Box",
             "properties": {
@@ -82,9 +82,9 @@
             "height": 128
           },
           {
-            "x": 128,
-            "width": 256,
-            "y": 128,
+            "x": 256,
+            "width": 384,
+            "y": 0,
             "title": "Shift Countdown",
             "type": "Match Time",
             "properties": {
@@ -95,12 +95,12 @@
               "red_start_time": 5,
               "time_display_mode": "Seconds Only"
             },
-            "height": 256
+            "height": 384
           },
           {
             "x": 0,
-            "width": 128,
-            "y": 128,
+            "width": 256,
+            "y": 0,
             "title": "Active",
             "type": "Boolean Box",
             "properties": {
@@ -112,11 +112,50 @@
               "topic": "/Robot/RobotManager/HubActive",
               "true_icon": "None"
             },
+            "height": 384
+          },
+          {
+            "x": 0,
+            "width": 640,
+            "y": 384,
+            "title": "CurrentShift",
+            "type": "Large Text Display",
+            "properties": {
+              "period": 0.06,
+              "data_type": "string",
+              "topic": "/Robot/RobotManager/CurrentShift"
+            },
             "height": 256
           }
         ],
         "layouts": [{
           "children": [
+            {
+              "x": 0,
+              "width": 128,
+              "y": 0,
+              "title": "AutoScore",
+              "type": "Toggle Switch",
+              "properties": {
+                "period": 0.06,
+                "data_type": "boolean",
+                "topic": "/DSOptions/AutoScore"
+              },
+              "height": 128
+            },
+            {
+              "x": 0,
+              "width": 128,
+              "y": 0,
+              "title": "DefaultWonAuto",
+              "type": "Toggle Switch",
+              "properties": {
+                "period": 0.06,
+                "data_type": "boolean",
+                "topic": "/DSOptions/DefaultWonAuto"
+              },
+              "height": 128
+            },
             {
               "x": 0,
               "width": 128,
@@ -140,6 +179,19 @@
                 "period": 0.06,
                 "data_type": "boolean",
                 "topic": "/DSOptions/UseHubState"
+              },
+              "height": 128
+            },
+            {
+              "x": 0,
+              "width": 128,
+              "y": 0,
+              "title": "UseSwerveAssist",
+              "type": "Toggle Switch",
+              "properties": {
+                "period": 0.06,
+                "data_type": "boolean",
+                "topic": "/DSOptions/UseSwerveAssist"
               },
               "height": 128
             },
@@ -176,7 +228,7 @@
           "title": "DSOptions",
           "type": "List Layout",
           "properties": {"label_position": "TOP"},
-          "height": 384
+          "height": 512
         }]
       }
     },
@@ -185,9 +237,9 @@
       "grid_layout": {
         "containers": [
           {
-            "x": 384,
-            "width": 384,
-            "y": 0,
+            "x": 0,
+            "width": 256,
+            "y": 512,
             "title": "Alerts",
             "type": "Alerts",
             "properties": {
@@ -197,9 +249,9 @@
             "height": 256
           },
           {
-            "x": 0,
-            "width": 384,
-            "y": 0,
+            "x": 128,
+            "width": 128,
+            "y": 384,
             "title": "SelectedAuto",
             "type": "ComboBox Chooser",
             "properties": {
@@ -210,7 +262,7 @@
             "height": 128
           },
           {
-            "x": 256,
+            "x": 128,
             "width": 128,
             "y": 128,
             "title": "BPS",
@@ -224,9 +276,9 @@
             "height": 128
           },
           {
-            "x": 0,
+            "x": 384,
             "width": 256,
-            "y": 128,
+            "y": 512,
             "title": "TrustFactor",
             "type": "Radial Gauge",
             "properties": {
@@ -245,9 +297,9 @@
             "height": 256
           },
           {
-            "x": 384,
-            "width": 512,
-            "y": 384,
+            "x": 0,
+            "width": 128,
+            "y": 128,
             "title": "Feeding RPM",
             "type": "Text Display",
             "properties": {
@@ -259,9 +311,9 @@
             "height": 128
           },
           {
-            "x": 896,
-            "width": 384,
-            "y": 384,
+            "x": 256,
+            "width": 128,
+            "y": 128,
             "title": "Feeding Angle",
             "type": "Text Display",
             "properties": {
@@ -273,9 +325,9 @@
             "height": 128
           },
           {
-            "x": 384,
-            "width": 512,
-            "y": 256,
+            "x": 256,
+            "width": 128,
+            "y": 0,
             "title": "Scoring RPM",
             "type": "Text Display",
             "properties": {
@@ -287,9 +339,9 @@
             "height": 128
           },
           {
-            "x": 896,
-            "width": 384,
-            "y": 256,
+            "x": 384,
+            "width": 128,
+            "y": 128,
             "title": "Scoring Angle",
             "type": "Text Display",
             "properties": {
@@ -301,9 +353,9 @@
             "height": 128
           },
           {
-            "x": 0,
-            "width": 384,
-            "y": 384,
+            "x": 384,
+            "width": 128,
+            "y": 256,
             "title": "State",
             "type": "Large Text Display",
             "properties": {
@@ -314,7 +366,7 @@
             "height": 128
           },
           {
-            "x": 256,
+            "x": 128,
             "width": 128,
             "y": 256,
             "title": "Reset BPS",
@@ -371,9 +423,9 @@
                 "height": 128
               }
             ],
-            "x": 768,
+            "x": 512,
             "width": 256,
-            "y": 0,
+            "y": 128,
             "title": "DSOptions",
             "type": "List Layout",
             "properties": {"label_position": "TOP"},
@@ -577,9 +629,9 @@
                 "height": 128
               }
             ],
-            "x": 1024,
+            "x": 896,
             "width": 256,
-            "y": 0,
+            "y": 128,
             "title": "FeatureFlags",
             "type": "List Layout",
             "properties": {"label_position": "TOP"},

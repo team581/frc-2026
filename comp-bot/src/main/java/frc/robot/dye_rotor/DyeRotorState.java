@@ -5,7 +5,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum DyeRotorState {
   UNHOMED(0.0, 180.0, 0.0, 0.0),
-  RESET_TO_IDLE(10.0, 180.0, 0.0, 0.0),
+  RESET_TO_IDLE(0.0, 180.0, 0.0, 0.0),
   IDLE(0.0, 180.0, 0.0, 0.0),
   SCORE(20.0, 180.0, 10.0, 10.0),
   FEED(20.0, 180.0, 10.0, 10.0),
@@ -16,7 +16,7 @@ public enum DyeRotorState {
   FEED_CLEANUP_INTAKE_SCAN(5.0, -145.0, 10.0, 10.0),
   FEED_CLEANUP_WHIP_AROUND(20.0, 55.0, 10.0, 10.0),
 
-  UNJAM(0.0, 180.0, 0.0, 0.0);
+  UNJAM(-1.0, 180.0, 0.0, 0.0);
 
   private static double bpsToRpm(double bps) {
     var circumference = 18.0 * Math.PI;
