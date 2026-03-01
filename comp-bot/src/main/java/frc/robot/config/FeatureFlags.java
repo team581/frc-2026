@@ -8,7 +8,7 @@ public class FeatureFlags {
 
   public static final BooleanSupplier WALL_SNAPS = FeatureFlag.of("WallSnaps", false);
   public static final BooleanSupplier INTAKE_DIRECTIONAL_SNAPS =
-      FeatureFlag.of("IntakeDirectionalSnaps", false);
+      FeatureFlag.of("IntakeDirectionalSnaps", true);
 
   public static final BooleanSupplier INTEGRATION_TEST = FeatureFlag.of("IntegrationTest", false);
 
