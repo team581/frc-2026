@@ -57,13 +57,13 @@ public class TurretCalculator {
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE, 80);
   }
 
-  public static Pose2d getTurretPose(Pose2d robot) {
-    return BaseTurretCalculator.getTurretPose(robot, TurretConfig.TURRET_TO_ROBOT);
-  }
-
   public static ChassisSpeeds getTurretChassisSpeeds(
       ChassisSpeeds robotSpeeds, double robotHeading) {
     return BaseTurretCalculator.getTurretChassisSpeeds(
         robotSpeeds, robotHeading, TurretConfig.TURRET_TO_ROBOT.getTranslation());
+  }
+
+  public static Pose2d getTurretPose(Pose2d robot) {
+    return BaseTurretCalculator.getTurretPose(robot, TurretConfig.TURRET_TO_ROBOT);
   }
 }

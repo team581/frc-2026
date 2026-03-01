@@ -198,7 +198,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if (shooter.atGoal()
             // If localization is healthy, you can feed if we're not in a no-feed zone
             // If localization is dead, you can always shoot
-            && (health.isLocalizationHealthy() ? !FieldUtil.isRobotInNoFeedZone(TurretCalculator.getTurretPose(robotPose)) : true)
+            && (health.isLocalizationHealthy()
+                ? !FieldUtil.isRobotInNoFeedZone(TurretCalculator.getTurretPose(robotPose))
+                : true)
             && turret.atGoal(feedingParameters.turretTolerance())
             && shooterHood.atGoal()) {
 

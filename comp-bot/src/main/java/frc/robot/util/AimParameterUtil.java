@@ -12,7 +12,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import frc.robot.shooter.ShooterConfig;
 import frc.robot.turret.TurretCalculator;
-import frc.robot.turret.TurretConfig;
 
 public class AimParameterUtil {
   private static final ShootOnTheMove FEEDING_SOTM =
@@ -121,7 +120,7 @@ public class AimParameterUtil {
             FieldUtil.HUB_POSE.getPose().getTranslation(),
             turretFieldRelativeSpeeds);
 
-    var turretCompenstatedRobotPose = robot.plus(TurretConfig.TURRET_TO_ROBOT);
+    var turretCompenstatedRobotPose = TurretCalculator.getTurretPose(robot);
     double distanceToGoal =
         turretCompenstatedRobotPose.getTranslation().getDistance(hubTranslation);
     var angle =

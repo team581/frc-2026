@@ -187,10 +187,6 @@ public class BaseTurretCalculator {
     return target;
   }
 
-  public static Pose2d getTurretPose(Pose2d robot, Transform2d turretToRobot) {
-    return robot.plus(turretToRobot);
-  }
-
   public static ChassisSpeeds getTurretChassisSpeeds(
       ChassisSpeeds robotSpeeds, double robotHeading, Translation2d turretToRobot) {
     var angularVelocity = robotSpeeds.omegaRadiansPerSecond;
@@ -201,5 +197,9 @@ public class BaseTurretCalculator {
     var turretTotalVelocityX = robotSpeeds.vxMetersPerSecond + turretSwingX;
     var turretTotalVelocityY = robotSpeeds.vyMetersPerSecond + turretSwingY;
     return new ChassisSpeeds(turretTotalVelocityX, turretTotalVelocityY, angularVelocity);
+  }
+
+  public static Pose2d getTurretPose(Pose2d robot, Transform2d turretToRobot) {
+    return robot.plus(turretToRobot);
   }
 }
