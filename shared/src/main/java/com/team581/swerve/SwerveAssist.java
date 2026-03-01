@@ -22,24 +22,21 @@ public class SwerveAssist {
   private static final double BUMP_ASSIST_VELOCITY_THRESHOLD = 0.5;
   private static final Rotation2d BUMP_ASSIST_VELOCITY_ANGLE_TOLERANCE =
       Rotation2d.fromDegrees(22.5);
-  private static final double WALL_INTAKE_ASSIST_VELOCITY_THRESHOLD = 0.5;
-  private static final Rotation2d WALL_INTAKE_ASSIST_VELOCITY_ANGLE_TOLERANCE =
-      Rotation2d.fromDegrees(30.0);
+  private static final Rotation2d WALL_SNAP_VELOCITY_ANGLE_TOLERANCE = Rotation2d.fromDegrees(40.0);
+
+  // Wall snap values
+  private static final Rotation2d WALL_SNAP_OFFSET = Rotation2d.fromDegrees(30.0);
+  private static final double WALL_SNAP_PROXIMITY_THRESHOLD = Units.inchesToMeters(45.0);
 
   // Angles to round the snap to when swerve assisting
   public static final Rotation2d TRENCH_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
   public static final Rotation2d BUMP_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(90.0);
-
-  // Wall intake drive assist values
-  private static final double WALL_PROXIMITY_THRESHOLD = Units.inchesToMeters(40.0);
-  private static final Rotation2d VELOCITY_TOWARD_INTAKE_TOLERANCE = Rotation2d.fromDegrees(60.0);
-  private static final double ASSIST_POINT_DISTANCE_FROM_WALL = Units.inchesToMeters(25.0);
-  private static final double ASSIST_POINT_DISTANCE_FROM_ROBOT = Units.inchesToMeters(40.0);
+  private static final Rotation2d WALL_SNAP_ROUND_ANGLE = Rotation2d.fromDegrees(180.0);
 
   private static final DoubleSupplier MIN_ROBOT_VELOCITY_FOR_DIRECTION_SNAPS =
       DogLog.tunable("Swerve/MinRobotVelocityForDirectionSnapsMetersPerSecond", 0.5);
 
-  private static final PIDController TRENCH_PID_CONTROLLER = new PIDController(10, 0, 0);
+  private static final PIDController SWERVE_ASSIST_PID_CONTROLLER = new PIDController(10, 0, 0);
 
   public static boolean ableToBumpAssist(Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var robotTranslation = robotPose.getTranslation();
@@ -80,94 +77,59 @@ public class SwerveAssist {
     }
   }
 
-  // TODO: WORK IN PROGRESS, need to make wallsnaps v2 work & use it in swerve
-  public static boolean ableToWallIntakeDriveAssist(
-      Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
+  public static boolean ableToWallSnap(
+      Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds, Rotation2d snapAngle) {
+    // Check if we are in a corner
+    if (FieldUtil.getCurrentWallSnapCornerZone(robotPose.getTranslation()).isPresent()) {
+      DogLog.log("SwerveAssist/WallSnaps/Checks/AbleToCornerTransition", true);
+      return true;
+    }
+    DogLog.log("SwerveAssist/WallSnaps/Checks/AbleToCornerTransition", false);
+
+    // Check if we are close to a wall
     var closestWallTranslation =
         MathHelpers.getClosestPointOnRectanglePerimeter(
             robotPose.getTranslation(), FieldUtil.FIELD_BOUNDS);
-
-    DogLog.log(
-        "SwerveAssist/WallIntakeDriveAssist/ClosestWallTranslation",
-        new Pose2d(closestWallTranslation, Rotation2d.kZero));
-
-    // If the closest wall is a driver station wall, then the y component will be equal to the
-    // robot's
-    var closestWallIsADriverStationWall = robotPose.getY() == closestWallTranslation.getY();
-    var closeToNonDriverStationWall =
-        Math.abs(robotPose.getTranslation().getY() - closestWallTranslation.getY())
-            < WALL_PROXIMITY_THRESHOLD;
-    var closeToDriverStationWall =
-        Math.abs(robotPose.getTranslation().getX() - closestWallTranslation.getX())
-            < WALL_PROXIMITY_THRESHOLD;
-    DogLog.log(
-        "SwerveAssist/WallIntakeDriveAssist/CloseToDriverStationWall", closeToDriverStationWall);
-
-    // Check if we are close to a wall
-    if (!closestWallIsADriverStationWall && closeToNonDriverStationWall) {
-      closeToDriverStationWall = false;
-      DogLog.log("SwerveAssist/WallIntakeDriveAssist/CloseToWallCheck", true);
-    } else if (closestWallIsADriverStationWall && closeToDriverStationWall) {
-      DogLog.log("SwerveAssist/WallIntakeDriveAssist/CloseToWallCheck", true);
-    } else {
-      // We are not close to any wall
-      DogLog.log("SwerveAssist/WallIntakeDriveAssist/CloseToWallCheck", false);
+    // If the closest wall is a driver station wall, the y component will be equal to the robot's
+    var closestWallIsADriverStationWall =
+        Math.abs(robotPose.getY() - closestWallTranslation.getY()) < 1e-5;
+    if ((closestWallIsADriverStationWall
+            && Math.abs(robotPose.getTranslation().getX() - closestWallTranslation.getX())
+                > WALL_SNAP_PROXIMITY_THRESHOLD)
+        || (!closestWallIsADriverStationWall
+            && Math.abs(robotPose.getTranslation().getY() - closestWallTranslation.getY())
+                > WALL_SNAP_PROXIMITY_THRESHOLD)) {
+      DogLog.log("SwerveAssist/WallSnaps/Checks/CloseToWallCheck", false);
       return false;
     }
-
-    // Check if drive direction and intake direction are the same
-    if (!MathUtil.isNear(
-        robotPose.getRotation().getDegrees(),
-        MathHelpers.getDriveDirection(fieldRelativeSpeeds).getDegrees(),
-        VELOCITY_TOWARD_INTAKE_TOLERANCE.getDegrees(),
-        -180,
-        180.0)) {
-      DogLog.log("SwerveAssist/WallIntakeDriveAssist/IntakeDriveDirectionCheck", false);
-      return false;
-    } else DogLog.log("SwerveAssist/WallIntakeDriveAssist/IntakeDriveDirectionCheck", true);
+    DogLog.log("SwerveAssist/WallSnaps/Checks/CloseToWallCheck", true);
 
     // Check if we are driving fast enough in the direction of the intake parallel to the wall
-    var assistPoint = Translation2d.kZero;
-    var distanceFromWall = ASSIST_POINT_DISTANCE_FROM_WALL;
-    if (closeToDriverStationWall) {
-      if (robotPose.getX() > FieldUtil.FIELD_LENGTH_X / 2.0) {
-        distanceFromWall = FieldUtil.FIELD_LENGTH_X - ASSIST_POINT_DISTANCE_FROM_WALL;
-      }
-
-      if (fieldRelativeSpeeds.vyMetersPerSecond > 0) {
-        assistPoint =
-            new Translation2d(
-                distanceFromWall, robotPose.getY() + ASSIST_POINT_DISTANCE_FROM_ROBOT);
-      } else {
-        assistPoint =
-            new Translation2d(
-                distanceFromWall, robotPose.getY() - ASSIST_POINT_DISTANCE_FROM_ROBOT);
-      }
-    } else {
-      if (robotPose.getY() > FieldUtil.FIELD_WIDTH_Y / 2.0) {
-        distanceFromWall = FieldUtil.FIELD_WIDTH_Y - ASSIST_POINT_DISTANCE_FROM_WALL;
-      }
-
-      if (fieldRelativeSpeeds.vxMetersPerSecond > 0) {
-        assistPoint =
-            new Translation2d(
-                robotPose.getX() + ASSIST_POINT_DISTANCE_FROM_ROBOT, distanceFromWall);
-      } else {
-        assistPoint =
-            new Translation2d(
-                robotPose.getX() - ASSIST_POINT_DISTANCE_FROM_ROBOT, distanceFromWall);
-      }
+    var roundedDriveDirection =
+        getRoundedSnapAngle(
+            MathHelpers.getDriveDirection(fieldRelativeSpeeds), WALL_SNAP_ROUND_ANGLE);
+    if (closestWallIsADriverStationWall) {
+      // Still want to round drive direction to 180.0 degrees, but rotated 90.0 degrees to be
+      // parallel w/ DS wall
+      roundedDriveDirection =
+          getRoundedSnapAngle(
+                  MathHelpers.getDriveDirection(fieldRelativeSpeeds)
+                      .minus(Rotation2d.fromDegrees(90.0)),
+                  WALL_SNAP_ROUND_ANGLE)
+              .plus(Rotation2d.fromDegrees(90.0));
     }
-    DogLog.log(
-        "SwerveAssist/WallIntakeDriveAssist/AssistPoint",
-        new Pose2d(assistPoint, Rotation2d.kZero));
-
-    return ableToSwerveAssist(
-        robotPose,
-        fieldRelativeSpeeds,
-        WALL_INTAKE_ASSIST_VELOCITY_THRESHOLD,
-        assistPoint,
-        WALL_INTAKE_ASSIST_VELOCITY_ANGLE_TOLERANCE);
+    if (!MathUtil.isNear(
+        robotPose.getRotation().getDegrees(),
+        roundedDriveDirection.getDegrees(),
+        WALL_SNAP_VELOCITY_ANGLE_TOLERANCE.getDegrees(),
+        -180.0,
+        180.0)) {
+      DogLog.log("SwerveAssist/WallSnaps/Checks/IntakeDriveDirectionCheck", false);
+      return false;
+    } else {
+      DogLog.log("SwerveAssist/WallSnaps/Checks/IntakeDriveDirectionCheck", true);
+      return true;
+    }
   }
 
   public static Rotation2d getRoundedSnapAngle(Rotation2d robotHeading, Rotation2d roundingAngle) {
@@ -181,7 +143,7 @@ public class SwerveAssist {
   public static PolarChassisSpeeds getTrenchAssistSpeeds(
       Translation2d robotTranslation, ChassisSpeeds inputSpeeds) {
     double wantedYVelocity =
-        TRENCH_PID_CONTROLLER.calculate(
+        SWERVE_ASSIST_PID_CONTROLLER.calculate(
             robotTranslation.getY(),
             FieldUtil.getClosestAllianceZoneTrenchMidpoint(robotTranslation).getY());
     if (FmsUtil.isRedAlliance()) {
@@ -204,38 +166,66 @@ public class SwerveAssist {
     return polarInputSpeeds;
   }
 
-  private static boolean ableToSwerveAssist(
-      Pose2d robotPose,
-      ChassisSpeeds fieldRelativeSpeeds,
-      double velocityThreshold,
-      Translation2d assistPoint,
-      Rotation2d velocityAngleTolerance) {
-    // Check if velocity meets threshold
-    if (MathHelpers.getLinearVelocity(fieldRelativeSpeeds) <= velocityThreshold) {
-      DogLog.log("SwerveAssist/VelocityThreshold", false);
-      return false;
+  public static Rotation2d getWallSnapAngle(
+      Translation2d robotTranslation, ChassisSpeeds fieldRelativeSpeeds, boolean inCorner) {
+    // get direction toward wall, then apply offset of snap round angle in that direction
+    var closestWallTranslation =
+        MathHelpers.getClosestPointOnRectanglePerimeter(robotTranslation, FieldUtil.FIELD_BOUNDS);
+    // If the closest wall is a driver station wall, the y component will be equal to the robot's
+    var closestWallIsADriverStationWall =
+        Math.abs(robotTranslation.getY() - closestWallTranslation.getY()) < 1e-5;
+    var angleToWall = closestWallTranslation.minus(robotTranslation).getAngle();
+    var driveDirection = MathHelpers.getDriveDirection(fieldRelativeSpeeds);
+    var roundedSnapAngle = Rotation2d.kZero;
+    // For DS wall, still round snap to 180.0 degrees, but rotated 90.0 degrees to be parallel w/ DS
+    // wall
+    if (inCorner) {
+      roundedSnapAngle =
+          closestWallIsADriverStationWall
+              ? getRoundedSnapAngle(
+                  angleToWall.minus(Rotation2d.fromDegrees(180.0)), WALL_SNAP_ROUND_ANGLE)
+              : getRoundedSnapAngle(
+                      angleToWall
+                          .minus(Rotation2d.fromDegrees(180.0))
+                          .minus(Rotation2d.fromDegrees(90.0)),
+                      WALL_SNAP_ROUND_ANGLE)
+                  .plus(Rotation2d.fromDegrees(90.0));
+    } else {
+      roundedSnapAngle =
+          closestWallIsADriverStationWall
+              ? getRoundedSnapAngle(
+                      driveDirection.minus(Rotation2d.fromDegrees(90.0)), WALL_SNAP_ROUND_ANGLE)
+                  .plus(Rotation2d.fromDegrees(90.0))
+              : getRoundedSnapAngle(driveDirection, WALL_SNAP_ROUND_ANGLE);
     }
-    DogLog.log("SwerveAssist/VelocityThreshold", true);
 
-    DogLog.log(
-        "SwerveAssist/ClosestFirstAssistPoint", new Pose2d(assistPoint, Rotation2d.kCCW_90deg));
+    // Check which direction we are going relative to the wall
+    var direction = 0;
+    if (inCorner) {
+      // Signed difference between drive direction and snap angle
+      double delta = driveDirection.minus(roundedSnapAngle).getRadians();
 
-    // Check if velocity angle is toward trench
-    var velocityAngle = MathHelpers.getDriveDirection(fieldRelativeSpeeds);
-    var angleToFirstAssistPoint = MathHelpers.getDriveDirection(robotPose, assistPoint);
+      // Normalize to [-pi, pi]
+      delta = Math.atan2(Math.sin(delta), Math.cos(delta));
 
-    if (MathUtil.isNear(
-        velocityAngle.getDegrees(),
-        angleToFirstAssistPoint.getDegrees(),
-        velocityAngleTolerance.getDegrees(),
-        -180.0,
-        180.0)) {
-      DogLog.log("SwerveAssist/VelocityAngleTolerance", true);
-      return true;
+      direction = (delta > 0) ? 1 : -1;
+    } else {
+      if (closestWallIsADriverStationWall) {
+        if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
+          direction = -1;
+        } else {
+          direction = 1;
+        }
+      } else {
+        if (angleToWall.plus(roundedSnapAngle).getDegrees() > 0) {
+          direction = 1;
+        } else {
+          direction = -1;
+        }
+      }
     }
 
-    DogLog.log("SwerveAssist/VelocityAngleTolerance", false);
-    return false;
+    return roundedSnapAngle.plus(WALL_SNAP_OFFSET.times(direction));
   }
 
   private static boolean ableToSwerveAssist(

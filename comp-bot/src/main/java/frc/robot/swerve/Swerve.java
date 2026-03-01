@@ -156,10 +156,12 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   private boolean ableToBumpAssist = false;
   private boolean ableToTrenchAssist = false;
-  private boolean ableToWallIntakeDriveAssist = false;
+  private boolean ableToWallSnap = false;
   private boolean ableToDirectionSnap = false;
-  private Translation2d lastWallIntakePoint = Translation2d.kZero;
-  private double distanceToWallIntakePoint = 0.0;
+  private boolean inWallSnapCorner = false;
+  private boolean previouslyInWallSnapCorner = false;
+  private Rotation2d cornerSnapAngle = Rotation2d.kZero;
+  private Rotation2d wallSnapAngle = Rotation2d.kZero;
   private Rotation2d filteredLastDriveDirection = Rotation2d.kZero;
 
   public Swerve(
@@ -245,22 +247,30 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToBumpAssist(drivetrainState.Pose, fieldRelativeSpeeds);
-    ableToWallIntakeDriveAssist =
-        DSOptions.USE_SWERVE_ASSIST.get()
-            && FeatureFlags.WALL_INTAKE_DRIVE_ASSIST.getAsBoolean()
+    ableToWallSnap =
+        FeatureFlags.WALL_SNAPS.getAsBoolean()
+            && !DriverStation.isAutonomous()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
-            && SwerveAssist.ableToWallIntakeDriveAssist(drivetrainState.Pose, fieldRelativeSpeeds);
+            && SwerveAssist.ableToWallSnap(
+                drivetrainState.Pose, fieldRelativeSpeeds, wallSnapAngle);
+
+    // Wall snap logic if we are in a corner
+    inWallSnapCorner =
+        FieldUtil.getCurrentWallSnapCornerZone(drivetrainState.Pose.getTranslation()).isPresent();
+    if (inWallSnapCorner && !previouslyInWallSnapCorner) {
+      cornerSnapAngle =
+          SwerveAssist.getWallSnapAngle(
+              drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, inWallSnapCorner);
+    }
+    wallSnapAngle =
+        inWallSnapCorner
+            ? cornerSnapAngle
+            : SwerveAssist.getWallSnapAngle(
+                drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, false);
+    previouslyInWallSnapCorner = inWallSnapCorner;
 
     if (getState() == SwerveState.INTAKE) {
-      lastWallIntakePoint =
-          MathHelpers.getIntersectionOnRectanglePerimeter(
-              drivetrainState.Pose.getTranslation(),
-              FieldUtil.FIELD_BOUNDS,
-              filteredLastDriveDirection);
-      distanceToWallIntakePoint =
-          lastWallIntakePoint.getDistance(drivetrainState.Pose.getTranslation());
-
       filteredLastDriveDirection =
           Rotation2d.fromDegrees(
               lastDriveDirectionFilter.calculate(
@@ -333,7 +343,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       case MANUAL -> {
         var speeds = driveSource.getRequestedSpeeds();
         if (ableToTrenchAssist) {
-
           DogLog.timestamp("Swerve/TrenchAssistActive");
           var trenchAssistSpeeds =
               SwerveAssist.getTrenchAssistSpeeds(drivetrainState.Pose.getTranslation(), speeds);
@@ -430,6 +439,13 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                       .withVelocityY(speeds.vyMetersPerSecond),
                   SwerveAssist.getRoundedSnapAngle(
                       drivetrainState.Pose.getRotation(), SwerveAssist.BUMP_SNAP_ROUND_ANGLE)));
+        } else if (ableToWallSnap) {
+          drivetrain.setControl(
+              withFieldRelativeTargetDirection(
+                  drivePerspectiveSnapsOpenLoop
+                      .withVelocityX(speeds.vxMetersPerSecond)
+                      .withVelocityY(speeds.vyMetersPerSecond),
+                  wallSnapAngle));
         } else if (ableToDirectionSnap) {
           DogLog.timestamp("Swerve/DirectionSnaps/Snapping");
           var swerveSnapsRequest =
@@ -477,6 +493,13 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                       .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond),
                   SwerveAssist.getRoundedSnapAngle(
                       drivetrainState.Pose.getRotation(), SwerveAssist.BUMP_SNAP_ROUND_ANGLE)));
+        } else if (ableToWallSnap) {
+          drivetrain.setControl(
+              withFieldRelativeTargetDirection(
+                  drivePerspectiveSnapsOpenLoop
+                      .withVelocityX(rateLimitedSpeeds.vxMetersPerSecond)
+                      .withVelocityY(rateLimitedSpeeds.vyMetersPerSecond),
+                  wallSnapAngle));
         } else if (ableToDirectionSnap) {
           DogLog.timestamp("Swerve/DirectionSnaps/Snapping");
           var swerveSnapsRequest =
@@ -557,12 +580,19 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     DogLog.log("Swerve/ModuleStates", drivetrainState.ModuleStates);
     DogLog.log("Swerve/ModuleTargets", drivetrainState.ModuleTargets);
     DogLog.log(
-        "SwerveSwerveTargetDirection", drivePerspectiveSnapsOpenLoop.TargetDirection.getDegrees());
+        "Swerve/SwerveTargetDirection", drivePerspectiveSnapsOpenLoop.TargetDirection.getDegrees());
     DogLog.log("Swerve/RobotRelativeSpeeds", drivetrainState.Speeds);
     DogLog.log("Swerve/FieldRelativeSpeeds", fieldRelativeSpeeds);
     DogLog.log("Swerve/AbleToBumpAssist", ableToBumpAssist);
     DogLog.log("Swerve/AbleToTrenchAssist", ableToTrenchAssist);
-    DogLog.log("Swerve/AbleToWallIntakeDriveAssist", ableToWallIntakeDriveAssist);
+    DogLog.log("Swerve/AbleToWallSnap", ableToWallSnap);
+    DogLog.log(
+        "SwerveAssist/WallSnaps/WallSnapAngle",
+        SwerveAssist.getWallSnapAngle(
+                drivetrainState.Pose.getTranslation(), fieldRelativeSpeeds, false)
+            .getDegrees());
+    DogLog.log("SwerveAssist/WallSnaps/CornerSnapAngle", cornerSnapAngle.getDegrees());
+    DogLog.log("SwerveAssist/WallSnaps/ChosenAngle", wallSnapAngle.getDegrees());
   }
 
   private void startSimThread() {

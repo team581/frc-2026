@@ -6,8 +6,7 @@ import java.util.function.BooleanSupplier;
 
 public class FeatureFlags {
 
-  public static final BooleanSupplier WALL_INTAKE_DRIVE_ASSIST =
-      FeatureFlag.of("WallIntakeDriveAssist", false);
+  public static final BooleanSupplier WALL_SNAPS = FeatureFlag.of("WallSnaps", false);
   public static final BooleanSupplier INTAKE_DIRECTIONAL_SNAPS =
       FeatureFlag.of("IntakeDirectionalSnaps", false);
 
