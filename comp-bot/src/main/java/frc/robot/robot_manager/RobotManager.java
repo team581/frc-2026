@@ -334,7 +334,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   protected void afterTransition(RobotState newState) {
     switch (newState) {
       case IDLE -> {
-        vision.setState(VisionState.TAGS);
+        vision.setState(VisionState.HUB_TAGS);
         shooter.idleRequest();
         // Set hood behavior separately while idling
         dyeRotor.idleRequest();

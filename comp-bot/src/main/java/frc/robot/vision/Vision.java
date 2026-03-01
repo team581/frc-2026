@@ -191,13 +191,13 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     if (getState() == VisionState.CALIBRATE_STATIC_TURRET) {
       return;
     }
-    if (state == VisionState.HUB_TAGS) {
-      state = VisionState.TAGS;
-    }
-
     if (state == VisionState.HUB_TAGS && getState() == VisionState.WAITING_FOR_HUB_TAGS) {
       return;
     }
+    if (state == VisionState.HUB_TAGS) {
+      state = VisionState.WAITING_FOR_HUB_TAGS;
+    }
+
     setStateFromRequest(state);
   }
 
