@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import frc.robot.shooter.ShooterConfig;
-import frc.robot.turret.Turret;
 import frc.robot.turret.TurretCalculator;
 import frc.robot.turret.TurretConfig;
 
@@ -41,7 +40,9 @@ public class AimParameterUtil {
   public static AimingParameters getFeedingParameters(
       FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var robotTranslation = robotPose.getTranslation();
-    var turretFieldRelativeSpeeds = TurretCalculator.getTurretChassisSpeeds(fieldRelativeSpeeds, robotPose.getRotation().getDegrees());
+    var turretFieldRelativeSpeeds =
+        TurretCalculator.getTurretChassisSpeeds(
+            fieldRelativeSpeeds, robotPose.getRotation().getDegrees());
     var separatedVelocityCompensatedGoal =
         FEEDING_SOTM.getSeparatedVelocityCompensatedGoalWithEffectiveTof(
             robotTranslation, feedLocation.getTranslation(robotPose), turretFieldRelativeSpeeds);
@@ -74,7 +75,9 @@ public class AimParameterUtil {
   public static AimingParameters getScoringParameters(
       Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     var robotTranslation = robotPose.getTranslation();
-    var turretFieldRelativeSpeeds = TurretCalculator.getTurretChassisSpeeds(fieldRelativeSpeeds, robotPose.getRotation().getDegrees());
+    var turretFieldRelativeSpeeds =
+        TurretCalculator.getTurretChassisSpeeds(
+            fieldRelativeSpeeds, robotPose.getRotation().getDegrees());
     var separatedVelocityCompensatedGoal =
         SCORING_SOTM.getSeparatedVelocityCompensatedGoalWithEffectiveTof(
             robotTranslation, FieldUtil.HUB_POSE.getTranslation(), turretFieldRelativeSpeeds);
@@ -109,7 +112,9 @@ public class AimParameterUtil {
 
   public static AimingParameters getTurretStuckScoringParameters(
       Pose2d robot, double turretAngle, ChassisSpeeds fieldRelativeSpeeds) {
-        var turretFieldRelativeSpeeds = TurretCalculator.getTurretChassisSpeeds(fieldRelativeSpeeds, robot.getRotation().getDegrees());
+    var turretFieldRelativeSpeeds =
+        TurretCalculator.getTurretChassisSpeeds(
+            fieldRelativeSpeeds, robot.getRotation().getDegrees());
     var hubTranslation =
         SCORING_SOTM.getVelocityCompensatedGoal(
             robot.getTranslation(),
