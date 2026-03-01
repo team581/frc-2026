@@ -62,7 +62,7 @@ public class Robot extends Base581Robot {
           new CameraConfig(
               LimelightModel.FOUR,
               true,
-              true,
+              false,
               // back
               Units.inchesToMeters(-13.389),
               // left

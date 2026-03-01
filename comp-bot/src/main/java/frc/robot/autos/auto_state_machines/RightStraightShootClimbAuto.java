@@ -29,29 +29,13 @@ public class RightStraightShootClimbAuto
                           10.489, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 30)),
               AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),
-              AutoPoint.ofRed(new Pose2d(8.852, 5.4, Rotation2d.kCW_90deg))
+              AutoPoint.ofRed(new Pose2d(8.852, 5.2, Rotation2d.kCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(2, 30)))
-          .withLinearConstraints(3.0, 10)
+          .withLinearConstraints(4.5, 8)
           .withAngularConstraints(Units.rotationsToRadians(4), Units.rotationsToRadians(4))
           .untilFinished(new PoseErrorTolerance(0.2, 3));
 
-  private final AutoSegment intakeAcrossMidlineTwo =
-      Trailblazer.segment(
-              AutoPoint.ofRed(
-                  new Pose2d(11.2, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
-              AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),
-              AutoPoint.of(
-                      () ->
-                          Point.ofRed(
-                              robotManager
-                                  .clusterMap
-                                  .getBestClusterPose()
-                                  .orElseGet(() -> new Pose2d(8.852, 5.2, Rotation2d.kCW_90deg))))
-                  .withTransitionTolerance(new PoseErrorTolerance(2, 30)))
-          .withLinearConstraints(3.0, 10)
-          .untilFinished(new PoseErrorTolerance(0.1, 3));
-
-  private final AutoSegment intakeAcrossMidlineThree =
+  public final AutoSegment intakeAcrossMidlineTwo =
       Trailblazer.segment(
               AutoPoint.ofRed(
                   new Pose2d(11.2, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
@@ -64,7 +48,40 @@ public class RightStraightShootClimbAuto
                                   .getBestClusterPose()
                                   .orElseGet(() -> new Pose2d(8.852, 5.0, Rotation2d.kCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(2, 30)))
-          .withLinearConstraints(3.0, 10)
+          .withLinearConstraints(3.0, 8)
+          .untilFinished(new PoseErrorTolerance(0.1, 3));
+
+
+  private final AutoSegment intakeAcrossMidlineTwoB =
+      Trailblazer.segment(
+              AutoPoint.ofRed(
+                  new Pose2d(11.2, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(new Pose2d(10.3, 6.8, Rotation2d.kCW_90deg))
+                  .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
+              AutoPoint.of(
+                  () ->
+                      Point.ofRed(
+                          robotManager
+                              .clusterMap
+                              .getBestClusterPose()
+                              .orElseGet(() -> new Pose2d(10.65, 4.5, Rotation2d.kCW_90deg)))))
+          .withLinearConstraints(4.5, 8)
+          .untilFinished(new PoseErrorTolerance(0.1, 3));
+
+  public final AutoSegment intakeAcrossMidlineThree =
+      Trailblazer.segment(
+              AutoPoint.ofRed(
+                  new Pose2d(11.2, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(new Pose2d(9.0, 6.865, Rotation2d.fromDegrees(-126.0))),
+              AutoPoint.of(
+                      () ->
+                          Point.ofRed(
+                              robotManager
+                                  .clusterMap
+                                  .getBestClusterPose()
+                                  .orElseGet(() -> new Pose2d(8.852, 4.7, Rotation2d.kCW_90deg))))
+                  .withTransitionTolerance(new PoseErrorTolerance(2, 30)))
+          .withLinearConstraints(3.0, 8)
           .untilFinished(new PoseErrorTolerance(0.1, 3));
 
   private final AutoSegment driveBackAndShootOne =
@@ -90,10 +107,10 @@ public class RightStraightShootClimbAuto
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.START_SHOOT_RQ),
               AutoPoint.ofRed(
-                  new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
+                  new Pose2d(11.5, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
               AutoPoint.ofRed(
                   new Pose2d(13.0, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)))
-          .withLinearConstraints(3.0, 10)
+          .withLinearConstraints(3.0, 8)
           .untilFinished(new PoseErrorTolerance(0.5, 3));
 
   private final AutoSegment driveBackAndShootThree =
@@ -107,7 +124,7 @@ public class RightStraightShootClimbAuto
                   new Pose2d(11.3, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)),
               AutoPoint.ofRed(
                   new Pose2d(13.5, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg)))
-          .withLinearConstraints(3.0, 10)
+          .withLinearConstraints(3.0, 8)
           .untilFinished(new PoseErrorTolerance(0.5, 3));
 
   public RightStraightShootClimbAuto(RobotManager robotManager, Trailblazer trailblazer) {
@@ -226,7 +243,7 @@ public class RightStraightShootClimbAuto
         robotManager.prepareScoreRequest();
       }
       case INTAKE_ACROSS_MIDLINE_2 -> {
-        trailblazer.setActiveSegment(intakeAcrossMidlineTwo);
+        trailblazer.setActiveSegment(intakeAcrossMidlineTwoB);
         robotManager.intakeRequest();
       }
       case DRIVE_BACK_2 -> {
@@ -237,7 +254,7 @@ public class RightStraightShootClimbAuto
         robotManager.prepareScoreRequest();
       }
       case INTAKE_ACROSS_MIDLINE_3 -> {
-        trailblazer.setActiveSegment(intakeAcrossMidlineThree);
+        trailblazer.setActiveSegment(intakeAcrossMidlineTwoB);
         robotManager.intakeRequest();
       }
       case DRIVE_BACK_3 -> {
@@ -248,8 +265,8 @@ public class RightStraightShootClimbAuto
         robotManager.prepareScoreRequest();
       }
       case DRIVE_TO_CLIMB -> {
-        robotManager.startAutoClimbSequence();
-        robotManager.prepareScoreRequest();
+   //     robotManager.startAutoClimbSequence();
+    //    robotManager.prepareScoreRequest();
       }
       case CLIMB -> {}
       case DONE -> {}
@@ -272,9 +289,9 @@ public class RightStraightShootClimbAuto
       case DRIVE_BACK_3 -> {}
       case SHOOT_3 -> {}
       case DRIVE_TO_CLIMB -> {
-        trailblazer.setActiveSegment(
-            ClimbAssist.getLineupClimbAssistSegment(
-                robotManager.localization.getPose(), ClimbLocation.CLOSEST));
+    //    trailblazer.setActiveSegment(
+    //        ClimbAssist.getLineupClimbAssistSegment(
+    //            robotManager.localization.getPose(), ClimbLocation.CLOSEST));
       }
       case CLIMB -> {}
       case DONE -> {}

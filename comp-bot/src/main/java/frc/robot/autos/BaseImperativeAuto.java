@@ -31,11 +31,7 @@ public abstract class BaseImperativeAuto<S extends Enum<S>> extends StateMachine
     if (DriverStation.isAutonomous()) {
       return true;
     }
-
     // If we have run an auto previously, then continue running it until we see teleop inputs
-    if (hasRanAuto) {
-      return !hasSeenInputInTeleop;
-    }
 
     // Otherwise, we are in teleop but haven't run the auto previously, so we should stay in teleop
     return false;

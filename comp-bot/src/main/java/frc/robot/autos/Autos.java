@@ -1,12 +1,14 @@
 package frc.robot.autos;
 
 import com.team581.autos.AutoChooser;
+import com.team581.config.DSOption;
 import com.team581.swerve.DriveSourceType;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.config.DSOptions;
 import frc.robot.robot_manager.RobotManager;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -46,7 +48,7 @@ public class Autos extends StateMachineSubsystem<AutoSelection> {
   @Override
   protected void whileInState(AutoSelection state) {
     if (DriverStation.isDisabled()) {
-      if (!hasEnabledAuto
+      if (!hasEnabledAuto && DSOptions.RESET_POSE_FOR_AUTO.getAsBoolean()
           && (RobotBase.isSimulation()
               || DriverStation.isAutonomous()
               || DriverStation.isFMSAttached())) {

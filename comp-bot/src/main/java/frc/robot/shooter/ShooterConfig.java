@@ -25,7 +25,9 @@ public class ShooterConfig {
   public static final double SELF_TEST_RIGHT_MOTOR_RPM_TOLERANCE = 250;
   public static final double SELF_TEST_RIGHT_MOTOR_EXPECTED_CURRENT = 10.0;
   public static final double SELF_TEST_RIGHT_MOTOR_CURRENT_TOLERANCE = 5;
-  public static final int RPM_TOLERANCE_SHOOTER = 100;
+  public static final int RPM_TOLERANCE = 100;
+    public static final int RPM_TOLERANCE_FEEDING = 1000;
+
   public static final double TEST_VOLTAGE = 6.0;
 
   public static final double MAX_SAFE_RPM = 5000;
@@ -33,13 +35,13 @@ public class ShooterConfig {
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToScoreRPM",
-          Map.entry(4.93, 2750.0),
-          Map.entry(3.47, 2250.0),
-          Map.entry(1.65, 2200.0));
+          Map.entry(4.93, 3100.0),
+          Map.entry(3.47, 2500.0),
+          Map.entry(1.65, 2300.0));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEEDING_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToFeedingRPM",
-          Map.entry(9.56, 3800.0),
+          Map.entry(9.56, 3500.0),
           Map.entry(3.56, 2500.0),
           Map.entry(1.69, 1840.0));
   public static final PolynomialRegression SCORING_REGRESSION_MODEL =

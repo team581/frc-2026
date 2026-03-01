@@ -20,8 +20,11 @@ public class AimParameterUtil {
   private static final ShootOnTheMove SCORING_SOTM =
       new ShootOnTheMove(ShooterConfig.DISTANCE_TO_SCORE_TOF);
 
-  private static final double SCORING_TURRET_TOLERANCE = Units.inchesToMeters(10);
-  private static final double FEEDING_TURRET_TOLERANCE = 1;
+  private static final double SCORING_TURRET_TOLERANCE = Units.inchesToMeters(20);
+  private static final double FEEDING_TURRET_TOLERANCE = Units.inchesToMeters(50);
+
+
+  private static final double FALLBACK_FEEDING_TURRET_TOLERANCE = 1;
   private static final double FEEDING_FALLBACK_DISTANCE_TO_GOAL = 8.0;
 
   public static AimingParameters getFallbackFeedingParameters(
@@ -32,7 +35,7 @@ public class AimParameterUtil {
             robotPose, robotPose.plus(new Transform2d(-1, 0, Rotation2d.kZero)).getTranslation());
 
     return new AimingParameters(
-        turretAngle, FEEDING_FALLBACK_DISTANCE_TO_GOAL, FEEDING_TURRET_TOLERANCE);
+        turretAngle, FEEDING_FALLBACK_DISTANCE_TO_GOAL, FALLBACK_FEEDING_TURRET_TOLERANCE);
   }
 
   public static AimingParameters getFeedingParameters(
@@ -82,13 +85,12 @@ public class AimParameterUtil {
         new Pose2d(
             separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal(), Rotation2d.kZero));
 
-    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robotPose);
     var turretAngle =
         TurretCalculator.calculateTurretAimingAngle(
-            robotPoseInAllianceZone,
+            robotPose,
             separatedVelocityCompensatedGoal.tangentiallyCompensatedGoal());
     var distanceToGoal =
-        robotPoseInAllianceZone
+        robotPose
             .getTranslation()
             .getDistance(separatedVelocityCompensatedGoal.radiallyCompensatedGoal());
 
@@ -113,10 +115,9 @@ public class AimParameterUtil {
             fieldRelativeSpeeds);
 
     var turretCompenstatedRobotPose = robot.plus(TurretConfig.TURRET_TO_ROBOT);
-    var robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(turretCompenstatedRobotPose);
-    double distanceToGoal = robotPoseInAllianceZone.getTranslation().getDistance(hubTranslation);
+    double distanceToGoal = turretCompenstatedRobotPose.getTranslation().getDistance(hubTranslation);
     var angle =
-        MathHelpers.getDriveDirection(robotPoseInAllianceZone, hubTranslation)
+        MathHelpers.getDriveDirection(turretCompenstatedRobotPose, hubTranslation)
             .minus(Rotation2d.fromDegrees(turretAngle));
 
     var turretTolerance =

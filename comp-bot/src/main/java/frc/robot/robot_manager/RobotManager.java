@@ -62,7 +62,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private AimingParameters feedingParameters = new AimingParameters(0, 0, 0);
   private static final double PRESET_FEED_DISTANCE = 0.0;
   private static final DoubleSubscriber DISTANCE_TO_HUB_THRESHOLD =
-      DogLog.tunable("RobotManager/DistanceToHubThreshold", 4.0);
+      DogLog.tunable("RobotManager/DistanceToHubThreshold", 10.0);
   private boolean isMoving = false;
   private boolean drivingToIntake = false;
 
@@ -198,7 +198,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             // If localization is healthy, you can feed if we're not in a no-feed zone
             // If localization is dead, you can always shoot
             && (health.isLocalizationHealthy() ? !FieldUtil.isRobotInNoFeedZone(robotPose) : true)
-            && !dyeRotor.isJammed()
             && turret.atGoal(feedingParameters.turretTolerance())
             && shooterHood.atGoal()) {
 
@@ -257,7 +256,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 && (health.isLocalizationHealthy()
                     ? !FieldUtil.isRobotInNoFeedZone(robotPose)
                     : true)
-                && !dyeRotor.isJammed()
                 && turret.atGoal(feedingParameters.turretTolerance())
                 && shooterHood.atGoal())) {
 

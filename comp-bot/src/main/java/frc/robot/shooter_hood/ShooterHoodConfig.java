@@ -31,6 +31,8 @@ public class ShooterHoodConfig {
   public static final double HOMING_END_POSITION = ANGLE_FROM_HORIZONTAL;
 
   public static final double TOLERANCE = 1;
+    public static final double FEEDING_TOLERANCE = 5;
+
 
   public static final TalonFXConfiguration MOTOR_CONFIG =
       new TalonFXConfiguration()
@@ -54,8 +56,8 @@ public class ShooterHoodConfig {
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "ShooterHood/DistanceToScore",
-          Map.entry(4.93, 40.0),
-          Map.entry(3.47, 32.0),
+          Map.entry(4.93, 38.0),
+          Map.entry(3.47, 30.0),
           Map.entry(1.65, 21.5));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED =
       TunableInterpolatingDoubleTreeMap.ofEntries(
