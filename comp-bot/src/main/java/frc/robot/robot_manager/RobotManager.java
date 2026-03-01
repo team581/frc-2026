@@ -137,7 +137,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           STOP_SHOOTING_PRESET_SCORE,
           STOP_SHOOTING_PRESET_FEED,
           STOP_SHOOTING_FEED ->
-          dyeRotor.getState()== DyeRotorState.IDLE ? RobotState.IDLE : currentState;
+          dyeRotor.getState() == DyeRotorState.IDLE ? RobotState.IDLE : currentState;
       case PREPARE_FORCE_SCORE -> {
         if ((FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()
                 || turret.atGoal(scoringParameters.turretTolerance()))
