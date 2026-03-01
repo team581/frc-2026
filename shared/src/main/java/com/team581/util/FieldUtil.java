@@ -588,6 +588,13 @@ public class FieldUtil {
     return TRENCH_ZONES.stream().anyMatch(zone -> zone.contains(robotPose));
   }
 
+  public static boolean isInNoScoreZone(Pose2d robot) {
+    if (FmsUtil.isRedAlliance()) {
+      return RED_CLIMB_ZONE.contains(robot.getTranslation());
+    }
+    return BLUE_CLIMB_ZONE.contains(robot.getTranslation());
+  }
+
   public static boolean isRobotInAllianceZone(Translation2d robot) {
     if (FmsUtil.isRedAlliance()) {
       return robot.getX() > getAllianceZoneX();

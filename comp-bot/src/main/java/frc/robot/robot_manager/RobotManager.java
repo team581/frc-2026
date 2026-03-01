@@ -1206,7 +1206,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         intake.getState() == IntakeState.INTAKE
             && MathUtil.isNear(robotRotation, driveDirection, 45, -180, 180)
             && MathHelpers.getLinearVelocity(speeds) > 1e-5;
-    isInScoringZone = !health.isLocalizationHealthy() || !FieldUtil.isInNoScoreZone(TurretCalculator.getTurretPose(robotPose));
+    isInScoringZone =
+        !health.isLocalizationHealthy()
+            || !FieldUtil.isInNoScoreZone(TurretCalculator.getTurretPose(robotPose));
   }
 
   private boolean getIsHubActiveOrNotUsingState() {
