@@ -87,6 +87,13 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
     DogLog.log("Shooter/Right/SupplyCurrent", rightMotor.getSupplyCurrent().getValueAsDouble());
 
     switch (state) {
+      case IDLE -> {
+        var setpoint = ShooterConfig.IDLE_RPM / 60.0;
+        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
+        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
+
+        DogLog.log("Shooter/RpmSetpoint", shootingRpm);
+      }
       case SCORE -> {
         var setpoint = shootingRpm / 60.0;
         leftMotor.setControl(voltageRequest.withVelocity(setpoint));
@@ -107,12 +114,6 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
         rightMotor.setControl(voltageRequest.withVelocity(setpoint));
 
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
-      }
-      case IDLE -> {
-        leftMotor.disable();
-        rightMotor.disable();
-
-        DogLog.log("Shooter/RpmSetpoint", -1.0);
       }
       case SELF_TEST_STOP_MOTORS -> {
         leftMotor.stopMotor();

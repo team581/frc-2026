@@ -89,12 +89,18 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
 
   public void idleRequest() {
     if (getState() != DyeRotorState.UNHOMED) {
+      setStateFromRequest(DyeRotorState.IDLE);
+    }
+  }
+
+  public void resetToIdleRequest() {
+    if (getState() != DyeRotorState.UNHOMED) {
       setStateFromRequest(DyeRotorState.RESET_TO_IDLE);
     }
   }
 
   private boolean nearIdlePosition() {
-    return MathUtil.isNear(DyeRotorState.IDLE.rotorPosition, rotorAngle, 45, -180, 180);
+    return MathUtil.isNear(DyeRotorState.IDLE.rotorPosition, rotorAngle, 30, -180, 180);
   }
 
   @Override
@@ -103,19 +109,13 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
       case UNHOMED -> {
         if (rotorMotor.isAlive() && rotorMotor.isConnected()) {
           rotorMotor.setPosition(Units.degreesToRotations(DyeRotorConfig.HOMING_END_POSITION));
-          yield DyeRotorState.RESET_TO_IDLE;
+          yield DyeRotorState.IDLE;
         }
         yield currentState;
       }
       case RESET_TO_IDLE -> {
         if (nearIdlePosition()) {
           yield DyeRotorState.IDLE;
-        }
-        yield currentState;
-      }
-      case IDLE -> {
-        if (!nearIdlePosition()) {
-          yield DyeRotorState.RESET_TO_IDLE;
         }
         yield currentState;
       }

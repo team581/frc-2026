@@ -22,6 +22,7 @@ import frc.robot.config.DSOptions;
 import frc.robot.config.FeatureFlags;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
+import frc.robot.dye_rotor.DyeRotorState;
 import frc.robot.health.HealthManager;
 import frc.robot.intake.Intake;
 import frc.robot.intake.IntakeState;
@@ -136,7 +137,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           STOP_SHOOTING_PRESET_SCORE,
           STOP_SHOOTING_PRESET_FEED,
           STOP_SHOOTING_FEED ->
-          timeout(1) ? RobotState.IDLE : currentState;
+          dyeRotor.getState()== DyeRotorState.IDLE ? RobotState.IDLE : currentState;
       case PREPARE_FORCE_SCORE -> {
         if ((FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()
                 || turret.atGoal(scoringParameters.turretTolerance()))
@@ -387,7 +388,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.TAGS);
         shooter.feedRequest(feedingParameters.distance());
         shooterHood.feedRequest(feedingParameters.distance());
-        dyeRotor.idleRequest();
+        dyeRotor.resetToIdleRequest();
         turret.feedRequest(feedingParameters.turretAngle());
         deploy.intakeRequest();
         intake.idleRequest();
@@ -420,7 +421,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.HUB_TAGS);
         shooter.scoreRequest(scoringParameters.distance());
         shooterHood.scoreRequest(scoringParameters.distance());
-        dyeRotor.idleRequest();
+        dyeRotor.resetToIdleRequest();
         turret.scoreRequest(scoringParameters.turretAngle());
         deploy.intakeRequest();
         intake.idleRequest();
@@ -453,7 +454,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.TAGS);
         shooter.feedRequest(PRESET_FEED_DISTANCE);
         shooterHood.feedRequest(PRESET_FEED_DISTANCE);
-        dyeRotor.idleRequest();
+        dyeRotor.resetToIdleRequest();
         turret.feedRequest(0);
         deploy.intakeRequest();
         intake.idleRequest();
@@ -486,7 +487,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         vision.setState(VisionState.TAGS);
         shooter.scoreRequest(scoringParameters.distance());
         shooterHood.scoreRequest(scoringParameters.distance());
-        dyeRotor.idleRequest();
+        dyeRotor.resetToIdleRequest();
         turret.scoreRequest(scoringParameters.turretAngle());
         intake.idleRequest();
         deploy.intakeRequest();

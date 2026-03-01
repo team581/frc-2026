@@ -28,6 +28,8 @@ public class ShooterConfig {
   public static final int RPM_TOLERANCE = 100;
   public static final int RPM_TOLERANCE_FEEDING = 1000;
 
+  public static final double IDLE_RPM = 400;
+
   public static final double TEST_VOLTAGE = 6.0;
 
   public static final double MAX_SAFE_RPM = 5000;
