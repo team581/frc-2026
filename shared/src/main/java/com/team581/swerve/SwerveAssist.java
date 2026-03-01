@@ -199,6 +199,11 @@ public class SwerveAssist {
               : getRoundedSnapAngle(driveDirection, WALL_SNAP_ROUND_ANGLE);
     }
 
+    // Near a climb zone, we won't fit with offset toward wall; use base snap angle
+    if (FieldUtil.nearClimbZone(robotTranslation)) {
+      return roundedSnapAngle;
+    }
+
     // Check which direction we are going relative to the wall
     var direction = 0;
     if (inCorner) {
