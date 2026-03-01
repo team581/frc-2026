@@ -4,6 +4,7 @@ import com.team581.math.BaseTurretCalculator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class TurretCalculator {
 
@@ -54,5 +55,9 @@ public class TurretCalculator {
   public static double getSmartUnwrapAngle(double target, double current) {
     return BaseTurretCalculator.getSmartUnwrapAngle(
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE, 80);
+  }
+
+  public static ChassisSpeeds getTurretChassisSpeeds(ChassisSpeeds robotSpeeds, double robotHeading) {
+    return BaseTurretCalculator.getTurretChassisSpeeds(robotSpeeds,robotHeading,TurretConfig.TURRET_TO_ROBOT.getTranslation());
   }
 }
