@@ -261,6 +261,21 @@ public class FieldUtil {
               HUB_POSE.bluePose().getX() + HUB_RADIUS_METERS + Units.inchesToMeters(6),
               HUB_POSE.bluePose().getY() - HUB_RADIUS_METERS - Units.inchesToMeters(8)));
 
+
+              private static final Point CLIMB_FRONT_CORNER_OUTPOST_SIDE = Point.ofRed(new Pose2d(Units.inchesToMeters(608.375814), Units.inchesToMeters(146.718750-6.0), Rotation2d.kZero));
+  private static final Point  CLIMB_BACK_CORNER_DEPOT_SIDE = Point.ofRed(new Pose2d(FIELD_LENGTH_X, Units.inchesToMeters(193.718750+6.0), Rotation2d.kZero));
+
+  private static final Rectangle2d RED_CLIMB_ZONE = new Rectangle2d(CLIMB_FRONT_CORNER_OUTPOST_SIDE.redPose().getTranslation(), CLIMB_BACK_CORNER_DEPOT_SIDE.redPose().getTranslation());
+    private static final Rectangle2d BLUE_CLIMB_ZONE = new Rectangle2d(CLIMB_FRONT_CORNER_OUTPOST_SIDE.bluePose().getTranslation(), CLIMB_BACK_CORNER_DEPOT_SIDE.bluePose().getTranslation());
+
+
+    public static boolean isInNoScoreZone(Pose2d robot) {
+      if (FmsUtil.isRedAlliance()) {
+        return RED_CLIMB_ZONE.contains(robot.getTranslation());
+      }
+      return BLUE_CLIMB_ZONE.contains(robot.getTranslation());
+    }
+
   public static Pose2d clampPoseToAllianceZone(Pose2d robot) {
     if (isRobotInAllianceZone(robot.getTranslation())) {
       return robot;
@@ -389,6 +404,25 @@ public class FieldUtil {
         "FieldUtil/RedOutpost/BumpAssistZones/Corner2",
         new Pose2d(
             MathHelpers.getCorners(RED_OUTPOST_BUMP_ASSIST_ZONE).get(2), Rotation2d.kCW_90deg));
+
+            // Climb  zones
+    DogLog.log(
+        "FieldUtil/RedClimbZone/Corner1",
+        new Pose2d(
+            MathHelpers.getCorners(RED_CLIMB_ZONE).get(0), Rotation2d.kCW_90deg));
+    DogLog.log(
+        "FieldUtil/RedClimbZone/Corner2",
+        new Pose2d(
+            MathHelpers.getCorners(RED_CLIMB_ZONE).get(2), Rotation2d.kCW_90deg));
+
+    DogLog.log(
+        "FieldUtil/BlueClimbZone/Corner1",
+        new Pose2d(
+            MathHelpers.getCorners(BLUE_CLIMB_ZONE).get(0), Rotation2d.kCW_90deg));
+    DogLog.log(
+        "FieldUtil/BlueClimbZone/Corner2",
+        new Pose2d(
+            MathHelpers.getCorners(BLUE_CLIMB_ZONE).get(2), Rotation2d.kCW_90deg));
 
     // Bump assist points
     DogLog.log(
