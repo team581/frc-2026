@@ -61,10 +61,11 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
           .withLinearConstraints(MAX_VELOCITY, MAX_ACCELERATION)
           .untilFinished(new PoseErrorTolerance(0.05, 3));
 
-            private final AutoSegment segment6LeftBump =
+  private final AutoSegment segment6LeftBump =
       Trailblazer.segment(
               // Climb area
-              AutoPoint.ofRed(new Pose2d(14.929, 7.0, Rotation2d.k180deg)).withTransitionTolerance(new PoseErrorTolerance(0.5, 50)),
+              AutoPoint.ofRed(new Pose2d(14.929, 7.0, Rotation2d.k180deg))
+                  .withTransitionTolerance(new PoseErrorTolerance(0.5, 50)),
               AutoPoint.ofRed(new Pose2d(13.36, 2.54, Rotation2d.fromDegrees(-45))))
           .withLinearConstraints(MAX_VELOCITY, MAX_ACCELERATION)
           .untilFinished(new PoseErrorTolerance(0.05, 3));
@@ -90,7 +91,10 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
   protected IntegrationTestState getNextState(IntegrationTestState currentState) {
     if (trailblazer.atGoal(robotManager.localization.getPose().getTranslation())) {
       return switch (currentState) {
-        case SEGMENT_2_CLOSE_CENTERED_WITH_HUB_SCORE,SEGMENT_3_BACK_CENTERED_WITH_HUB_SCORE ,SEGMENT_4_RIGHT_TRENCH_SCORE,SEGMENT_5_RIGHT_CORNER_SCORE->
+        case SEGMENT_2_CLOSE_CENTERED_WITH_HUB_SCORE,
+            SEGMENT_3_BACK_CENTERED_WITH_HUB_SCORE,
+            SEGMENT_4_RIGHT_TRENCH_SCORE,
+            SEGMENT_5_RIGHT_CORNER_SCORE ->
             timeout(6.0) ? currentState.nextState() : currentState;
 
         default -> currentState.nextState();
@@ -128,7 +132,7 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
         trailblazer.setActiveSegment(segment1DriveToStart);
         robotManager.idleRequest();
       }
-       case SEGMENT_2_CLOSE_CENTERED_WITH_HUB -> {
+      case SEGMENT_2_CLOSE_CENTERED_WITH_HUB -> {
         trailblazer.setActiveSegment(segment2CloseCenteredWithHub);
         robotManager.idleRequest();
       }
@@ -140,7 +144,7 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
         trailblazer.setActiveSegment(segment3BackCenteredWithHub);
         robotManager.idleRequest();
       }
-       case SEGMENT_3_BACK_CENTERED_WITH_HUB_SCORE -> {
+      case SEGMENT_3_BACK_CENTERED_WITH_HUB_SCORE -> {
         trailblazer.setActiveSegment(segment3BackCenteredWithHub);
         robotManager.prepareScoreRequest();
       }
@@ -148,7 +152,7 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
         trailblazer.setActiveSegment(segment4RightTrench);
         robotManager.idleRequest();
       }
-       case SEGMENT_4_RIGHT_TRENCH_SCORE -> {
+      case SEGMENT_4_RIGHT_TRENCH_SCORE -> {
         trailblazer.setActiveSegment(segment4RightTrench);
         robotManager.prepareScoreRequest();
       }
@@ -156,15 +160,14 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
         trailblazer.setActiveSegment(segment5RightCorner);
         robotManager.idleRequest();
       }
-       case SEGMENT_5_RIGHT_CORNER_SCORE -> {
+      case SEGMENT_5_RIGHT_CORNER_SCORE -> {
         trailblazer.setActiveSegment(segment5RightCorner);
         robotManager.prepareScoreRequest();
       }
-       case SEGMENT_6_SCORE_ON_THE_MOVE_LEFT_BUMP -> {
+      case SEGMENT_6_SCORE_ON_THE_MOVE_LEFT_BUMP -> {
         trailblazer.setActiveSegment(segment6LeftBump);
         robotManager.prepareScoreRequest();
       }
-
     }
   }
 
