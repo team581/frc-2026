@@ -5,7 +5,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum DyeRotorState {
   UNHOMED(0.0, 180.0, 0.0, 0.0),
-  RESET_TO_IDLE(0.0, 180.0, 0.0, 0.0),
+  RESET_TO_IDLE(15.0, 180.0, 0.0, 0.0),
   IDLE(0.0, 180.0, 0.0, 0.0),
   SCORE(20.0, 180.0, 10.0, 10.0),
   FEED(20.0, 180.0, 10.0, 10.0),
