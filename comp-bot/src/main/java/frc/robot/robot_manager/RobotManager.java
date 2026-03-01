@@ -30,6 +30,7 @@ import frc.robot.shooter.Shooter;
 import frc.robot.shooter_hood.ShooterHood;
 import frc.robot.swerve.Swerve;
 import frc.robot.turret.Turret;
+import frc.robot.turret.TurretCalculator;
 import frc.robot.util.AimParameterUtil;
 import frc.robot.util.AimParameterUtil.AimingParameters;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -197,7 +198,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if (shooter.atGoal()
             // If localization is healthy, you can feed if we're not in a no-feed zone
             // If localization is dead, you can always shoot
-            && (health.isLocalizationHealthy() ? !FieldUtil.isRobotInNoFeedZone(robotPose) : true)
+            && (health.isLocalizationHealthy() ? !FieldUtil.isRobotInNoFeedZone(TurretCalculator.getTurretPose(robotPose)) : true)
             && turret.atGoal(feedingParameters.turretTolerance())
             && shooterHood.atGoal()) {
 
@@ -254,7 +255,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if (!FeatureFlags.CANCEL_IN_PROGRESS_SHOT.getAsBoolean()
             || (shooter.atGoal()
                 && (health.isLocalizationHealthy()
-                    ? !FieldUtil.isRobotInNoFeedZone(robotPose)
+                    ? !FieldUtil.isRobotInNoFeedZone(TurretCalculator.getTurretPose(robotPose))
                     : true)
                 && turret.atGoal(feedingParameters.turretTolerance())
                 && shooterHood.atGoal())) {
@@ -1259,7 +1260,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         "RobotManager/Feeding/FeedTransition/LocalizationHealthy", health.isLocalizationHealthy());
     DogLog.log(
         "RobotManager/Feeding/FeedTransition/InNoFeedZone",
-        !FieldUtil.isRobotInNoFeedZone(robotPose));
+        !FieldUtil.isRobotInNoFeedZone(TurretCalculator.getTurretPose(robotPose)));
     DogLog.log("RobotManager/Feeding/FeedTransition/DyeRotorNotJammed", !dyeRotor.isJammed());
     DogLog.log(
         "RobotManager/Feeding/FeedTransition/TurretAtGoal",
