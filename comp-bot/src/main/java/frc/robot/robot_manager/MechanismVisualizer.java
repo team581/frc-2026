@@ -38,7 +38,7 @@ public final class MechanismVisualizer {
    * radius. Tune this to match observed shot distances.
    */
   private static final DoubleSubscriber EFFECTIVE_WHEEL_RADIUS =
-      (DogLog.tunable("SimShooter/EffectiveWheelRadiusInches", 1.4));
+      DogLog.tunable("SimShooter/EffectiveWheelRadiusInches", 1.4);
 
   /**
    * Additive offset in degrees applied to the hood angle to account for the difference between the
