@@ -263,6 +263,13 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     return false;
   }
 
+  public double getBps() {
+    // Inverse of DyeRotorState.bpsToRpm: rpm = (bps / (circumference / ballDiameter)) * 60
+    var circumference = 18.0 * Math.PI;
+    var ballDiameter = 6.0;
+    return rotorMotorRpm * (circumference / ballDiameter) / 60.0;
+  }
+
   public double getAngle() {
     return rotorAngle;
   }
