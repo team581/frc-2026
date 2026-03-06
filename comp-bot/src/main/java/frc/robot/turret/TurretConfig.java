@@ -19,8 +19,8 @@ import frc.robot.config.RobotKind;
 
 public class TurretConfig {
   // TODO: adjust after bringup
-  public static final double MIN_ANGLE = RobotKind.IS_COMP_BOT ? -308 : -360;
-  public static final double MAX_ANGLE = RobotKind.IS_COMP_BOT ? 60 : 30;
+  public static final double MIN_ANGLE = RobotKind.IS_COMP_BOT ? -308 : -340;
+  public static final double MAX_ANGLE = RobotKind.IS_COMP_BOT ? 60 : 10;
   public static final double OUT_OF_BOUNDS_THRESHOLD = 1.0;
   public static final double HOMING_END_POSITION = MIN_ANGLE;
   public static final DoubleSubscriber TOLERANCE = DogLog.tunable("Turret/Tolerance", 1.0);
@@ -29,7 +29,7 @@ public class TurretConfig {
 
   // CAL NUMBER
   public static final double ROTOR_CAL_OFFSET =
-      RobotKind.IS_COMP_BOT ? 0.548095703125 : 0.214599609375;
+      RobotKind.IS_COMP_BOT ? 0.548095703125 : 0.6796875;
 
   public static final double MOTOR_ROTATION_RESOLUTION = 1 / MOTOR_TO_TURRET;
   public static final double ENCODER_TO_TURRET =
@@ -49,11 +49,11 @@ public class TurretConfig {
           .withVoltage(new VoltageConfigs().withPeakForwardVoltage(10).withPeakReverseVoltage(-10))
           .withSlot0(
               new Slot0Configs()
-                  .withKP(RobotKind.IS_COMP_BOT ? 200 : 0.0)
-                  .withKV(RobotKind.IS_COMP_BOT ? 6.0 : 0.0)
+                  .withKP(200)
+                  .withKV(6.0)
                   .withKG(0.0)
-                  .withKD(RobotKind.IS_COMP_BOT ? 1.7 : 0.0)
-                  .withKS(RobotKind.IS_COMP_BOT ? 0.2 : 0.0));
+                  .withKD(1.7)
+                  .withKS(0.2));
   public static final CANcoderConfiguration ENCODER_CONFIG =
       new CANcoderConfiguration()
           .withMagnetSensor(
