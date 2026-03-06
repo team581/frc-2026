@@ -6,13 +6,16 @@ import dev.doglog.DogLog;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class Intake extends StateMachineSubsystem<IntakeState> {
-  private final TalonFX motor;
+  private final TalonFX leftMotor;
+  private final TalonFX rightMotor;
 
-  public Intake(TalonFX motor) {
+  public Intake(TalonFX leftMotor, TalonFX rightMotor) {
     super(SubsystemPriority.INTAKE, IntakeState.IDLE);
 
-    motor.getConfigurator().apply(IntakeConfig.MOTOR_CONFIG);
-    this.motor = motor;
+    leftMotor.getConfigurator().apply(IntakeConfig.LEFT_MOTOR_CONFIG);
+    rightMotor.getConfigurator().apply(IntakeConfig.RIGHT_MOTOR_CONFIG);
+    this.leftMotor = leftMotor;
+    this.rightMotor = rightMotor;
   }
 
   public void shootRequest() {
@@ -50,24 +53,30 @@ public class Intake extends StateMachineSubsystem<IntakeState> {
   protected void afterTransition(IntakeState newState) {
     switch (newState) {
       case IDLE -> {
-        motor.disable();
+        leftMotor.disable();
+        rightMotor.disable();
       }
       case INTAKE -> {
-        motor.setVoltage(newState.getIntakeVoltage());
+        leftMotor.setVoltage(newState.getIntakeVoltage());
+        rightMotor.setVoltage(newState.getIntakeVoltage());
       }
       case INTAKE_AUTO -> {
-        motor.setVoltage(newState.getIntakeVoltage());
+        leftMotor.setVoltage(newState.getIntakeVoltage());
+        rightMotor.setVoltage(newState.getIntakeVoltage());
       }
       case SHOOT, SHOOT_THEN_INTAKE -> {
-        motor.setVoltage(newState.getIntakeVoltage());
+        leftMotor.setVoltage(newState.getIntakeVoltage());
+        rightMotor.setVoltage(newState.getIntakeVoltage());
       }
     }
   }
 
   @Override
   protected void collectInputs() {
-    DogLog.log("Intake/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    DogLog.log("Intake/VelocityRPM", motor.getVelocity().getValueAsDouble() * 60.0);
+    DogLog.log("Intake/Left/StatorCurrent", leftMotor.getStatorCurrent().getValueAsDouble());
+    DogLog.log("Intake/Right/StatorCurrent", rightMotor.getStatorCurrent().getValueAsDouble());
+    DogLog.log("Intake/Left/VelocityRPM", leftMotor.getVelocity().getValueAsDouble() * 60.0);
+    DogLog.log("Intake/Right/VelocityRPM", rightMotor.getVelocity().getValueAsDouble() * 60.0);
     DogLog.log("Intake/Voltage", getState().getIntakeVoltage());
   }
 }
