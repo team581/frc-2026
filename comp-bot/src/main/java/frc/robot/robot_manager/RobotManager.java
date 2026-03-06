@@ -359,10 +359,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
-        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
+          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
+          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -385,10 +386,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.feedRequest(feedingParameters.distance());
         turret.feedRequest(
             feedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
-        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
+          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
+          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -424,10 +426,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
-        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
+          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
+          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.rateLimitedDriveRequest();
@@ -467,10 +470,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.feedRequest(feedingParameters.distance());
         turret.feedRequest(0, 0);
 
-        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
+          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
+          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -509,10 +513,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
-        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
+          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
+          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
