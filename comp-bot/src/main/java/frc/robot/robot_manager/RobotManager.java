@@ -360,6 +360,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
+        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
           intake.shootThenIntakeRequest();
         } else {
@@ -385,6 +386,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.feedRequest(feedingParameters.distance());
         turret.feedRequest(
             feedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
+        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
           intake.shootThenIntakeRequest();
         } else {
@@ -423,6 +425,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
+        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
           intake.shootThenIntakeRequest();
         } else {
@@ -465,6 +468,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.feedRequest(feedingParameters.distance());
         turret.feedRequest(0, 0);
 
+        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
           intake.shootThenIntakeRequest();
         } else {
@@ -506,6 +510,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.scoreRequest(scoringParameters.distance());
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
+        deploy.shuffleRequest();
         if (intake.getState().isIntaking()) {
           intake.shootThenIntakeRequest();
         } else {
