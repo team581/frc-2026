@@ -361,10 +361,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -388,10 +386,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.feedRequest(
             feedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -428,10 +424,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.rateLimitedDriveRequest();
@@ -472,10 +466,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.feedRequest(0, 0);
 
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -515,10 +507,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
