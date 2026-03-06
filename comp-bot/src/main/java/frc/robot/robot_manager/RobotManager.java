@@ -360,10 +360,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -387,10 +385,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.feedRequest(
             feedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -427,10 +423,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.rateLimitedDriveRequest();
@@ -471,10 +465,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.feedRequest(0, 0);
 
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -514,10 +506,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         turret.scoreRequest(
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
-          deploy.intakeRequest();
           intake.shootThenIntakeRequest();
         } else {
-          deploy.shuffleRequest();
           intake.shootRequest();
         }
         swerve.normalDriveRequest();
@@ -806,6 +796,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           dyeRotor.scoreRequest(scoringParameters.distance());
         }
+
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
+        }
       }
       case PREPARE_FEED -> {
         smartTurretHoodPrepareFeedRequest();
@@ -829,6 +825,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           dyeRotor.feedCleanupRequest(feedingParameters.distance());
         } else {
           dyeRotor.feedRequest(feedingParameters.distance());
+        }
+
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
         }
       }
 
@@ -858,6 +860,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         } else {
           swerve.normalDriveRequest();
         }
+
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
+        }
       }
       case PREPARE_PRESET_FEED -> {
         // TODO: Use fallback feeding parameters
@@ -875,6 +883,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           swerve.intakeDriveRequest();
         } else {
           swerve.normalDriveRequest();
+        }
+
+        if (drivingToIntake) {
+          deploy.intakeRequest();
+        } else {
+          deploy.shuffleRequest();
         }
       }
       case AUTOMATIC_CLIMB_1_APPROACH_L1, AUTOMATIC_CLIMB_2_LINEUP_L1 -> {
