@@ -69,6 +69,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private double timeUntilNextShift = 0.0;
   private boolean isHubActive = true;
   private boolean isInScoringZone = false;
+  private boolean isInAllianceZone = false;
   private final DoubleSubscriber tunableHubStateOffset =
       DogLog.tunable("RobotManager/MatchTimeOffset", 0.0);
   private final Timer teleopTimer = new Timer();
@@ -1067,6 +1068,19 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     }
   }
 
+  public void prepareScoreOrFeedRequest() {
+    var shouldScore = isInAllianceZone;
+    if (!health.isLocalizationHealthy()) {
+      shouldScore = isHubActive;
+    }
+
+    if (shouldScore) {
+      prepareScoreRequest();
+    } else {
+      prepareFeedRequest();
+    }
+  }
+
   public void setFeedGoalLeftRequest() {
     feedLocation = FeedLocation.LEFT;
   }
@@ -1281,6 +1295,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     isInScoringZone =
         !health.isLocalizationHealthy()
             || !FieldUtil.isInNoScoreZone(TurretCalculator.getTurretPose(robotPose));
+
+
+    isInAllianceZone = FieldUtil.isRobotPastObstacleTowardAllianceZone(TurretCalculator.getTurretPose(robotPose).getTranslation());
   }
 
   private boolean getIsHubActiveOrNotUsingState() {
