@@ -12,7 +12,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
-import frc.robot.config.RobotKind;
 
 public class DeployConfig {
 
@@ -31,7 +30,7 @@ public class DeployConfig {
 
   private static final Slot0Configs AVERAGE_GAINS =
       new Slot0Configs()
-          .withKP(RobotKind.IS_COMP_BOT ? 3 : 3)
+          .withKP(3)
           .withKI(0)
           .withKD(0.0)
           .withKG(0.0)
@@ -40,12 +39,7 @@ public class DeployConfig {
           .withKA(0);
   // Difference axis gains typically go in Slot 1
   private static final Slot1Configs DIFFERENCE_GAINS =
-      new Slot1Configs()
-          .withKP(RobotKind.IS_COMP_BOT ? 3 : 3)
-          .withKI(0)
-          .withKD(0.0)
-          .withKS(0.0)
-          .withKV(0.0);
+      new Slot1Configs().withKP(3).withKI(0).withKD(0.0).withKS(0.0).withKV(0.0);
 
   public static final TalonFXConfiguration LEFT_MOTOR_CONFIG =
       new TalonFXConfiguration()

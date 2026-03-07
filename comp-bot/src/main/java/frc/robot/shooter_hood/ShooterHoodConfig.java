@@ -6,13 +6,11 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team581.math.PolynomialRegression;
 import com.team581.util.tuning.TunableInterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import frc.robot.config.RobotKind;
 import java.util.Map;
 
 public class ShooterHoodConfig {
@@ -46,11 +44,7 @@ public class ShooterHoodConfig {
                   // TODO: Change to brake after bringup completed
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.CounterClockwise_Positive))
-          .withSlot0(
-              new Slot0Configs()
-                  .withKP(RobotKind.IS_COMP_BOT ? 350 : 350)
-                  .withKV(0)
-                  .withKS(0));
+          .withSlot0(new Slot0Configs().withKP(350).withKV(0).withKS(0));
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE =
       TunableInterpolatingDoubleTreeMap.ofEntries(
