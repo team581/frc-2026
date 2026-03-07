@@ -24,7 +24,7 @@ import frc.robot.config.FeatureFlags;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.health.HealthManager;
-import frc.robot.intake.Intake;
+import frc.robot.intake.GenericIntake;
 import frc.robot.localization.Localization;
 import frc.robot.shooter.Shooter;
 import frc.robot.shooter_hood.ShooterHood;
@@ -46,7 +46,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private final DyeRotor dyeRotor;
   public final Deploy deploy;
   private final Turret turret;
-  private final Intake intake;
+  private final GenericIntake intake;
   private final Vision vision;
   public final XboxController driverController;
   private final HealthManager health;
@@ -83,7 +83,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       Shooter shooter,
       DyeRotor dyeRotor,
       Turret turret,
-      Intake intake,
+      GenericIntake intake,
       Deploy deploy,
       Vision vision,
       XboxController driverController,

@@ -14,12 +14,15 @@ import frc.robot.autos.Autos;
 import frc.robot.climber.Climber;
 import frc.robot.cluster_map.ClusterMap;
 import frc.robot.config.FeatureFlags;
+import frc.robot.config.RobotKind;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.generated.BuildConstants;
 import frc.robot.health.HealthManager;
 import frc.robot.imu.Imu;
+import frc.robot.intake.GenericIntake;
 import frc.robot.intake.Intake;
+import frc.robot.intake.IntakeTwoMotor;
 import frc.robot.localization.Localization;
 import frc.robot.robot_manager.RobotManager;
 import frc.robot.shooter.Shooter;
@@ -55,7 +58,10 @@ public class Robot extends Base581Robot {
 
   private final Shooter shooter =
       new Shooter(hardware.shooterLeftMotor, hardware.shooterRightMotor);
-  private final Intake intake = new Intake(hardware.leftIntakeMotor, hardware.rightIntakeMotor);
+  private final GenericIntake intake =
+      RobotKind.IS_COMP_BOT
+          ? new IntakeTwoMotor(hardware.intakeLeftMotor, hardware.intakeRightMotor)
+          : new Intake(hardware.intakeLeftMotor);
   private final Deploy deploy =
       new Deploy(hardware.deployDifferentialMechanism, hardware.hopperCANRange);
   private final DyeRotor dyeRotor =

@@ -28,8 +28,8 @@ public class Hardware {
   public final TalonFX rotorMotor = new TalonFX(18, canivore);
   public final TalonFX horizontalMotor = new TalonFX(19, rio);
   public final TalonFX verticalMotor = new TalonFX(20, rio);
-  public final TalonFX leftIntakeMotor = new TalonFX(21, rio);
-  public final TalonFX rightIntakeMotor = new TalonFX(22, rio);
+  public final TalonFX intakeLeftMotor = new TalonFX(21, rio);
+  public final TalonFX intakeRightMotor = RobotKind.IS_COMP_BOT ? new TalonFX(27) : intakeLeftMotor;
 
   public final SimpleDifferentialMechanism<TalonFX> deployDifferentialMechanism =
       new SimpleDifferentialMechanism<>(
