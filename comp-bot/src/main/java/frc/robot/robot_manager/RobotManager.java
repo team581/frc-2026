@@ -1296,9 +1296,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         !health.isLocalizationHealthy()
             || !FieldUtil.isInNoScoreZone(TurretCalculator.getTurretPose(robotPose));
 
-    isInAllianceZone =
-        FieldUtil.isRobotPastObstacleTowardAllianceZone(
-            TurretCalculator.getTurretPose(robotPose).getTranslation());
+
+    isInAllianceZone = FieldUtil.isRobotPastObstacleTowardAllianceZone(TurretCalculator.getTurretPose(robotPose).getTranslation());
   }
 
   private boolean getIsHubActiveOrNotUsingState() {
