@@ -48,10 +48,9 @@ public class ShooterHoodConfig {
                   .withInverted(InvertedValue.CounterClockwise_Positive))
           .withSlot0(
               new Slot0Configs()
-                  .withKP(RobotKind.IS_COMP_BOT ? 0 : 350)
+                  .withKP(RobotKind.IS_COMP_BOT ? 350 : 350)
                   .withKV(0)
-                  .withKS(0)
-                  .withGravityType(GravityTypeValue.Arm_Cosine));
+                  .withKS(0));
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE =
       TunableInterpolatingDoubleTreeMap.ofEntries(
