@@ -31,7 +31,7 @@ public class DeployConfig {
 
   private static final Slot0Configs AVERAGE_GAINS =
       new Slot0Configs()
-          .withKP(RobotKind.IS_COMP_BOT ? 0 : 3)
+          .withKP(RobotKind.IS_COMP_BOT ? 3 : 3)
           .withKI(0)
           .withKD(0.0)
           .withKG(0.0)
@@ -41,7 +41,7 @@ public class DeployConfig {
   // Difference axis gains typically go in Slot 1
   private static final Slot1Configs DIFFERENCE_GAINS =
       new Slot1Configs()
-          .withKP(RobotKind.IS_COMP_BOT ? 0 : 3)
+          .withKP(RobotKind.IS_COMP_BOT ? 3 : 3)
           .withKI(0)
           .withKD(0.0)
           .withKS(0.0)
