@@ -11,6 +11,7 @@ public class Intake extends GenericIntake {
     this.motor = motor;
   }
 
+  @Override
   public void shootRequest() {
     if (getState() == IntakeState.INTAKE) {
       return;
@@ -18,10 +19,12 @@ public class Intake extends GenericIntake {
     setStateFromRequest(IntakeState.SHOOT);
   }
 
+  @Override
   public void shootThenIntakeRequest() {
     setStateFromRequest(IntakeState.SHOOT_THEN_INTAKE);
   }
 
+  @Override
   public void stopShootingRequest() {
     switch (getState()) {
       case SHOOT -> setStateFromRequest(IntakeState.IDLE);
@@ -30,14 +33,17 @@ public class Intake extends GenericIntake {
     }
   }
 
+  @Override
   public void intakeRequest() {
     setStateFromRequest(IntakeState.INTAKE);
   }
 
+  @Override
   public void intakeAutoRequest() {
     setStateFromRequest(IntakeState.INTAKE_AUTO);
   }
 
+  @Override
   public void idleRequest() {
     setStateFromRequest(IntakeState.IDLE);
   }
