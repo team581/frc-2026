@@ -133,13 +133,9 @@ public class Robot extends Base581Robot {
         .onPress(() -> robotManager.setDriverWantsIntake(true))
         .onRelease(() -> robotManager.setDriverWantsIntake(false));
 
-    driver
-        .rightTrigger()
-        .onPress(robotManager::prepareScoreOrFeedRequest);
+    driver.rightTrigger().onPress(robotManager::prepareScoreOrFeedRequest);
 
-    driver
-        .rightBumper()
-        .onPress(robotManager::idleRequest);
+    driver.rightBumper().onPress(robotManager::idleRequest);
 
     operator.start().onPress(robotManager::homeDeployRequest);
 
