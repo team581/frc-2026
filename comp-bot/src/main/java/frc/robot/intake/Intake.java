@@ -46,30 +46,24 @@ public class Intake extends GenericIntake {
   protected void afterTransition(IntakeState newState) {
     switch (newState) {
       case IDLE -> {
-        leftMotor.disable();
-        rightMotor.disable();
+        motor.disable();
       }
       case INTAKE -> {
-        leftMotor.setVoltage(newState.getIntakeVoltage());
-        rightMotor.setVoltage(newState.getIntakeVoltage());
+        motor.setVoltage(newState.getIntakeVoltage());
       }
       case INTAKE_AUTO -> {
-        leftMotor.setVoltage(newState.getIntakeVoltage());
-        rightMotor.setVoltage(newState.getIntakeVoltage());
+        motor.setVoltage(newState.getIntakeVoltage());
       }
       case SHOOT, SHOOT_THEN_INTAKE -> {
-        leftMotor.setVoltage(newState.getIntakeVoltage());
-        rightMotor.setVoltage(newState.getIntakeVoltage());
+        motor.setVoltage(newState.getIntakeVoltage());
       }
     }
   }
 
   @Override
   protected void collectInputs() {
-    DogLog.log("Intake/Left/StatorCurrent", leftMotor.getStatorCurrent().getValueAsDouble());
-    DogLog.log("Intake/Right/StatorCurrent", rightMotor.getStatorCurrent().getValueAsDouble());
-    DogLog.log("Intake/Left/VelocityRPM", leftMotor.getVelocity().getValueAsDouble() * 60.0);
-    DogLog.log("Intake/Right/VelocityRPM", rightMotor.getVelocity().getValueAsDouble() * 60.0);
+    DogLog.log("Intake/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    DogLog.log("Intake/VelocityRPM", motor.getVelocity().getValueAsDouble() * 60.0);
     DogLog.log("Intake/Voltage", getState().getIntakeVoltage());
   }
 }
