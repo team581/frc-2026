@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import java.util.function.BooleanSupplier;
 
 public record Point(Pose2d redPose, Pose2d bluePose) {
@@ -18,7 +19,9 @@ public record Point(Pose2d redPose, Pose2d bluePose) {
       FeatureFlag.of("ClampedAutoPoints", true);
 
   private static final Rectangle2d CLAMPED_AREA =
-      new Rectangle2d(new Translation2d(16.54, 8.069), new Translation2d(8.246, 1.645));
+      new Rectangle2d(
+          new Translation2d(16.54, 8.069),
+          new Translation2d(8.246 + Units.inchesToMeters(31), 1.645));
 
   private static Pose2d clamp(Pose2d input) {
     return new Pose2d(CLAMPED_AREA.nearest(input.getTranslation()), input.getRotation());

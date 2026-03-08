@@ -49,6 +49,9 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private static final DoubleSubscriber MAX_LINEAR_RATE_SHOOTING =
       DogLog.tunable("Swerve/MaxLinearRateShooting", 2.0);
 
+  private static final DoubleSubscriber SNAKE_MODE_AGRESSIVENESS =
+      DogLog.tunable("Swerve/SnakeModeAgressiveness", 0.25);
+
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
   private static final DoubleSubscriber MAX_ANGULAR_RATE_SHOOTING =
       DogLog.tunable("Swerve/MaxAngularRateShootingRot", 0.4);
@@ -56,7 +59,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   private static final double SIM_LOOP_PERIOD = Units.millisecondsToSeconds(5);
 
-  private final CircularFilter lastDriveDirectionFilter = new CircularFilter(15);
+  private final CircularFilter lastDriveDirectionFilter = new CircularFilter(1);
   private final SlewRateLimiter maxLinearVelocityRateLimiter = new SlewRateLimiter(5.0);
   private final SlewRateLimiter maxAngularVelocityRateLimiter = new SlewRateLimiter(5.0);
 
@@ -285,14 +288,18 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
     if (getState() == SwerveState.INTAKE || getState() == SwerveState.INTAKE_RATE_LIMITED) {
       filteredLastDriveDirection =
-          Rotation2d.fromDegrees(
-              lastDriveDirectionFilter.calculate(
-                  MathHelpers.getDriveDirection(fieldRelativeSpeeds).getDegrees()));
+          filteredLastDriveDirection.interpolate(
+              MathHelpers.getDriveDirection(driveSource.getRequestedSpeeds())
+                  .plus(Rotation2d.fromDegrees(FmsUtil.isRedAlliance() ? 180 : 0)),
+              (SNAKE_MODE_AGRESSIVENESS.get()
+                      * MathHelpers.getLinearVelocity(driveSource.getRequestedSpeeds()))
+                  / teleopDriveSource.maxLinearVelocity);
 
       ableToDirectionSnap =
           FeatureFlags.INTAKE_DIRECTIONAL_SNAPS.getAsBoolean()
               && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
-              && SwerveAssist.ableToDirectionSnap(fieldRelativeSpeeds);
+              && SwerveAssist.ableToDirectionSnap(
+                  fieldRelativeSpeeds, teleopDriveSource.getRightY());
     }
 
     var requestedSpeeds = driveSource.getRequestedSpeeds();

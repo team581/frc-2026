@@ -48,6 +48,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     }
     return ImmutableSet.of();
   }
+  ;
 
   public final String limelightTableName;
   public final CameraConfig config;
@@ -110,7 +111,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     var distance = mT1Estimate.avgTagDist;
 
     var xyDev = 0.01 * Math.pow(distance, 0.8);
-    var thetaDev = Double.POSITIVE_INFINITY;
+    var thetaDev = 999.0;
 
     if (config.useMt2()) {
       PoseEstimate mT2Estimate =
@@ -132,7 +133,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     var devs = VecBuilder.fill(xyDev, xyDev, thetaDev);
 
     DogLog.log("Vision/" + name + "/Tags/RawLimelightPose", mTPose);
-    DogLog.log("Vision/" + name + "/Tags/MT2Timestamp", mTEstimateTimestamp);
+    DogLog.log("Vision/" + name + "/Tags/MTTimestamp", mTEstimateTimestamp);
     DogLog.log("Vision/" + name + "/Tags/DistanceFromTag", distance);
     return tagResult.update(mTPose, mTEstimateTimestamp, devs);
   }
@@ -190,9 +191,10 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
       if (Timer.getTimestamp() - lastTagTimestamp > 30) {
         DogLog.logFault(
             limelightTableName + " has not seen a tag in the last 30 seconds", AlertType.kWarning);
+      } else {
+        DogLog.clearFault(limelightTableName + " has not seen a tag in the last 30 seconds");
       }
     } else {
-
       DogLog.clearFault(limelightTableName + " has not seen a tag in the last 30 seconds");
     }
 

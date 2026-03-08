@@ -103,7 +103,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   @Override
   protected void whileInState(TurretState currentState) {
     switch (currentState) {
-      case UNHOMED -> {
+      case UNHOMED, STUCK -> {
         motor.disable();
       }
       case SCORE, FEED, CLIMB -> {
@@ -130,13 +130,9 @@ public class Turret extends StateMachineSubsystem<TurretState> {
                         clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle))))
                 .withVelocity(Units.radiansToRotations(feedForward)));
       }
-      case STUCK -> {
-        motor.disable();
-      }
       default -> {}
     }
 
-    DogLog.log("Turret/AtGoal", atGoal());
     DogLog.log("Turret/StatorCurrent", statorCurrent);
     DogLog.log("Turret/Voltage", voltage);
   }
@@ -253,10 +249,6 @@ public class Turret extends StateMachineSubsystem<TurretState> {
       // TODO: Reconsider for turret wrapping
       default -> MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), tolerance);
     };
-  }
-
-  public boolean atGoal() {
-    return atGoal(TurretConfig.TOLERANCE.get());
   }
 
   public void stuckRequest() {

@@ -3,6 +3,7 @@ package com.team581.util;
 import com.google.common.collect.ImmutableList;
 import com.team581.autos.Point;
 import com.team581.math.MathHelpers;
+import com.team581.math.ObstructionCalculator;
 import com.team581.math.Triangle2d;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -354,6 +355,10 @@ public class FieldUtil {
       new Rectangle2d(
           CLIMB_FRONT_CORNER_OUTPOST_SIDE.bluePose().getTranslation(),
           CLIMB_BACK_CORNER_DEPOT_SIDE.bluePose().getTranslation());
+
+  // TODO: Define obstruction polygons and integrate with shooting logic
+  public static final ObstructionCalculator FIELD_OBSTACLES =
+      ObstructionCalculator.fromTranslations();
 
   public static Pose2d clampPoseToAllianceZone(Pose2d robot) {
     if (isRobotInAllianceZone(robot.getTranslation())) {

@@ -21,6 +21,9 @@ dependencies {
 	// https://central.sonatype.com/artifact/com.google.guava/guava
 	implementation 'com.google.guava:guava:33.5.0-jre'
 
+	// https://central.sonatype.com/artifact/org.apache.commons/commons-geometry-euclidean
+	implementation 'org.apache.commons:commons-geometry-euclidean:1.0'
+
 	// https://central.sonatype.com/artifact/org.apache.commons/commons-math4-core
 	implementation 'org.apache.commons:commons-math4-legacy-core:4.0-beta1'
 	implementation("org.apache.commons:commons-math4-legacy:4.0-beta1")

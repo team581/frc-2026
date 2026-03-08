@@ -10,8 +10,8 @@ import org.jspecify.annotations.Nullable;
 public class XboxControllerDriveSource implements DriveSource {
   private final XboxController controller;
 
-  private double maxLinearVelocity;
-  private Rotation2d maxAngularVelocity;
+  public double maxLinearVelocity;
+  public Rotation2d maxAngularVelocity;
 
   public XboxControllerDriveSource(
       XboxController controller, double maxLinearVelocity, Rotation2d maxAngularVelocity) {
@@ -23,6 +23,14 @@ public class XboxControllerDriveSource implements DriveSource {
   @Override
   public DriveSourceType getDriveSourceType() {
     return DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP;
+  }
+
+  public double getLeftX() {
+    return controller.getLeftX();
+  }
+
+  public double getLeftY() {
+    return controller.getLeftY();
   }
 
   @Override
@@ -41,6 +49,14 @@ public class XboxControllerDriveSource implements DriveSource {
         rotationMagnitude,
         maxLinearVelocity,
         maxAngularVelocity);
+  }
+
+  public double getRightX() {
+    return controller.getRightX();
+  }
+
+  public double getRightY() {
+    return controller.getRightY();
   }
 
   public void setMaxVelocity(double maxLinearVelocity, Rotation2d maxAngularVelocity) {

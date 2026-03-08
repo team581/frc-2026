@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.config.FeatureFlags;
 import frc.robot.localization.Localization;
 import frc.robot.swerve.Swerve;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -58,7 +59,7 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   }
 
   public Optional<Pose2d> getBestClusterPose() {
-    if (RobotBase.isSimulation()) {
+    if (RobotBase.isSimulation() && FeatureFlags.CLUSTER_MAP.getAsBoolean()) {
       var fakeBestCluster = new Pose2d(9, 5, localization.getPose().getRotation());
       var rotation = MathHelpers.getDriveDirection(localization.getPose(), fakeBestCluster);
       return timeout(5.0) ? Optional.of(new Pose2d(9, 5, rotation)) : Optional.empty();
@@ -198,6 +199,9 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
 
   @Override
   protected void collectInputs() {
+    if (!FeatureFlags.CLUSTER_MAP.getAsBoolean()) {
+      return;
+    }
     swerveSpeeds = swerve.getRobotRelativeSpeeds();
     updateMap();
   }

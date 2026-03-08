@@ -63,7 +63,11 @@ public class SwerveAssist {
     }
   }
 
-  public static boolean ableToDirectionSnap(ChassisSpeeds fieldRelativeSpeeds) {
+  public static boolean ableToDirectionSnap(
+      ChassisSpeeds fieldRelativeSpeeds, double controllerRightYValue) {
+    if (Math.abs(controllerRightYValue) < 0.75) {
+      return false;
+    }
     var robotVelocity = MathHelpers.getLinearVelocity(fieldRelativeSpeeds);
     return robotVelocity > MIN_ROBOT_VELOCITY_FOR_DIRECTION_SNAPS.getAsDouble();
   }

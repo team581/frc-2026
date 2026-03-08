@@ -10,24 +10,21 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.DoubleSubscriber;
+import frc.robot.config.RobotKind;
 
 public class TurretConfig {
-  // TODO: adjust after bringup
-  public static final double MIN_ANGLE = -360;
-  public static final double MAX_ANGLE = 30;
+  public static final double MIN_ANGLE = RobotKind.IS_COMP_BOT ? -340.0 : -355.0;
+  public static final double MAX_ANGLE = RobotKind.IS_COMP_BOT ? 70.0 : 5.0;
   public static final double OUT_OF_BOUNDS_THRESHOLD = 1.0;
   public static final double HOMING_END_POSITION = MIN_ANGLE;
-  public static final DoubleSubscriber TOLERANCE = DogLog.tunable("Turret/Tolerance", 1.0);
 
   public static final double MOTOR_TO_TURRET = ((220.0 / 14.0) * (36.0 / 10.0));
 
   // CAL NUMBER
-  public static final double ROTOR_CAL_OFFSET = -0.249267578125;
+  public static final double ROTOR_CAL_OFFSET = RobotKind.IS_COMP_BOT ? -0.1845703125 : 0.6796875;
 
   public static final double MOTOR_ROTATION_RESOLUTION = 1 / MOTOR_TO_TURRET;
   public static final double ENCODER_TO_TURRET =
@@ -46,7 +43,7 @@ public class TurretConfig {
               new CurrentLimitsConfigs().withStatorCurrentLimit(40).withSupplyCurrentLimit(20))
           .withVoltage(new VoltageConfigs().withPeakForwardVoltage(10).withPeakReverseVoltage(-10))
           .withSlot0(
-              new Slot0Configs().withKP(200.0).withKV(6.0).withKG(0.0).withKD(1.7).withKS(0.2));
+              new Slot0Configs().withKP(200).withKV(6.0).withKG(0.0).withKD(1.7).withKS(0.2));
   public static final CANcoderConfiguration ENCODER_CONFIG =
       new CANcoderConfiguration()
           .withMagnetSensor(

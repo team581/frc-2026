@@ -11,17 +11,19 @@ import frc.robot.vision.limelight.Limelight;
 public class HealthManager extends StateMachineSubsystem<HealthState> {
   private final Limelight turretLimelight;
   private final Limelight backLimelight;
+  private final Limelight groundLimelight;
 
   private boolean localizationHealthy = true;
   private boolean fuelDetectionHealthy = true;
   private boolean allCamerasHealthy = true;
 
-  // TODO: Add intake Limelight
-  public HealthManager(Limelight turretLimelight, Limelight backLimelight) {
+  public HealthManager(
+      Limelight turretLimelight, Limelight backLimelight, Limelight groundLimelight) {
     super(SubsystemPriority.HEALTH, HealthState.DEFAULT_STATE);
 
     this.turretLimelight = turretLimelight;
     this.backLimelight = backLimelight;
+    this.groundLimelight = groundLimelight;
   }
 
   /** Returns whether all cameras are healthy. */
@@ -42,10 +44,11 @@ public class HealthManager extends StateMachineSubsystem<HealthState> {
   @Override
   protected void collectInputs() {
     localizationHealthy =
-        RobotBase.isSimulation() || turretLimelight.getCameraHealth() != CameraHealth.OFFLINE;
-    // TODO: This should use intake limelight
+        RobotBase.isSimulation()
+            || (turretLimelight.getCameraHealth() != CameraHealth.OFFLINE
+                || backLimelight.getCameraHealth() != CameraHealth.OFFLINE);
     fuelDetectionHealthy =
-        RobotBase.isSimulation() || backLimelight.getCameraHealth() != CameraHealth.OFFLINE;
+        RobotBase.isSimulation() || groundLimelight.getCameraHealth() != CameraHealth.OFFLINE;
     allCamerasHealthy = localizationHealthy && fuelDetectionHealthy;
   }
 

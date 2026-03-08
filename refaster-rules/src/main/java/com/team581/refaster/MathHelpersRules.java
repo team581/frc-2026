@@ -43,6 +43,19 @@ class MathHelpersRules {
     }
   }
 
+  /** Prefer {@link MathHelpers#average(double, double)} over {@code (a + b) / 2.0}. */
+  static class Average {
+    @BeforeTemplate
+    double before(double a, double b) {
+      return (a + b) / 2.0;
+    }
+
+    @AfterTemplate
+    double after(double a, double b) {
+      return MathHelpers.average(a, b);
+    }
+  }
+
   /**
    * Prefer {@link MathHelpers#rotation2d(double, double)} over {@code new Rotation2d(x, y)} to
    * safely handle small magnitude vectors.
