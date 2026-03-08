@@ -10,19 +10,19 @@ import frc.robot.config.DSOptions;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class HubActivity extends StateMachineSubsystem<HubActivityState> {
+  private static final double FORCE_SCORE_TRANSITION_TIMEOUT = 3.0;
   private final DoubleSubscriber tunableHubStateOffset =
       DogLog.tunable("HubActivity/MatchTimeOffset", 0.0);
+
   private final Timer teleopTimer = new Timer();
-
   private double timeSinceMatchStart = 0.0;
-  private double timeUntilNextShift = 0.0;
 
+  private double timeUntilNextShift = 0.0;
   private boolean actualHubActive = true;
   private double scoringShooterTOF = 0.0;
   private boolean tofBasedHubActive = true;
-  private boolean forceScoreTransitionEndOfActiveHub = false;
 
-  private static final double FORCE_SCORE_TRANSITION_TIMEOUT = 3.0;
+  private boolean forceScoreTransitionEndOfActiveHub = false;
 
   public HubActivity() {
     super(SubsystemPriority.HUB_ACTIVITY, HubActivityState.DEFAULT_STATE);
@@ -30,10 +30,48 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
     teleopTimer.start();
   }
 
+  public boolean ableToForceScoreTransitionEndOfActiveHub() {
+    return forceScoreTransitionEndOfActiveHub;
+  }
+
+  public boolean getActualHubActive() {
+    return actualHubActive;
+  }
+
+  public boolean getTOFBasedHubActive() {
+    return tofBasedHubActive;
+  }
+
   @Override
   public void teleopInit() {
     teleopTimer.reset();
     timeSinceMatchStart = FmsUtil.MATCH_TIME_AT_TELEOP_START;
+  }
+
+  public void updateShooterScoringTOF(double scoringShooterTOF) {
+    this.scoringShooterTOF = scoringShooterTOF;
+  }
+
+  private boolean calculateActualHubActive() {
+    // Hub always active in auto or if DS option is turned off
+    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
+      return true;
+    }
+
+    return FmsUtil.isHubActive(
+        timeSinceMatchStart + tunableHubStateOffset.get(),
+        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
+  }
+
+  private boolean calculateTOFBasedHubActive() {
+    // Hub always active in auto or if DS option is turned off
+    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
+      return true;
+    }
+
+    return FmsUtil.isHubActive(
+        timeSinceMatchStart + scoringShooterTOF + tunableHubStateOffset.get(),
+        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
   }
 
   @Override
@@ -60,43 +98,5 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
         ableToForceScoreTransitionEndOfActiveHub());
     DogLog.log("HubActivity/ActualHubActive", actualHubActive);
     DogLog.log("HubActivity/TOFBasedHubActive", tofBasedHubActive);
-  }
-
-  private boolean calculateActualHubActive() {
-    // Hub always active in auto or if DS option is turned off
-    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
-      return true;
-    }
-
-    return FmsUtil.isHubActive(
-        timeSinceMatchStart + tunableHubStateOffset.get(),
-        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
-  }
-
-  private boolean calculateTOFBasedHubActive() {
-    // Hub always active in auto or if DS option is turned off
-    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
-      return true;
-    }
-
-    return FmsUtil.isHubActive(
-        timeSinceMatchStart + scoringShooterTOF + tunableHubStateOffset.get(),
-        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
-  }
-
-  public boolean getActualHubActive() {
-    return actualHubActive;
-  }
-
-  public void updateShooterScoringTOF(double scoringShooterTOF) {
-    this.scoringShooterTOF = scoringShooterTOF;
-  }
-
-  public boolean getTOFBasedHubActive() {
-    return tofBasedHubActive;
-  }
-
-  public boolean ableToForceScoreTransitionEndOfActiveHub() {
-    return forceScoreTransitionEndOfActiveHub;
   }
 }
