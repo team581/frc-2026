@@ -1,4 +1,50 @@
 {
+  "cameras": [
+    {
+      "name": "Back (LL4)",
+      "position": [
+        -0.3401,
+        0.2118,
+        0.5018
+      ],
+      "fov": 82,
+      "rotations": [
+        {
+          "axis": "z",
+          "degrees": -175.5
+        },
+        {
+          "axis": "y",
+          "degrees": 10
+        },
+        {
+          "axis": "x",
+          "degrees": -0.83
+        }
+      ],
+      "resolution": [
+        1280,
+        800
+      ]
+    },
+    {
+      "name": "Ground (LL3)",
+      "position": [
+        0.652,
+        0,
+        0.329
+      ],
+      "fov": 62.5,
+      "rotations": [{
+        "axis": "y",
+        "degrees": 20
+      }],
+      "resolution": [
+        640,
+        480
+      ]
+    }
+  ],
   "components": [
     {
       "zeroedRotations": [

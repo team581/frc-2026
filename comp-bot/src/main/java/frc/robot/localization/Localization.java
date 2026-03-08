@@ -7,6 +7,7 @@ import com.team581.vision.results.TagResult;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
@@ -14,9 +15,12 @@ import frc.robot.imu.Imu;
 import frc.robot.swerve.Swerve;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.Vision;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Localization extends StateMachineSubsystem<LocalizationState> {
-  private static final double LATENCY_CONSTANT = 0.0;
+  private static final DoubleSubscriber LATENCY_CONSTANT =
+      DogLog.tunable("Localization/StaticLatencyAdjustment", 10.0);
   private final Swerve swerve;
   private final TunerSwerveDrivetrain drivetrain;
   private final Vision vision;
@@ -88,26 +92,34 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
     trustFactor.reset();
   }
 
-  private void ingestTagResult(TagResult result) {
+  private void ingestTagResult(List<TagResult> results) {
     DogLog.timestamp("Localization/IngestTagResult");
-    trustFactor.tagSeen(result.standardDevs().getData()[0]);
-    var visionPose = result.pose();
-
-    if (!vision.seenTagRecentlyForReset()) {
-      resetPose(visionPose);
+    var averageTimestamp = 0.0;
+    for (TagResult result : results) {
+      var visionPose = result.pose();
+      averageTimestamp += result.timestamp();
+      if (!vision.seenTagRecentlyForReset()) {
+        resetPose(visionPose);
+      }
+      swerve.drivetrain.addVisionMeasurement(
+          visionPose,
+          Utils.fpgaToCurrentTime(result.timestamp() - (LATENCY_CONSTANT.get() / 1000)),
+          result.standardDevs());
     }
-    swerve.drivetrain.addVisionMeasurement(
-        visionPose,
-        Utils.fpgaToCurrentTime(result.timestamp() - (LATENCY_CONSTANT / 1000)),
-        result.standardDevs());
+    averageTimestamp = averageTimestamp / results.size();
+    trustFactor.ingestTagResult(getPose(averageTimestamp), results);
   }
 
   @Override
   protected void collectInputs() {
-    vision.getAdjustedTurretLimelighTagResult().ifPresent(this::ingestTagResult);
-    vision.getBackLimelightTagResult().ifPresent(this::ingestTagResult);
+    List<TagResult> presentList = new ArrayList<>(2);
+    vision.getAdjustedTurretLimelighTagResult().ifPresent(presentList::add);
+    vision.getBackLimelightTagResult().ifPresent(presentList::add);
+
+    ingestTagResult(presentList);
+
     robotPose = drivetrain.getState().Pose;
 
-    trustFactor.update(robotPose, imu.collisionDetected());
+    trustFactor.update(robotPose, Swerve.TRANSLATION_STD_DEV, imu.collisionDetected());
   }
 }

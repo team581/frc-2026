@@ -27,7 +27,7 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
   private static final Pose2d RED_START_POSE =
       FieldUtil.HUB_POSE
           .redPose()
-          .plus(new Transform2d(Units.inchesToMeters(60.0), 0.0, Rotation2d.k180deg));
+          .plus(new Transform2d(Units.inchesToMeters(60.0), 0.0, Rotation2d.kZero));
 
   private final AutoSegment segment1DriveToStart =
       Trailblazer.segment(AutoPoint.ofRed(RED_START_POSE))
@@ -36,14 +36,14 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
 
   private final AutoSegment segment2CloseCenteredWithHub =
       Trailblazer.segment(
-              AutoPoint.ofRed(RED_START_POSE.plus(new Transform2d(0.25, 0.0, Rotation2d.kZero))))
+              AutoPoint.ofRed(RED_START_POSE.plus(new Transform2d(0.2, 0.0, Rotation2d.kZero))))
           .withLinearConstraints(MAX_VELOCITY, MAX_ACCELERATION)
           .untilFinished(new PoseErrorTolerance(0.05, 3));
 
   private final AutoSegment segment3BackCenteredWithHub =
       Trailblazer.segment(
               // Climb area
-              AutoPoint.ofRed(new Pose2d(14.929, RED_START_POSE.getY(), Rotation2d.kZero)))
+              AutoPoint.ofRed(new Pose2d(14.929, RED_START_POSE.getY(), Rotation2d.k180deg)))
           .withLinearConstraints(MAX_VELOCITY, MAX_ACCELERATION)
           .untilFinished(new PoseErrorTolerance(0.05, 3));
 
@@ -54,10 +54,18 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
           .withLinearConstraints(MAX_VELOCITY, MAX_ACCELERATION)
           .untilFinished(new PoseErrorTolerance(0.05, 3));
 
-  private final AutoSegment segment5RightTrench =
+  private final AutoSegment segment5RightCorner =
       Trailblazer.segment(
               // Climb area
-              AutoPoint.ofRed(new Pose2d(14.929, RED_START_POSE.getY(), Rotation2d.k180deg)),
+              AutoPoint.ofRed(new Pose2d(16.0, 7.517, Rotation2d.k180deg)))
+          .withLinearConstraints(MAX_VELOCITY, MAX_ACCELERATION)
+          .untilFinished(new PoseErrorTolerance(0.05, 3));
+
+  private final AutoSegment segment6LeftBump =
+      Trailblazer.segment(
+              // Climb area
+              AutoPoint.ofRed(new Pose2d(14.929, 7.0, Rotation2d.k180deg))
+                  .withTransitionTolerance(new PoseErrorTolerance(0.5, 50)),
               AutoPoint.ofRed(new Pose2d(13.36, 2.54, Rotation2d.fromDegrees(-45))))
           .withLinearConstraints(MAX_VELOCITY, MAX_ACCELERATION)
           .untilFinished(new PoseErrorTolerance(0.05, 3));
@@ -83,8 +91,12 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
   protected IntegrationTestState getNextState(IntegrationTestState currentState) {
     if (trailblazer.atGoal(robotManager.localization.getPose().getTranslation())) {
       return switch (currentState) {
-        case SEGMENT_2_CLOSE_CENTERED_WITH_HUB ->
-            timeout(2.0) ? IntegrationTestState.SEGMENT_3_BACK_CENTERED_WITH_HUB : currentState;
+        case SEGMENT_2_CLOSE_CENTERED_WITH_HUB_SCORE,
+            SEGMENT_3_BACK_CENTERED_WITH_HUB_SCORE,
+            SEGMENT_4_RIGHT_TRENCH_SCORE,
+            SEGMENT_5_RIGHT_CORNER_SCORE ->
+            timeout(6.0) ? currentState.nextState() : currentState;
+
         default -> currentState.nextState();
       };
     }
@@ -122,18 +134,38 @@ public class IntegrationTest extends BaseImperativeAuto<IntegrationTestState> {
       }
       case SEGMENT_2_CLOSE_CENTERED_WITH_HUB -> {
         trailblazer.setActiveSegment(segment2CloseCenteredWithHub);
+        robotManager.idleRequest();
+      }
+      case SEGMENT_2_CLOSE_CENTERED_WITH_HUB_SCORE -> {
+        trailblazer.setActiveSegment(segment2CloseCenteredWithHub);
         robotManager.prepareScoreRequest();
       }
       case SEGMENT_3_BACK_CENTERED_WITH_HUB -> {
+        trailblazer.setActiveSegment(segment3BackCenteredWithHub);
+        robotManager.idleRequest();
+      }
+      case SEGMENT_3_BACK_CENTERED_WITH_HUB_SCORE -> {
         trailblazer.setActiveSegment(segment3BackCenteredWithHub);
         robotManager.prepareScoreRequest();
       }
       case SEGMENT_4_RIGHT_TRENCH -> {
         trailblazer.setActiveSegment(segment4RightTrench);
+        robotManager.idleRequest();
+      }
+      case SEGMENT_4_RIGHT_TRENCH_SCORE -> {
+        trailblazer.setActiveSegment(segment4RightTrench);
         robotManager.prepareScoreRequest();
       }
-      case SEGMENT_5_LEFT_RAMP -> {
-        trailblazer.setActiveSegment(segment5RightTrench);
+      case SEGMENT_5_RIGHT_CORNER -> {
+        trailblazer.setActiveSegment(segment5RightCorner);
+        robotManager.idleRequest();
+      }
+      case SEGMENT_5_RIGHT_CORNER_SCORE -> {
+        trailblazer.setActiveSegment(segment5RightCorner);
+        robotManager.prepareScoreRequest();
+      }
+      case SEGMENT_6_SCORE_ON_THE_MOVE_LEFT_BUMP -> {
+        trailblazer.setActiveSegment(segment6LeftBump);
         robotManager.prepareScoreRequest();
       }
     }

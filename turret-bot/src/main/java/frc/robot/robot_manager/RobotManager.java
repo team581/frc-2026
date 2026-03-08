@@ -181,7 +181,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     var turretVelocity = turret.getVelocityDegreesPerSecond();
     DogLog.log("RobotManager/TurretVelocity", turretVelocity);
 
-    readyToShootAtHub = FmsUtil.isHubActive(timeSinceMatchStart + TIME_OF_FLIGHT.get());
+    readyToShootAtHub = FmsUtil.isHubActive(timeSinceMatchStart + TIME_OF_FLIGHT.get(), true);
     inAllianceZone = FieldUtil.isRobotInAllianceZone(robotTranslation);
     robotPoseInAllianceZone = FieldUtil.clampPoseToAllianceZone(robotPose);
     DogLog.log("RobotManager/Autoscore", autoscore);

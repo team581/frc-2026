@@ -59,7 +59,7 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   }
 
   public Optional<Pose2d> getBestClusterPose() {
-    if (RobotBase.isSimulation()) {
+    if (RobotBase.isSimulation() && FeatureFlags.CLUSTER_MAP.getAsBoolean()) {
       var fakeBestCluster = new Pose2d(9, 5, localization.getPose().getRotation());
       var rotation = MathHelpers.getDriveDirection(localization.getPose(), fakeBestCluster);
       return timeout(5.0) ? Optional.of(new Pose2d(9, 5, rotation)) : Optional.empty();

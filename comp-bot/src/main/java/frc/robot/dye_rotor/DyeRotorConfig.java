@@ -24,20 +24,20 @@ public class DyeRotorConfig {
   public static final double HOMING_END_POSITION = 180;
 
   public static final DoubleSubscriber JAM_CURRENT_THRESHOLD =
-      DogLog.tunable("DyeRotor/Horizontal/JamCurrentThreshold", 75.0);
+      DogLog.tunable("DyeRotor/Horizontal/JamCurrentThreshold", 55.0);
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_BPS =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "DyeRotor/DistanceToScoreBPS",
           Map.entry(5.56, 10.0),
-          Map.entry(3.56, 20.0),
-          Map.entry(1.69, 20.0));
+          Map.entry(3.56, 75.0),
+          Map.entry(1.69, 100.0));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED_BPS =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "DyeRotor/DistanceToFeedBPS",
-          Map.entry(9.56, 20.0),
-          Map.entry(3.56, 20.0),
-          Map.entry(1.69, 20.0));
+          Map.entry(9.56, 100.0),
+          Map.entry(3.56, 100.0),
+          Map.entry(1.69, 100.0));
 
   public static final TalonFXConfiguration ROTOR_MOTOR_CONFIG =
       new TalonFXConfiguration()
@@ -90,8 +90,7 @@ public class DyeRotorConfig {
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
-                  .withInverted(InvertedValue.CounterClockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0).withKS(0.0));
+                  .withInverted(InvertedValue.CounterClockwise_Positive));
   public static boolean ROTOR_STOP;
 
   private DyeRotorConfig() {}

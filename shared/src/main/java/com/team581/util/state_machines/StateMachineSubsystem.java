@@ -13,7 +13,8 @@ import org.jspecify.annotations.Nullable;
  * A state machine that is also a subsystem. Extends {@link StateMachine} and implements {@link
  * Subsystem}.
  */
-public class StateMachineSubsystem<S extends Enum<S>> extends StateMachine<S> implements Subsystem {
+public abstract class StateMachineSubsystem<S extends Enum<S>> extends StateMachine<S>
+    implements Subsystem {
   public static String getSubsystemName(Class<?> cls) {
     var name = cls.getSimpleName();
 

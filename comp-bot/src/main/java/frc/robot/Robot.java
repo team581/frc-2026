@@ -1,8 +1,6 @@
 package frc.robot;
 
 import com.team581.Base581Robot;
-import com.team581.config.CameraConfig;
-import com.team581.config.LimelightModel;
 import com.team581.controller.ControllerBindings;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.Trailblazer;
@@ -12,26 +10,33 @@ import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autos.Autos;
 import frc.robot.climber.Climber;
 import frc.robot.cluster_map.ClusterMap;
 import frc.robot.config.FeatureFlags;
+import frc.robot.config.RobotKind;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.generated.BuildConstants;
 import frc.robot.health.HealthManager;
 import frc.robot.imu.Imu;
+import frc.robot.intake.GenericIntake;
 import frc.robot.intake.Intake;
+import frc.robot.intake.IntakeTwoMotor;
 import frc.robot.localization.Localization;
 import frc.robot.robot_manager.RobotManager;
 import frc.robot.shooter.Shooter;
 import frc.robot.shooter_hood.ShooterHood;
 import frc.robot.swerve.Swerve;
 import frc.robot.turret.Turret;
+import frc.robot.vision.CameraConfigs;
 import frc.robot.vision.Vision;
 import frc.robot.vision.limelight.Limelight;
 import frc.robot.vision.limelight.LimelightState;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Robot extends Base581Robot {
   private final Hardware hardware = new Hardware();
@@ -42,57 +47,13 @@ public class Robot extends Base581Robot {
           new PidPathFollower(new PIDController(3.5, 0, 0), new PIDController(4.0, 0, 0)));
 
   private final Limelight turretLimelight =
-      new Limelight(
-          "turret",
-          LimelightState.TAGS,
-          new CameraConfig(
-              LimelightModel.FOUR,
-              true,
-              false,
-              Units.inchesToMeters(0.0),
-              Units.inchesToMeters(0.0),
-              Units.inchesToMeters(20.348),
-              30.0,
-              0.0,
-              0.0));
+      new Limelight("turret", LimelightState.TAGS, CameraConfigs.TURRET);
   private final Limelight backLimelight =
-      new Limelight(
-          "backl",
-          LimelightState.TAGS,
-          new CameraConfig(
-              LimelightModel.FOUR,
-              true,
-              true,
-              // back
-              Units.inchesToMeters(-13.389),
-              // left
-              Units.inchesToMeters(-8.3370),
-              Units.inchesToMeters(19.7564),
-              // TODO: get real number from cad
-              10.00,
-              180.0 + 4.5,
-              -0.83));
-
-  // ground when stowed
-  // Units.inchesToMeters(12.9742),
-  // Units.inchesToMeters(0.0),
-  // Units.inchesToMeters(16.8886)
-
+      new Limelight("backl", LimelightState.TAGS, CameraConfigs.BACK);
   private final Limelight groundLimelight =
-      new Limelight(
-          "ground",
-          LimelightState.CLUSTER_MAP,
-          new CameraConfig(
-              LimelightModel.THREE,
-              false,
-              false,
-              Units.inchesToMeters(25.671),
-              Units.inchesToMeters(0.0),
-              Units.inchesToMeters(12.9525),
-              -20.0,
-              0.0,
-              0.0));
-  private final HealthManager health = new HealthManager(turretLimelight, backLimelight);
+      new Limelight("ground", LimelightState.CLUSTER_MAP, CameraConfigs.GROUND);
+  private final HealthManager health =
+      new HealthManager(turretLimelight, backLimelight, groundLimelight);
   private final Swerve swerve =
       new Swerve(hardware.drivetrain, health, hardware.driverController, trailblazer);
   private final Imu imu = new Imu(swerve.drivetrain);
@@ -101,7 +62,10 @@ public class Robot extends Base581Robot {
 
   private final Shooter shooter =
       new Shooter(hardware.shooterLeftMotor, hardware.shooterRightMotor);
-  private final Intake intake = new Intake(hardware.intakeMotor);
+  private final GenericIntake intake =
+      RobotKind.IS_COMP_BOT
+          ? new IntakeTwoMotor(hardware.intakeLeftMotor, hardware.intakeRightMotor)
+          : new Intake(hardware.intakeLeftMotor);
   private final Deploy deploy =
       new Deploy(hardware.deployDifferentialMechanism, hardware.hopperCANRange);
   private final DyeRotor dyeRotor =
@@ -147,6 +111,16 @@ public class Robot extends Base581Robot {
     finalizeInit();
 
     FieldUtil.debugLogFieldZones();
+
+    if (RobotBase.isSimulation()) {
+      try {
+        var docsDir = Path.of(System.getProperty("user.dir")).resolve("../docs");
+        Files.writeString(
+            docsDir.resolve("field_obstacles.svg"), FieldUtil.FIELD_OBSTACLES.toSvg());
+      } catch (IOException e) {
+        throw new RuntimeException("Failed to write field obstacles SVG", e);
+      }
+    }
   }
 
   @Override
@@ -176,18 +150,12 @@ public class Robot extends Base581Robot {
 
     driver
         .leftTrigger()
-        .onPress(robotManager::intakeRequest)
-        .onRelease(robotManager::cancelIntakeRequest);
+        .onPress(() -> robotManager.setDriverWantsIntake(true))
+        .onRelease(() -> robotManager.setDriverWantsIntake(false));
 
-    driver
-        .rightTrigger()
-        .onPress(robotManager::prepareScoreRequest)
-        .onRelease(robotManager::idleRequest);
+    driver.rightTrigger().onPress(robotManager::prepareScoreOrFeedRequest);
 
-    driver
-        .rightBumper()
-        .onPress(robotManager::prepareFeedRequest)
-        .onRelease(robotManager::idleRequest);
+    driver.rightBumper().onPress(robotManager::idleRequest);
 
     operator.start().onPress(robotManager::homeDeployRequest);
 

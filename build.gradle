@@ -1,6 +1,6 @@
 plugins {
-	id 'com.diffplug.spotless' version '8.2.1'
-	id 'net.ltgt.errorprone' version '5.0.0'
+	id 'com.diffplug.spotless' version '8.3.0'
+	id 'net.ltgt.errorprone' version '5.1.0'
 	// Declared here with apply false so the plugin is loaded once by the root classloader
 	// This fixes Windows issues with the VS Code language server
 	id "edu.wpi.first.GradleRIO" version "2026.2.1" apply false
@@ -32,8 +32,8 @@ subprojects {
 
 	// Error Prone dependencies
 	dependencies {
-		compileOnly "com.google.errorprone:error_prone_annotations:2.47.0"
-		errorprone "com.google.errorprone:error_prone_core:2.47.0"
+		compileOnly "com.google.errorprone:error_prone_annotations:2.48.0"
+		errorprone "com.google.errorprone:error_prone_core:2.48.0"
 		errorprone "tech.picnic.error-prone-support:error-prone-contrib:0.28.0"
 		errorprone "tech.picnic.error-prone-support:refaster-runner:0.28.0"
 

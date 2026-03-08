@@ -6,7 +6,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team581.math.MathHelpers;
 import com.team581.simkit.SimKit;
-import com.team581.util.AprilTags;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
 import dev.doglog.DogLog;
@@ -26,10 +25,11 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private final CANcoder encoder;
   private double currentAngle = 0.0;
   private double goalAngle = 0.0;
+  private double setpoint = 0.0;
   private double velocity = 0.0;
   private double voltage = 0.0;
   private double statorCurrent = 0.0;
-  private double robotRotationFeedForward = 0.0;
+  private double feedForward = 0.0;
   private double stuckAngle = 0.0;
 
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withEnableFOC(false);
@@ -98,45 +98,55 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     DogLog.log(
         "Turret/Encoder/EncoderAngle",
         Units.rotationsToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
+
+    switch (getState()) {
+      case UNHOMED -> {}
+      case SCORE, FEED, CLIMB, CLIMB_SCORE, STUCK -> {
+        setpoint = clamp(TurretCalculator.getOptimalAngle(goalAngle, currentAngle));
+      }
+      case IDLE_SCORE, IDLE_FEED -> {
+        setpoint = clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle));
+      }
+    }
   }
 
   @Override
   protected void whileInState(TurretState currentState) {
     switch (currentState) {
-      case UNHOMED -> {
+      case UNHOMED, STUCK -> {
         motor.disable();
       }
       case SCORE, FEED, CLIMB -> {
         motor.setControl(
             positionRequest
-                .withPosition(
-                    Units.degreesToRotations(
-                        clamp(TurretCalculator.getOptimalAngle(goalAngle, currentAngle))))
-                .withVelocity(Units.degreesToRotations(robotRotationFeedForward)));
+                .withPosition(Units.degreesToRotations(clamp(setpoint)))
+                .withVelocity(Units.radiansToRotations(getFeedForward())));
       }
       case IDLE_SCORE, IDLE_FEED -> {
         motor.setControl(
             positionRequest
-                .withPosition(
-                    Units.degreesToRotations(
-                        clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle))))
-                .withVelocity(Units.degreesToRotations(robotRotationFeedForward)));
+                .withPosition(Units.degreesToRotations(clamp(setpoint)))
+                .withVelocity(Units.radiansToRotations(getFeedForward())));
       }
       case CLIMB_SCORE -> {
         motor.setControl(
-            positionRequest.withPosition(
-                Units.degreesToRotations(
-                    clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle)))));
-      }
-      case STUCK -> {
-        motor.disable();
+            positionRequest
+                .withPosition(Units.degreesToRotations(clamp(setpoint)))
+                .withVelocity(Units.radiansToRotations(getFeedForward())));
       }
       default -> {}
     }
 
-    DogLog.log("Turret/AtGoal", atGoal());
     DogLog.log("Turret/StatorCurrent", statorCurrent);
     DogLog.log("Turret/Voltage", voltage);
+  }
+
+  private double getFeedForward() {
+    if (MathUtil.isNear(TurretConfig.MAX_ANGLE, currentAngle, 3)
+        || MathUtil.isNear(TurretConfig.MIN_ANGLE, currentAngle, 3)) {
+      return 0.0;
+    }
+    return feedForward;
   }
 
   public void setState(TurretState newState) {
@@ -146,11 +156,6 @@ public class Turret extends StateMachineSubsystem<TurretState> {
         setStateFromRequest(newState);
       }
     }
-  }
-
-  public boolean goalOutOfBounds() {
-    return goalAngle > (TurretConfig.MAX_ANGLE - TurretConfig.OUT_OF_BOUNDS_THRESHOLD)
-        || goalAngle < (TurretConfig.MIN_ANGLE + TurretConfig.OUT_OF_BOUNDS_THRESHOLD);
   }
 
   @Override
@@ -168,15 +173,22 @@ public class Turret extends StateMachineSubsystem<TurretState> {
         DogLog.clearFault("Turret is not homed");
       }
     }
-    if (DriverStation.isDisabled() && getState() != TurretState.UNHOMED) {
-      if (!MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
-        DogLog.logFault("Turret is misaligned", AlertType.kWarning);
-        DogLog.clearFault("Turret is misaligned");
+    if (DriverStation.isDisabled()) {
+      if (getState() != TurretState.UNHOMED) {
+        if (!MathUtil.isNear(setpoint, MathHelpers.angleModulus(currentAngle), 10.0)) {
+          DogLog.logFault("Turret is misaligned", AlertType.kWarning);
+        } else {
+          DogLog.clearFault("Turret is misaligned");
+        }
       }
+    } else {
+      // Clear the misalignment fault once teleop starts
+      DogLog.clearFault("Turret is misaligned");
     }
   }
 
-  public void scoreRequest(double goalAngle) {
+  public void scoreRequest(double goalAngle, double feedForward) {
+    this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
@@ -185,7 +197,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     setState(TurretState.SCORE);
   }
 
-  public void climbScoreRequest(boolean isLeft) {
+  public void climbScoreRequest(boolean isLeft, double feedForward) {
+    this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
@@ -194,18 +207,18 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     setState(TurretState.CLIMB_SCORE);
   }
 
-  public void climbRequest(Pose2d robotPose) {
+  public void climbRequest(Pose2d robotPose, double feedForward) {
+    this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
     }
-    goalAngle =
-        TurretCalculator.calculateTurretAimingAngle(
-            robotPose, AprilTags.getClimbTagPose().getTranslation());
+    goalAngle = 0.0;
     setState(TurretState.CLIMB);
   }
 
-  public void feedRequest(double goalAngle) {
+  public void feedRequest(double goalAngle, double feedForward) {
+    this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
@@ -214,7 +227,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     setState(TurretState.FEED);
   }
 
-  public void idleScoreRequest(double goalAngle) {
+  public void idleScoreRequest(double goalAngle, double feedForward) {
+    this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
@@ -223,7 +237,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     setState(TurretState.IDLE_SCORE);
   }
 
-  public void idleFeedRequest(double goalAngle) {
+  public void idleFeedRequest(double goalAngle, double feedForward) {
+    this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
@@ -232,21 +247,27 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     setState(TurretState.IDLE_FEED);
   }
 
-  public void setRobotRotationRate(double rateDegrees) {
-    robotRotationFeedForward = -rateDegrees;
-  }
-
   public boolean atGoal(double tolerance) {
     return switch (getState()) {
       case UNHOMED -> false;
       case STUCK -> true;
-      // TODO: Reconsider for turret wrapping
-      default -> MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), tolerance);
+      default -> MathUtil.isNear(setpoint, currentAngle, tolerance);
     };
   }
 
-  public boolean atGoal() {
-    return atGoal(TurretConfig.TOLERANCE.get());
+  public boolean atGoal(double tolerance, double upcomingAngle) {
+    return switch (getState()) {
+      case UNHOMED -> false;
+      case STUCK -> true;
+      default -> {
+        var potentialSetpoint = TurretCalculator.getOptimalAngle(upcomingAngle, currentAngle);
+
+        if (!MathUtil.isNear(potentialSetpoint, setpoint, 90)) {
+          yield false;
+        }
+        yield MathUtil.isNear(setpoint, currentAngle, tolerance, -180, 180);
+      }
+    };
   }
 
   public void stuckRequest() {

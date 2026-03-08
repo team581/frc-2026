@@ -10,6 +10,10 @@ public record PoseErrorTolerance(double linearErrorTolerance, double angularErro
     this(linearErrorTolerance, angularErrorTolerance.getDegrees());
   }
 
+  public PoseErrorTolerance(double linearErrorTolerance) {
+    this(linearErrorTolerance, 360);
+  }
+
   public boolean atPose(Pose2d expected, Pose2d actual) {
     return atTranslation(expected.getTranslation(), actual.getTranslation())
         && atRotation(expected.getRotation(), actual.getRotation());

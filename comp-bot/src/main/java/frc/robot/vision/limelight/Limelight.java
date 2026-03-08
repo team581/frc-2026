@@ -1,5 +1,6 @@
 package frc.robot.vision.limelight;
 
+import com.google.common.collect.ImmutableSet;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
 import com.team581.mechanisms.vision.CameraHealth;
@@ -7,6 +8,7 @@ import com.team581.util.ReusableOptional;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.vision.limelight.LimelightHelpers;
 import com.team581.vision.limelight.LimelightHelpers.PoseEstimate;
+import com.team581.vision.limelight.LimelightHelpers.RawFiducial;
 import com.team581.vision.limelight.PoseEstimateValidator;
 import com.team581.vision.results.OptionalTagResult;
 import dev.doglog.DogLog;
@@ -20,6 +22,7 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.SubsystemPriority;
 import java.util.Locale;
 import java.util.OptionalDouble;
+import java.util.Set;
 
 public class Limelight extends StateMachineSubsystem<LimelightState> {
   private static final double USE_MT1_ROTATION_THRESHOLD_INCHES = 40;
@@ -31,8 +34,21 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
       };
 
   private static final int[] HUB_TAGS = new int[] {2, 3, 4, 5, 8, 9, 10, 11};
-
+  private static final Set<Integer> HUB_TAGS_SET = Set.of(2, 3, 4, 5, 8, 9, 10, 11);
+  private static final Set<Integer> RED_HUB_TAGS = ImmutableSet.of(2, 3, 4, 5);
+  private static final Set<Integer> BLUE_HUB_TAGS = ImmutableSet.of(8, 9, 10, 11);
   private static final double IS_OFFLINE_TIMEOUT = 3;
+
+  public Set<Integer> getActiveHubTags() {
+    var alliance = edu.wpi.first.wpilibj.DriverStation.getAlliance();
+    if (alliance.isPresent()) {
+      return alliance.orElseThrow() == edu.wpi.first.wpilibj.DriverStation.Alliance.Red
+          ? RED_HUB_TAGS
+          : BLUE_HUB_TAGS;
+    }
+    return ImmutableSet.of();
+  }
+  ;
 
   public final String limelightTableName;
   public final CameraConfig config;
@@ -49,6 +65,8 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
 
   private double angularVelocity = 0.0;
   private boolean updatedLimelightPos = false;
+
+  private PoseEstimate latestEstimate = new PoseEstimate();
 
   public Limelight(String name, LimelightState initialState, CameraConfig config) {
     super(SubsystemPriority.VISION, initialState);
@@ -82,6 +100,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     }
 
     PoseEstimate mT1Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightTableName);
+    latestEstimate = mT1Estimate;
 
     if (!poseEstimateValidator.shouldTrust(mT1Estimate, angularVelocity)) {
       return tagResult.empty();
@@ -91,8 +110,8 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     var mTPose = mT1Estimate.pose;
     var distance = mT1Estimate.avgTagDist;
 
-    var xyDev = 0.01 * Math.pow(distance, 1.2);
-    var thetaDev = Double.POSITIVE_INFINITY;
+    var xyDev = 0.01 * Math.pow(distance, 0.8);
+    var thetaDev = 999.0;
 
     if (config.useMt2()) {
       PoseEstimate mT2Estimate =
@@ -114,7 +133,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     var devs = VecBuilder.fill(xyDev, xyDev, thetaDev);
 
     DogLog.log("Vision/" + name + "/Tags/RawLimelightPose", mTPose);
-    DogLog.log("Vision/" + name + "/Tags/MT2Timestamp", mTEstimateTimestamp);
+    DogLog.log("Vision/" + name + "/Tags/MTTimestamp", mTEstimateTimestamp);
     DogLog.log("Vision/" + name + "/Tags/DistanceFromTag", distance);
     return tagResult.update(mTPose, mTEstimateTimestamp, devs);
   }
@@ -172,9 +191,10 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
       if (Timer.getTimestamp() - lastTagTimestamp > 30) {
         DogLog.logFault(
             limelightTableName + " has not seen a tag in the last 30 seconds", AlertType.kWarning);
+      } else {
+        DogLog.clearFault(limelightTableName + " has not seen a tag in the last 30 seconds");
       }
     } else {
-
       DogLog.clearFault(limelightTableName + " has not seen a tag in the last 30 seconds");
     }
 
@@ -255,6 +275,20 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
       case TAGS, HUB_TAGS, OFF -> getCameraHealth() != CameraHealth.OFFLINE;
       default -> false;
     };
+  }
+
+  public boolean seeingHubTag() {
+    if (!poseEstimateValidator.shouldTrust(latestEstimate, angularVelocity)) {
+      return false;
+    }
+
+    for (RawFiducial fiducial : latestEstimate.rawFiducials) {
+      if (HUB_TAGS_SET.contains(Integer.valueOf(fiducial.id))) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @Override

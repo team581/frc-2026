@@ -12,7 +12,6 @@ import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.config.FeatureFlags;
 import frc.robot.imu.Imu;
 import frc.robot.turret.TurretConfig;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -23,6 +22,8 @@ import java.util.OptionalDouble;
 
 public class Vision extends StateMachineSubsystem<VisionState> {
   private final Debouncer seeingTagDebouncer = new Debouncer(1.0, DebounceType.kFalling);
+  private final Debouncer seeingHubTagDebouncer = new Debouncer(0.5, DebounceType.kFalling);
+
   private final Debouncer seeingTagForPoseResetDebouncer =
       new Debouncer(5.0, DebounceType.kFalling);
 
@@ -51,7 +52,9 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   private boolean hasSeenTag = false;
   private boolean seeingTag = false;
   private boolean seeingTagDebounced = false;
+
   private boolean seenTagRecentlyForReset = true;
+  private boolean seeingHubTags = false;
 
   public Vision(
       Imu imu, Limelight turretLimelight, Limelight backLimelight, Limelight groundLimelight) {
@@ -63,6 +66,19 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   }
 
   @Override
+  protected VisionState getNextState(VisionState currentState) {
+    return switch (currentState) {
+      case HUB_TAGS, WAITING_FOR_HUB_TAGS -> {
+        if (seeingHubTags) {
+          yield VisionState.HUB_TAGS;
+        }
+        yield VisionState.WAITING_FOR_HUB_TAGS;
+      }
+      default -> currentState;
+    };
+  }
+
+  @Override
   protected void collectInputs() {
     robotAngularVelocity = imu.getRobotAngularVelocity();
 
@@ -71,7 +87,7 @@ public class Vision extends StateMachineSubsystem<VisionState> {
 
     adjustedTurretResult = getAdjustedTurretLimelightTagResult(turretResult);
 
-    if (turretResult.isPresent()) {
+    if (turretResult.isPresent() || backResult.isPresent()) {
       hasSeenTag = true;
       seeingTag = true;
     } else {
@@ -83,6 +99,10 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     } else {
       seenTagRecentlyForReset = seeingTagForPoseResetDebouncer.calculate(seeingTag);
     }
+
+    seeingHubTags =
+        seeingHubTagDebouncer.calculate(
+            turretLimelight.seeingHubTag() || backLimelight.seeingHubTag());
   }
 
   // Call this in turret's periodic() or a fast telemetry thread
@@ -135,7 +155,7 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     // If the turret is at +90 degrees, we rotate -90 degrees to get back to the robot front.
     var turretToRobot =
         MathHelpers.transform2dFromRotation(
-            Rotation2d.fromDegrees(robotToTurretObservation.orElseThrow()));
+            Rotation2d.fromDegrees(-robotToTurretObservation.orElseThrow()));
 
     // Add this rotation to the Turret's Field Pose to finally get the Robot's Field Pose
     var fieldToRobotEstimate = fieldToTurretPose.plus(turretToRobot);
@@ -156,6 +176,7 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   }
 
   public boolean seenTagRecentlyForReset() {
+    DogLog.log("Vision/SeenTagRecentlyForReset", seenTagRecentlyForReset);
     return seenTagRecentlyForReset || RobotBase.isSimulation();
   }
 
@@ -171,9 +192,13 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     if (getState() == VisionState.CALIBRATE_STATIC_TURRET) {
       return;
     }
-    if (state == VisionState.HUB_TAGS && !FeatureFlags.VISION_HUB_TAGS_FILTER.getAsBoolean()) {
-      state = VisionState.TAGS;
+    if (state == VisionState.HUB_TAGS && getState() == VisionState.WAITING_FOR_HUB_TAGS) {
+      return;
     }
+    if (state == VisionState.HUB_TAGS) {
+      state = VisionState.WAITING_FOR_HUB_TAGS;
+    }
+
     setStateFromRequest(state);
   }
 
@@ -201,6 +226,11 @@ public class Vision extends StateMachineSubsystem<VisionState> {
       case HUB_TAGS -> {
         turretLimelight.setState(LimelightState.HUB_TAGS);
         backLimelight.setState(LimelightState.HUB_TAGS);
+        groundLimelight.setState(LimelightState.CLUSTER_MAP);
+      }
+      case WAITING_FOR_HUB_TAGS -> {
+        turretLimelight.setState(LimelightState.TAGS);
+        backLimelight.setState(LimelightState.TAGS);
         groundLimelight.setState(LimelightState.CLUSTER_MAP);
       }
       case CALIBRATE_STATIC_TURRET -> {

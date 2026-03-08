@@ -92,6 +92,6 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
     vision.getMainLimelighTagResult().ifPresent(this::ingestTagResult);
     robotPose = drivetrain.getState().Pose;
 
-    trustFactor.update(robotPose, imu.collisionDetected());
+    trustFactor.update(robotPose, Swerve.TRANSLATION_STD_DEV, imu.collisionDetected());
   }
 }

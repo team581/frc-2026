@@ -37,6 +37,8 @@ import java.util.function.DoubleSupplier;
 import org.jspecify.annotations.Nullable;
 
 public class Swerve extends StateMachineSubsystem<SwerveState> {
+  public static final double TRANSLATION_STD_DEV = 0.003;
+
   public static final double MAX_SPEED = 4.75;
 
   public static final double MAX_HUB_SPEED = 2.0;
@@ -142,7 +144,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
       startSimThread();
     }
 
-    drivetrain.setStateStdDevs(new Matrix<>(VecBuilder.fill(0.003, 0.003, 0.002)));
+    drivetrain.setStateStdDevs(
+        new Matrix<>(VecBuilder.fill(TRANSLATION_STD_DEV, TRANSLATION_STD_DEV, 0.002)));
   }
 
   public void setDriveSource(DriveSource driveSource) {
