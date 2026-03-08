@@ -974,7 +974,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     if (!health.isLocalizationHealthy() || !localization.isTrustworthy() || nearTrench) {
       shooterHood.idleRequest();
       turret.idleScoreRequest(
-          scoringParameters.turretAngle(), lookaheadScoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
+          scoringParameters.turretAngle(),
+          lookaheadScoringParameters.turretAngle(),
+          scoringParameters.turretFeedForwardRadians());
 
       DogLog.log("RobotManager/SmartIdle/Status", "NearTrench");
     } else if (FieldUtil.isRobotPastObstacleTowardAllianceZone(robotPose.getTranslation())) {
@@ -984,7 +986,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         shooterHood.scoreRequest(scoringParameters.distance());
       }
       turret.idleScoreRequest(
-          scoringParameters.turretAngle(), lookaheadScoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
+          scoringParameters.turretAngle(),
+          lookaheadScoringParameters.turretAngle(),
+          scoringParameters.turretFeedForwardRadians());
 
       DogLog.log("RobotManager/SmartIdle/Status", "InAllianceZone");
     } else {
@@ -994,7 +998,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         shooterHood.feedRequest(feedingParameters.distance());
       }
       turret.idleFeedRequest(
-          feedingParameters.turretAngle(), lookaheadFeedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
+          feedingParameters.turretAngle(),
+          lookaheadFeedingParameters.turretAngle(),
+          feedingParameters.turretFeedForwardRadians());
 
       DogLog.log("RobotManager/SmartIdle/Status", "NotInAlliance");
     }
@@ -1013,7 +1019,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       DogLog.log("RobotManager/Scoring/SmartPrepareScore/TurretStatus", "NotInAllianceZone");
 
       turret.idleScoreRequest(
-          scoringParameters.turretAngle(), lookaheadScoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
+          scoringParameters.turretAngle(),
+          lookaheadScoringParameters.turretAngle(),
+          scoringParameters.turretFeedForwardRadians());
     }
 
     // Hood Behavior
@@ -1039,7 +1047,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       DogLog.log("RobotManager/Scoring/SmartPrepareScore/TurretStatus", "NotInAllianceZone");
 
       turret.idleFeedRequest(
-          feedingParameters.turretAngle(), lookaheadFeedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
+          feedingParameters.turretAngle(),
+          lookaheadFeedingParameters.turretAngle(),
+          feedingParameters.turretFeedForwardRadians());
     }
 
     // Hood Behavior

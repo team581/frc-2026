@@ -28,7 +28,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private double rawGoalAngle = 0.0;
   private double rawGoalAngleLookahead = 0.0;
   private double smartUnwrapIdleGoalAngle = 0.0;
-  private double smartUnwrapIdleGoalAngleLookahead = 0.0;
+
   private double optimalShootingGoalAngle = 0.0;
   private double optimalShootingGoalAngleLookahead = 0.0;
   private double velocity = 0.0;
@@ -99,9 +99,10 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     vision.addTurretObservation(Timer.getFPGATimestamp(), latencyCompensatedAngle, velocity);
 
     smartUnwrapIdleGoalAngle = TurretCalculator.getSmartUnwrapIdleAngle(rawGoalAngle, currentAngle);
-    smartUnwrapIdleGoalAngleLookahead = TurretCalculator.getSmartUnwrapIdleAngle(rawGoalAngleLookahead, currentAngle);
+
     optimalShootingGoalAngle = TurretCalculator.getOptimalShootingAngle(rawGoalAngle, currentAngle);
-    optimalShootingGoalAngleLookahead = TurretCalculator.getOptimalShootingAngle(rawGoalAngleLookahead, currentAngle);
+    optimalShootingGoalAngleLookahead =
+        TurretCalculator.getOptimalShootingAngle(rawGoalAngleLookahead, currentAngle);
 
     DogLog.log("Turret/Angle", currentAngle);
     DogLog.log("Turret/Motor/LatencyCompensatedAngle", latencyCompensatedAngle);
@@ -121,17 +122,13 @@ public class Turret extends StateMachineSubsystem<TurretState> {
       case SCORE, FEED, CLIMB_SCORE -> {
         motor.setControl(
             positionRequest
-                .withPosition(
-                    Units.degreesToRotations(
-                        clamp(optimalShootingGoalAngle)))
+                .withPosition(Units.degreesToRotations(clamp(optimalShootingGoalAngle)))
                 .withVelocity(Units.radiansToRotations(feedForward)));
       }
       case IDLE_SCORE, IDLE_FEED, CLIMB -> {
         motor.setControl(
             positionRequest
-                .withPosition(
-                    Units.degreesToRotations(
-                        clamp(smartUnwrapIdleGoalAngle)))
+                .withPosition(Units.degreesToRotations(clamp(smartUnwrapIdleGoalAngle)))
                 .withVelocity(Units.radiansToRotations(feedForward)));
       }
       default -> {}
@@ -259,7 +256,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
           DogLog.timestamp("Turret/AboutToUnwrap/True");
           yield false;
         }
-          DogLog.timestamp("Turret/AboutToUnwrap/False");
+        DogLog.timestamp("Turret/AboutToUnwrap/False");
         yield MathUtil.isNear(optimalShootingGoalAngle, currentAngle, tolerance);
       }
       default -> MathUtil.isNear(smartUnwrapIdleGoalAngle, currentAngle, tolerance);
