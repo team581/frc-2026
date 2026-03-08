@@ -159,16 +159,16 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
         // TODO: Test force score logic at last 3 seconds of active period
-        if (((FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()
-                    || turret.atGoal(scoringParameters.turretTolerance()))
-                && (shooter.atGoal()
-                    && localization.isTrustworthy()
-                    && FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
-                    && !dyeRotor.isJammed()
-                    && shooterHood.atGoal()
-                    && isHubActive
-                    && isInScoringZone))
-            || (isHubActive && timeUntilNextShift < 3.0)) {
+        if (FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
+            && (((FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()
+                        || turret.atGoal(scoringParameters.turretTolerance()))
+                    && (shooter.atGoal()
+                        && localization.isTrustworthy()
+                        && !dyeRotor.isJammed()
+                        && shooterHood.atGoal()
+                        && isHubActive
+                        && isInScoringZone))
+                || (isHubActive && timeUntilNextShift < 3.0))) {
           yield RobotState.SCORE;
         }
         yield currentState;
