@@ -20,6 +20,7 @@ import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.generated.BuildConstants;
 import frc.robot.health.HealthManager;
+import frc.robot.hub_activity.HubActivity;
 import frc.robot.imu.Imu;
 import frc.robot.intake.GenericIntake;
 import frc.robot.intake.Intake;
@@ -77,6 +78,7 @@ public class Robot extends Base581Robot {
   private final Climber climber = new Climber(hardware.climbMotor);
 
   private final ClusterMap clusterMap = new ClusterMap(localization, swerve, groundLimelight);
+  private final HubActivity hubActivity = new HubActivity();
 
   private final RobotManager robotManager =
       new RobotManager(
@@ -91,6 +93,7 @@ public class Robot extends Base581Robot {
           vision,
           hardware.driverController,
           health,
+          hubActivity,
           trailblazer,
           climber,
           clusterMap,

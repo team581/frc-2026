@@ -13,6 +13,7 @@ public enum SubsystemPriority implements SubsystemPriorityBase {
   IMU(10),
   // Vision inputs run before localization so that it has fresh vision data for pose estimator
   VISION(10),
+  HUB_ACTIVITY(10),
 
   // 0-9 is for actuator subsystems
   DEPLOY(0),

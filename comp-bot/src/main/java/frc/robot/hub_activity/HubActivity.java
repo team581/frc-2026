@@ -1,0 +1,102 @@
+package frc.robot.hub_activity;
+
+import com.team581.util.FmsUtil;
+import com.team581.util.state_machines.StateMachineSubsystem;
+import dev.doglog.DogLog;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import frc.robot.config.DSOptions;
+import frc.robot.util.scheduling.SubsystemPriority;
+
+public class HubActivity extends StateMachineSubsystem<HubActivityState> {
+  private final DoubleSubscriber tunableHubStateOffset =
+      DogLog.tunable("HubActivity/MatchTimeOffset", 0.0);
+  private final Timer teleopTimer = new Timer();
+
+  private double timeSinceMatchStart = 0.0;
+  private double timeUntilNextShift = 0.0;
+
+  private boolean actualHubActive = true;
+  private double scoringShooterTOF = 0.0;
+  private boolean tofBasedHubActive = true;
+  private boolean forceScoreTransitionEndOfActiveHub = false;
+
+  private static final double FORCE_SCORE_TRANSITION_TIMEOUT = 3.0;
+
+  public HubActivity() {
+    super(SubsystemPriority.HUB_ACTIVITY, HubActivityState.DEFAULT_STATE);
+
+    teleopTimer.start();
+  }
+
+  @Override
+  public void teleopInit() {
+    teleopTimer.reset();
+    timeSinceMatchStart = FmsUtil.MATCH_TIME_AT_TELEOP_START;
+  }
+
+  @Override
+  protected void collectInputs() {
+    timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
+    timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
+    DogLog.log("HubActivity/CurrentShift", FmsUtil.currentShift(timeSinceMatchStart));
+
+    actualHubActive = calculateActualHubActive();
+    tofBasedHubActive = calculateTOFBasedHubActive();
+    forceScoreTransitionEndOfActiveHub =
+        DSOptions.USE_HUB_STATE.get()
+            && actualHubActive
+            && timeUntilNextShift < FORCE_SCORE_TRANSITION_TIMEOUT;
+  }
+
+  @Override
+  protected void whileInState(HubActivityState state) {
+    DogLog.log("HubActivity/TimeSinceMatchStart", timeSinceMatchStart);
+    DogLog.log("HubActivity/TimeSinceTeleopEnable", teleopTimer.get());
+    DogLog.log("HubActivity/TimeUntilNextShift", timeUntilNextShift);
+    DogLog.log(
+        "HubActivity/Scoring/ScoreTransition/ForceScoreTransitionEndOfActiveHub",
+        ableToForceScoreTransitionEndOfActiveHub());
+    DogLog.log("HubActivity/ActualHubActive", actualHubActive);
+    DogLog.log("HubActivity/TOFBasedHubActive", tofBasedHubActive);
+  }
+
+  private boolean calculateActualHubActive() {
+    // Hub always active in auto or if DS option is turned off
+    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
+      return true;
+    }
+
+    return FmsUtil.isHubActive(
+        timeSinceMatchStart + tunableHubStateOffset.get(),
+        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
+  }
+
+  private boolean calculateTOFBasedHubActive() {
+    // Hub always active in auto or if DS option is turned off
+    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
+      return true;
+    }
+
+    return FmsUtil.isHubActive(
+        timeSinceMatchStart + scoringShooterTOF + tunableHubStateOffset.get(),
+        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
+  }
+
+  public boolean getActualHubActive() {
+    return actualHubActive;
+  }
+
+  public void updateShooterScoringTOF(double scoringShooterTOF) {
+    this.scoringShooterTOF = scoringShooterTOF;
+  }
+
+  public boolean getTOFBasedHubActive() {
+    return tofBasedHubActive;
+  }
+
+  public boolean ableToForceScoreTransitionEndOfActiveHub() {
+    return forceScoreTransitionEndOfActiveHub;
+  }
+}
