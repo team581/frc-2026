@@ -175,11 +175,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         yield currentState;
       }
       case PREPARE_PRESET_SCORE -> {
-        if (!isMoving
-                && (shooter.atGoal()
-                    && !dyeRotor.isJammed()
-                    && turret.atGoal(scoringParameters.turretTolerance())
-                    && shooterHood.atGoal())
+        if ((!isMoving
+                && shooter.atGoal()
+                && !dyeRotor.isJammed()
+                && turret.atGoal(scoringParameters.turretTolerance())
+                && shooterHood.atGoal())
             || forceScoreTransitionEndOfActiveHub) {
           yield RobotState.PRESET_SCORE;
         }
