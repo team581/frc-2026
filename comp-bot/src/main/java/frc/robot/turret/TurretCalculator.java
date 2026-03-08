@@ -47,12 +47,12 @@ public class TurretCalculator {
         goalTranslation, robotPose, goalCentricToleranceMeters, TurretConfig.TURRET_TO_ROBOT);
   }
 
-  public static double getOptimalAngle(double target, double current) {
+  public static double getOptimalShootingAngle(double target, double current) {
     return BaseTurretCalculator.getOptimalAngle(
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE);
   }
 
-  public static double getSmartUnwrapAngle(double target, double current) {
+  public static double getSmartUnwrapIdleAngle(double target, double current) {
     return BaseTurretCalculator.getSmartUnwrapAngle(
         target, current, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE, 80);
   }

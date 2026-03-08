@@ -25,7 +25,12 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   private final TalonFX motor;
   private final CANcoder encoder;
   private double currentAngle = 0.0;
-  private double goalAngle = 0.0;
+  private double rawGoalAngle = 0.0;
+  private double rawGoalAngleLookahead = 0.0;
+  private double smartUnwrapIdleGoalAngle = 0.0;
+  private double smartUnwrapIdleGoalAngleLookahead = 0.0;
+  private double optimalShootingGoalAngle = 0.0;
+  private double optimalShootingGoalAngleLookahead = 0.0;
   private double velocity = 0.0;
   private double voltage = 0.0;
   private double statorCurrent = 0.0;
@@ -93,11 +98,18 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     // Add the predicted angle to the vision buffer at the current timestamp
     vision.addTurretObservation(Timer.getFPGATimestamp(), latencyCompensatedAngle, velocity);
 
+    smartUnwrapIdleGoalAngle = TurretCalculator.getSmartUnwrapIdleAngle(rawGoalAngle, currentAngle);
+    smartUnwrapIdleGoalAngleLookahead = TurretCalculator.getSmartUnwrapIdleAngle(rawGoalAngleLookahead, currentAngle);
+    optimalShootingGoalAngle = TurretCalculator.getOptimalShootingAngle(rawGoalAngle, currentAngle);
+    optimalShootingGoalAngleLookahead = TurretCalculator.getOptimalShootingAngle(rawGoalAngleLookahead, currentAngle);
+
     DogLog.log("Turret/Angle", currentAngle);
     DogLog.log("Turret/Motor/LatencyCompensatedAngle", latencyCompensatedAngle);
     DogLog.log(
         "Turret/Encoder/EncoderAngle",
         Units.rotationsToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
+    DogLog.log("Turret/AboutToUnwrap/GoalAngle", rawGoalAngle);
+    DogLog.log("Turret/AboutToUnwrap/LookaheadGoalAngle", rawGoalAngleLookahead);
   }
 
   @Override
@@ -106,33 +118,26 @@ public class Turret extends StateMachineSubsystem<TurretState> {
       case UNHOMED, STUCK -> {
         motor.disable();
       }
-      case SCORE, FEED, CLIMB -> {
+      case SCORE, FEED, CLIMB_SCORE -> {
         motor.setControl(
             positionRequest
                 .withPosition(
                     Units.degreesToRotations(
-                        clamp(TurretCalculator.getOptimalAngle(goalAngle, currentAngle))))
+                        clamp(optimalShootingGoalAngle)))
                 .withVelocity(Units.radiansToRotations(feedForward)));
       }
-      case IDLE_SCORE, IDLE_FEED -> {
+      case IDLE_SCORE, IDLE_FEED, CLIMB -> {
         motor.setControl(
             positionRequest
                 .withPosition(
                     Units.degreesToRotations(
-                        clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle))))
-                .withVelocity(Units.radiansToRotations(feedForward)));
-      }
-      case CLIMB_SCORE -> {
-        motor.setControl(
-            positionRequest
-                .withPosition(
-                    Units.degreesToRotations(
-                        clamp(TurretCalculator.getSmartUnwrapAngle(goalAngle, currentAngle))))
+                        clamp(smartUnwrapIdleGoalAngle)))
                 .withVelocity(Units.radiansToRotations(feedForward)));
       }
       default -> {}
     }
 
+    // DogLog.log("Turret/AtGoal", atGoal());
     DogLog.log("Turret/StatorCurrent", statorCurrent);
     DogLog.log("Turret/Voltage", voltage);
   }
@@ -147,8 +152,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   }
 
   public boolean goalOutOfBounds() {
-    return goalAngle > (TurretConfig.MAX_ANGLE - TurretConfig.OUT_OF_BOUNDS_THRESHOLD)
-        || goalAngle < (TurretConfig.MIN_ANGLE + TurretConfig.OUT_OF_BOUNDS_THRESHOLD);
+    return rawGoalAngle > (TurretConfig.MAX_ANGLE - TurretConfig.OUT_OF_BOUNDS_THRESHOLD)
+        || rawGoalAngle < (TurretConfig.MIN_ANGLE + TurretConfig.OUT_OF_BOUNDS_THRESHOLD);
   }
 
   @Override
@@ -168,7 +173,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     }
     if (DriverStation.isDisabled()) {
       if (getState() != TurretState.UNHOMED) {
-        if (!MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
+        if (!MathUtil.isNear(rawGoalAngle, MathHelpers.angleModulus(currentAngle), 10.0)) {
           DogLog.logFault("Turret is misaligned", AlertType.kWarning);
         } else {
           DogLog.clearFault("Turret is misaligned");
@@ -180,13 +185,14 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     }
   }
 
-  public void scoreRequest(double goalAngle, double feedForward) {
+  public void scoreRequest(double goalAngle, double lookaheadGoalAngle, double feedForward) {
     this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
     }
-    this.goalAngle = goalAngle;
+    this.rawGoalAngle = goalAngle;
+    this.rawGoalAngleLookahead = lookaheadGoalAngle;
     setState(TurretState.SCORE);
   }
 
@@ -196,7 +202,7 @@ public class Turret extends StateMachineSubsystem<TurretState> {
       stuckRequest();
       return;
     }
-    this.goalAngle = 0.0;
+    this.rawGoalAngle = 0.0;
     setState(TurretState.CLIMB_SCORE);
   }
 
@@ -206,39 +212,40 @@ public class Turret extends StateMachineSubsystem<TurretState> {
       stuckRequest();
       return;
     }
-    goalAngle =
+    rawGoalAngle =
         TurretCalculator.calculateTurretAimingAngle(
             robotPose, AprilTags.getClimbTagPose().getTranslation());
     setState(TurretState.CLIMB);
   }
 
-  public void feedRequest(double goalAngle, double feedForward) {
+  public void feedRequest(double goalAngle, double lookaheadGoalAngle, double feedForward) {
     this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
     }
-    this.goalAngle = goalAngle;
+    this.rawGoalAngle = goalAngle;
+    this.rawGoalAngleLookahead = lookaheadGoalAngle;
     setState(TurretState.FEED);
   }
 
-  public void idleScoreRequest(double goalAngle, double feedForward) {
+  public void idleScoreRequest(double goalAngle, double lookaheadGoalAngle, double feedForward) {
     this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
     }
-    this.goalAngle = goalAngle;
+    this.rawGoalAngle = goalAngle;
     setState(TurretState.IDLE_SCORE);
   }
 
-  public void idleFeedRequest(double goalAngle, double feedForward) {
+  public void idleFeedRequest(double goalAngle, double lookaheadGoalAngle, double feedForward) {
     this.feedForward = feedForward;
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
       stuckRequest();
       return;
     }
-    this.goalAngle = goalAngle;
+    this.rawGoalAngle = goalAngle;
     setState(TurretState.IDLE_FEED);
   }
 
@@ -246,8 +253,16 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     return switch (getState()) {
       case UNHOMED -> false;
       case STUCK -> true;
-      // TODO: Reconsider for turret wrapping
-      default -> MathUtil.isNear(goalAngle, MathHelpers.angleModulus(currentAngle), tolerance);
+      case SCORE, FEED -> {
+        // If the current angle is not near the lookahead goal angle, we are about to unwrap
+        if (!MathUtil.isNear(optimalShootingGoalAngle, optimalShootingGoalAngleLookahead, 90.0)) {
+          DogLog.timestamp("Turret/AboutToUnwrap/True");
+          yield false;
+        }
+          DogLog.timestamp("Turret/AboutToUnwrap/False");
+        yield MathUtil.isNear(optimalShootingGoalAngle, currentAngle, tolerance);
+      }
+      default -> MathUtil.isNear(smartUnwrapIdleGoalAngle, currentAngle, tolerance);
     };
   }
 
@@ -271,8 +286,8 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     return velocity;
   }
 
-  private static double clamp(double wantedAngle) {
-    return MathUtil.clamp(wantedAngle, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE);
+  private static double clamp(double angle) {
+    return MathUtil.clamp(angle, TurretConfig.MIN_ANGLE, TurretConfig.MAX_ANGLE);
   }
 
   @Override
