@@ -67,7 +67,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
   private double timeSinceMatchStart = 0.0;
   private double timeUntilNextShift = 0.0;
-  private boolean isHubActive = true;
+  private boolean actualHubActive = true;
+  private boolean tofBasedHubActive = true;
+  private boolean forceScoreTransitionEndOfActiveHub = false;
   private boolean isInScoringZone = false;
   private boolean isInAllianceZone = false;
   private final DoubleSubscriber tunableHubStateOffset =
@@ -147,7 +149,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         yield currentState;
       }
       case IDLE -> {
-        if (DSOptions.AUTO_SCORE.getAsBoolean() && isHubActive) {
+        if (DSOptions.AUTO_SCORE.getAsBoolean() && tofBasedHubActive) {
           yield RobotState.PREPARE_SCORE;
         }
         yield currentState;
@@ -155,30 +157,30 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case PREPARE_SCORE -> {
         logScoringTransition();
 
-        if (DSOptions.AUTO_SCORE.getAsBoolean() && !isHubActive) {
+        if (DSOptions.AUTO_SCORE.getAsBoolean() && !tofBasedHubActive) {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
-        // TODO: Test force score logic at last 3 seconds of active period
-        if (FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
+        if ((FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
+                && localization.isTrustworthy())
             && (((FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()
                         || turret.atGoal(scoringParameters.turretTolerance()))
                     && (shooter.atGoal()
-                        && localization.isTrustworthy()
                         && !dyeRotor.isJammed()
                         && shooterHood.atGoal()
-                        && isHubActive
+                        && tofBasedHubActive
                         && isInScoringZone))
-                || (isHubActive && timeUntilNextShift < 3.0))) {
+                || forceScoreTransitionEndOfActiveHub)) {
           yield RobotState.SCORE;
         }
         yield currentState;
       }
       case PREPARE_PRESET_SCORE -> {
-        if (shooter.atGoal()
-            && !dyeRotor.isJammed()
-            && turret.atGoal(scoringParameters.turretTolerance())
-            && shooterHood.atGoal()
-            && !isMoving) {
+        if (!isMoving
+                && (shooter.atGoal()
+                    && !dyeRotor.isJammed()
+                    && turret.atGoal(scoringParameters.turretTolerance())
+                    && shooterHood.atGoal())
+            || forceScoreTransitionEndOfActiveHub) {
           yield RobotState.PRESET_SCORE;
         }
         yield currentState;
@@ -223,7 +225,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
 
-        if (!isHubActive) {
+        if (!tofBasedHubActive) {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
 
@@ -233,18 +235,20 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 && !dyeRotor.isJammed()
                 && turret.atGoal(scoringParameters.turretTolerance())
                 && shooterHood.atGoal()
-                && isInScoringZone)) {
+                && isInScoringZone)
+            || forceScoreTransitionEndOfActiveHub) {
           yield currentState;
         }
 
         yield RobotState.PREPARE_SCORE;
       }
       case PRESET_SCORE -> {
-        if (shooter.atGoal()
-            && !dyeRotor.isJammed()
-            && turret.atGoal(scoringParameters.turretTolerance())
-            && shooterHood.atGoal()
-            && !isMoving) {
+        if (!isMoving
+            && ((shooter.atGoal()
+                    && !dyeRotor.isJammed()
+                    && turret.atGoal(scoringParameters.turretTolerance())
+                    && shooterHood.atGoal())
+                || forceScoreTransitionEndOfActiveHub)) {
           yield currentState;
         }
         yield RobotState.PREPARE_PRESET_SCORE;
@@ -923,12 +927,14 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/Feeding/FeedParameters", feedingParameters);
     DogLog.log("RobotManager/Scoring/ScoringParameters", scoringParameters);
 
-    DogLog.log("RobotManager/Scoring/ScoreTransition/IsHubActive", isHubActive);
+    DogLog.log("RobotManager/Scoring/ScoreTransition/RealIsHubActive", actualHubActive);
+    DogLog.log("RobotManager/Scoring/ScoreTransition/TOFBasedIsHubActive", tofBasedHubActive);
     DogLog.log("RobotManager/TimeSinceMatchStart", timeSinceMatchStart);
     DogLog.log("RobotManager/TimeSinceTeleopEnable", teleopTimer.get());
 
     DogLog.log("RobotManager/TimeUntilNextShift", timeUntilNextShift);
-    DogLog.log("RobotManager/HubActive", getIsHubActive());
+    DogLog.log("RobotManager/RealHubActive", getActualHubActive());
+    DogLog.log("RobotManager/TOFBasedHubActive", getTOFBasedHubActive());
     DogLog.log("RobotManager/DrivingToIntake", drivingToIntake);
 
     MechanismVisualizer.log(
@@ -1073,7 +1079,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   public void prepareScoreOrFeedRequest() {
     var shouldScore = isInAllianceZone;
     if (!health.isLocalizationHealthy()) {
-      shouldScore = isHubActive;
+      shouldScore = tofBasedHubActive;
     }
 
     if (shouldScore) {
@@ -1285,7 +1291,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
     timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
 
-    isHubActive = getIsHubActiveOrNotUsingState();
+    actualHubActive = getActualHubActive();
+    tofBasedHubActive = getTOFBasedHubActive();
+    // TODO: Make constant end of active hub time
+    forceScoreTransitionEndOfActiveHub =
+        DSOptions.USE_HUB_STATE.get() && actualHubActive && timeUntilNextShift < 3.0;
     timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
     DogLog.log("RobotManager/CurrentShift", FmsUtil.currentShift(timeSinceMatchStart));
     var swerveVector = MathHelpers.getDriveDirection(speeds);
@@ -1303,25 +1313,26 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             TurretCalculator.getTurretPose(robotPose).getTranslation());
   }
 
-  private boolean getIsHubActiveOrNotUsingState() {
+  // TODO: Make hub/match timer class with these functions
+  private boolean getActualHubActive() {
     if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
       return true;
     }
 
-    return getIsHubActive();
+    return FmsUtil.isHubActive(
+        timeSinceMatchStart + tunableHubStateOffset.get(),
+        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
   }
 
-  private boolean getIsHubActive() {
-    if (FeatureFlags.LOOKAHEAD_SCORING.getAsBoolean()) {
-      return FmsUtil.isHubActive(
-          timeSinceMatchStart
-              + shooter.getScoreTimeOfFlight(scoringParameters.distance())
-              + tunableHubStateOffset.get(),
-          DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
+  private boolean getTOFBasedHubActive() {
+    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
+      return true;
     }
 
     return FmsUtil.isHubActive(
-        timeSinceMatchStart + tunableHubStateOffset.get(),
+        timeSinceMatchStart
+            + shooter.getScoreTimeOfFlight(scoringParameters.distance())
+            + tunableHubStateOffset.get(),
         DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
   }
 

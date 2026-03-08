@@ -12,9 +12,6 @@ public class FeatureFlags {
 
   public static final BooleanSupplier INTEGRATION_TEST = FeatureFlag.of("IntegrationTest", false);
 
-  public static final BooleanSupplier LOOKAHEAD_SCORING =
-      FeatureFlag.of("TimeOfFlightInHubActivity", true);
-
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
 
   public static final BooleanSupplier STOP_SHOOTING_STATE =
