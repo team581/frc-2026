@@ -86,7 +86,10 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
   protected void collectInputs() {
     timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
     timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
-    DogLog.log("HubActivity/CurrentShift", FmsUtil.currentShift(timeSinceMatchStart));
+
+    SmartDashboard.putString("HubActivity/CurrentShift", FmsUtil.currentShift(timeSinceMatchStart));
+    SmartDashboard.putString("HubActivity/Active", getHubStateColor().toHexString());
+    SmartDashboard.putNumber("HubActivity/TimeUntilNextShift", timeUntilNextShift);
 
     actualHubActive = calculateActualHubActive();
     tofBasedHubActive = calculateTOFBasedHubActive();
