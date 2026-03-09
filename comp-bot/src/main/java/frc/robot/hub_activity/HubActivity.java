@@ -6,6 +6,8 @@ import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.config.DSOptions;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -110,4 +112,18 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
     DogLog.log("HubActivity/ActualHubActive", actualHubActive);
     DogLog.log("HubActivity/TOFBasedHubActive", tofBasedHubActive);
   }
+
+  public Color getHubStateColor() {
+    if (getTOFBasedHubActive()) {
+      if (getActualHubActive()) {
+        return Color.kLimeGreen;
+      } else {
+        boolean isGreen = Math.floor(teleopTimer.get() / 0.1) % 2 == 0;
+        return isGreen ? Color.kLimeGreen : Color.kBlack;
+      }
+    } else {
+      return Color.kRed;
+    }
+  }
 }
+
