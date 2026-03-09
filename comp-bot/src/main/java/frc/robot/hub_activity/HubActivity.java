@@ -69,9 +69,17 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
       return true;
     }
 
-    return FmsUtil.isHubActive(
-        timeSinceMatchStart + scoringShooterTOF + tunableHubStateOffset.get(),
-        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
+    var risingTOFOffsetHubActive =
+        FmsUtil.isHubActive(
+            timeSinceMatchStart + scoringShooterTOF + tunableHubStateOffset.get(),
+            DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
+
+    var fallingOffsetHubActive =
+        FmsUtil.isHubActive(
+            timeSinceMatchStart + scoringShooterTOF - tunableHubStateOffset.get(),
+            DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
+
+    return risingTOFOffsetHubActive || fallingOffsetHubActive;
   }
 
   @Override
