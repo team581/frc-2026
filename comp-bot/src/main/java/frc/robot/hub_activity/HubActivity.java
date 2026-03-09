@@ -12,7 +12,7 @@ import frc.robot.util.scheduling.SubsystemPriority;
 public class HubActivity extends StateMachineSubsystem<HubActivityState> {
   private static final double FORCE_SCORE_TRANSITION_TIMEOUT = 3.0;
   private final DoubleSubscriber tunableHubStateOffset =
-      DogLog.tunable("HubActivity/MatchTimeOffset", 0.0);
+      DogLog.tunable("HubActivity/MatchTimeOffset", 2.0);
 
   private final Timer teleopTimer = new Timer();
   private double timeSinceMatchStart = 0.0;
