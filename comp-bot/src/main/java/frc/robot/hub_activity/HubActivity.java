@@ -59,7 +59,7 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
     }
 
     return FmsUtil.isHubActive(
-        timeSinceMatchStart + tunableHubStateOffset.get(),
+        timeSinceMatchStart,
         DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
   }
 
