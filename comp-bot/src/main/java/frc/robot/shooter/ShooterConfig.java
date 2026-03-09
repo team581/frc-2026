@@ -36,12 +36,19 @@ public class ShooterConfig {
   public static final double MAX_SAFE_RPM = 6000;
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_RPM =
-      TunableInterpolatingDoubleTreeMap.ofEntries(
-          "Shooter/DistanceToScoreRPM",
-          Map.entry(5.551, 2350.0),
-          Map.entry(3.42, 2000.0),
-          Map.entry(2.33, 1850.0),
-          Map.entry(1.41, 1650.0));
+      RobotKind.IS_COMP_BOT
+          ? TunableInterpolatingDoubleTreeMap.ofEntries(
+              "Shooter/DistanceToScoreRPM",
+              Map.entry(5.551, 2350.0),
+              Map.entry(4.25, 1850.0),
+              Map.entry(1.89, 1400.0),
+              Map.entry(1.25, 1400.0))
+          : TunableInterpolatingDoubleTreeMap.ofEntries(
+              "Shooter/DistanceToScoreRPM",
+              Map.entry(5.551, 2350.0),
+              Map.entry(3.42, 2000.0),
+              Map.entry(2.33, 1850.0),
+              Map.entry(1.41, 1650.0));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEEDING_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToFeedingRPM",

@@ -24,7 +24,9 @@ public class TurretConfig {
   public static final double MOTOR_TO_TURRET = ((220.0 / 14.0) * (36.0 / 10.0));
 
   // CAL NUMBER
-  public static final double ROTOR_CAL_OFFSET = RobotKind.IS_COMP_BOT ? -0.1845703125 : 0.6796875;
+  public static final double ENCODER_CAL_OFFSET =
+      RobotKind.IS_COMP_BOT ? -0.18408203125 : 0.6796875;
+  public static final double MOTOR_ROTOR_CAL_OFFSET = RobotKind.IS_COMP_BOT ? 0.157227 : 0.0;
 
   public static final double MOTOR_ROTATION_RESOLUTION = 1 / MOTOR_TO_TURRET;
   public static final double ENCODER_TO_TURRET =
@@ -48,7 +50,7 @@ public class TurretConfig {
       new CANcoderConfiguration()
           .withMagnetSensor(
               new MagnetSensorConfigs()
-                  .withMagnetOffset(ROTOR_CAL_OFFSET)
+                  .withMagnetOffset(ENCODER_CAL_OFFSET)
                   .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
                   .withAbsoluteSensorDiscontinuityPoint(0.2));
 

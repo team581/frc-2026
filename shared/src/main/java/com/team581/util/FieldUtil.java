@@ -136,7 +136,7 @@ public class FieldUtil {
   private static final Pose2d BLUE_DEPOT_BUMP_CENTER =
       new Pose2d(
           BLUE_OBSTACLE_X, FIELD_WIDTH_Y - BUMP_CENTER_Y_DISTANCE_FROM_WALL, Rotation2d.kZero);
-  private static final Pose2d RED_OUTPOST_BUMP_CENTER =
+  public static final Pose2d RED_OUTPOST_BUMP_CENTER =
       new Pose2d(
           RED_OBSTACLE_X, FIELD_WIDTH_Y - BUMP_CENTER_Y_DISTANCE_FROM_WALL, Rotation2d.kZero);
   private static final Pose2d RED_DEPOT_BUMP_CENTER =
@@ -147,7 +147,7 @@ public class FieldUtil {
           BLUE_OUTPOST_BUMP_CENTER, BUMP_ASSIST_ZONE_LENGTH_X, BUMP_ASSIST_ZONE_LENGTH_Y);
   private static final Rectangle2d BLUE_DEPOT_BUMP_ASSIST_ZONE =
       new Rectangle2d(BLUE_DEPOT_BUMP_CENTER, BUMP_ASSIST_ZONE_LENGTH_X, BUMP_ASSIST_ZONE_LENGTH_Y);
-  private static final Rectangle2d RED_OUTPOST_BUMP_ASSIST_ZONE =
+  public static final Rectangle2d RED_OUTPOST_BUMP_ASSIST_ZONE =
       new Rectangle2d(
           RED_OUTPOST_BUMP_CENTER, BUMP_ASSIST_ZONE_LENGTH_X, BUMP_ASSIST_ZONE_LENGTH_Y);
   private static final Rectangle2d RED_DEPOT_BUMP_ASSIST_ZONE =

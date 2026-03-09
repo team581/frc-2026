@@ -18,7 +18,8 @@ public class TurretCalculator {
         turretEncoderPosition,
         TurretConfig.MOTOR_TO_TURRET,
         TurretConfig.ENCODER_TO_TURRET,
-        TurretConfig.MOTOR_ROTATION_RESOLUTION);
+        TurretConfig.MOTOR_ROTATION_RESOLUTION,
+        TurretConfig.MOTOR_ROTOR_CAL_OFFSET);
   }
 
   public static double calculateSwerveTurretCompensationAngle(

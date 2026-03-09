@@ -16,8 +16,9 @@ public class BaseTurretCalculator {
       double turretEncoderPosition,
       double motorToTurretRatio,
       double encoderToTurretRatio,
-      double motorRotationResolution) {
-    double rotor_position = turretMotorPosition % 1;
+      double motorRotationResolution,
+      double rotorCalibratedOffset) {
+    double rotor_position = (turretMotorPosition % 1) - rotorCalibratedOffset;
     DogLog.log("Turret/Calculator/motor_mod", rotor_position);
     double rotorRotationsRelativeToTurret = rotor_position / motorToTurretRatio;
     double roughAbsolutePosition = turretEncoderPosition / encoderToTurretRatio;

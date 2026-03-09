@@ -244,8 +244,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                   : fieldCentricSnapsClosedLoop;
 
           // We want just the translation to be operator perspective, rotation is always blue
-          // alliance
-          // perspective
+          // alliance perspective
           var usedSnapAngle =
               swerveRequest.ForwardPerspective == ForwardPerspectiveValue.BlueAlliance
                   ? scoreAngle
@@ -278,8 +277,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                   : fieldCentricSnapsClosedLoop;
 
           // We want just the translation to be operator perspective, rotation is always blue
-          // alliance
-          // perspective
+          // alliance perspective
           var usedSnapAngle =
               swerveRequest.ForwardPerspective == ForwardPerspectiveValue.BlueAlliance
                   ? feedAngle

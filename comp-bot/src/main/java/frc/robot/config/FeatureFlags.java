@@ -7,15 +7,10 @@ import java.util.function.BooleanSupplier;
 public class FeatureFlags {
 
   public static final BooleanSupplier WALL_SNAPS = FeatureFlag.of("WallSnaps", false);
-  public static final BooleanSupplier INTAKE_DIRECTIONAL_SNAPS =
-      FeatureFlag.of("IntakeDirectionalSnaps", true);
 
   public static final BooleanSupplier INTEGRATION_TEST = FeatureFlag.of("IntegrationTest", false);
 
   public static final BooleanSupplier REGRESSION_MODEL = FeatureFlag.of("RegressionModel", false);
-
-  public static final BooleanSupplier STOP_SHOOTING_STATE =
-      FeatureFlag.of("UseStopShootingState", true);
 
   public static final BooleanSupplier IGNORE_TURRET_AT_GOAL = FeatureFlag.of("IgnoreTurret", false);
 
@@ -23,10 +18,6 @@ public class FeatureFlags {
       FeatureFlag.of("CancelInProgressShot", true);
 
   public static final BooleanSupplier CLUSTER_MAP = FeatureFlag.of("ClusterMap", false);
-
-  public static final BooleanSupplier HOOD_ALWAYS_IDLE = FeatureFlag.of("HoodAlwaysIdle", true);
-  public static final BooleanSupplier DYE_ROTOR_CLEANUP_MODE =
-      FeatureFlag.of("DyeRotorCleanup", false);
 
   public static final BooleanSupplier CLAMPED_AUTO_POINTS = Point.CLAMPED_POINTS_FEATURE_FLAG;
 

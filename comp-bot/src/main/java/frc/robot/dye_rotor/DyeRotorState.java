@@ -11,12 +11,6 @@ public enum DyeRotorState {
   SCORE(100.0, 180.0, 10.0, 10.0),
   FEED(20.0, 180.0, 10.0, 10.0),
 
-  SCORE_CLEANUP_INTAKE_SCAN(5.0, -145.0, 10.0, 10.0),
-  SCORE_CLEANUP_WHIP_AROUND(20.0, 55.0, 10.0, 10.0),
-
-  FEED_CLEANUP_INTAKE_SCAN(5.0, -145.0, 10.0, 10.0),
-  FEED_CLEANUP_WHIP_AROUND(20.0, 55.0, 10.0, 10.0),
-
   UNJAM(RobotKind.IS_COMP_BOT ? -8.0 : -1.0, 180.0, 0.0, 0.0);
 
   private static double bpsToRpm(double bps) {

@@ -4,12 +4,14 @@ import com.team581.math.MathHelpers;
 import com.team581.math.ShootOnTheMove;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.shooter.ShooterConfig;
 import frc.robot.turret.TurretCalculator;
 
@@ -26,6 +28,9 @@ public class AimParameterUtil {
   private static final double FALLBACK_FEEDING_TURRET_TOLERANCE = 1;
   private static final double FEEDING_FALLBACK_DISTANCE_TO_GOAL = 8.0;
 
+  private static final DoubleSubscriber UPCOMING_TURRET_ANGLE_LOOKAHEAD =
+      DogLog.tunable("AimingParameters/UpcomingTurretAngleLookahead", 0.5);
+
   public static AimingParameters getFallbackFeedingParameters(
       FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
 
@@ -33,17 +38,25 @@ public class AimParameterUtil {
         TurretCalculator.calculateTurretAimingAngle(
             robotPose, robotPose.plus(new Transform2d(-1, 0, Rotation2d.kZero)).getTranslation());
 
+    var upcomingTurretAngle =
+        TurretCalculator.calculateTurretAimingAngle(
+            MathHelpers.getLookaheadPose(
+                robotPose, fieldRelativeSpeeds, UPCOMING_TURRET_ANGLE_LOOKAHEAD.get()),
+            robotPose.plus(new Transform2d(-1, 0, Rotation2d.kZero)).getTranslation());
+
     return new AimingParameters(
         turretAngle,
         FEEDING_FALLBACK_DISTANCE_TO_GOAL,
         FALLBACK_FEEDING_TURRET_TOLERANCE,
-        -fieldRelativeSpeeds.omegaRadiansPerSecond);
+        -fieldRelativeSpeeds.omegaRadiansPerSecond,
+        upcomingTurretAngle);
   }
 
   public static AimingParameters getFeedingParameters(
       FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     // Calculate translation of turret on the field
-    var turretTranslation = TurretCalculator.getTurretPose(robotPose).getTranslation();
+    var turretPose = TurretCalculator.getTurretPose(robotPose);
+    var turretTranslation = turretPose.getTranslation();
 
     // Calculate speeds of turret (x, y, omega)
     var turretFieldRelativeSpeeds =
@@ -77,14 +90,26 @@ public class AimParameterUtil {
     double totalTurretFFRadians =
         -translationalFF - turretFieldRelativeSpeeds.omegaRadiansPerSecond;
 
+    var upcomingTurretAngle =
+        TurretCalculator.calculateTurretAimingAngle(
+            MathHelpers.getLookaheadPose(
+                turretPose, fieldRelativeSpeeds, UPCOMING_TURRET_ANGLE_LOOKAHEAD.get()),
+            compensatedGoal);
+
     return new AimingParameters(
-        turretAngle, fullyCompensatedDistanceToGoal, turretTolerance, totalTurretFFRadians);
+        turretAngle,
+        fullyCompensatedDistanceToGoal,
+        turretTolerance,
+        totalTurretFFRadians,
+        upcomingTurretAngle);
   }
 
   public static AimingParameters getScoringParameters(
       Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
     // Calculate translation of turret on the field
-    var turretTranslation = TurretCalculator.getTurretPose(robotPose).getTranslation();
+    var turretPose = TurretCalculator.getTurretPose(robotPose);
+
+    var turretTranslation = turretPose.getTranslation();
 
     // Calculate speeds of turret (x, y, omega)
     var turretFieldRelativeSpeeds =
@@ -118,8 +143,18 @@ public class AimParameterUtil {
     double totalTurretFFRadians =
         -translationalFF - turretFieldRelativeSpeeds.omegaRadiansPerSecond;
 
+    var upcomingTurretAngle =
+        TurretCalculator.calculateTurretAimingAngle(
+            MathHelpers.getLookaheadPose(
+                turretPose, fieldRelativeSpeeds, UPCOMING_TURRET_ANGLE_LOOKAHEAD.get()),
+            compensatedGoal);
+
     return new AimingParameters(
-        turretAngle, fullyCompensatedDistanceToGoal, turretTolerance, totalTurretFFRadians);
+        turretAngle,
+        fullyCompensatedDistanceToGoal,
+        turretTolerance,
+        totalTurretFFRadians,
+        upcomingTurretAngle);
   }
 
   public static AimingParameters getTurretStuckScoringParameters(
@@ -147,12 +182,14 @@ public class AimParameterUtil {
         angle.getDegrees(),
         distanceToGoal,
         turretTolerance,
-        -turretFieldRelativeSpeeds.omegaRadiansPerSecond);
+        -turretFieldRelativeSpeeds.omegaRadiansPerSecond,
+        turretAngle);
   }
 
   public record AimingParameters(
       double turretAngle,
       double distance,
       double turretTolerance,
-      double turretFeedForwardRadians) {}
+      double turretFeedForwardRadians,
+      double upcomingTurretAngle) {}
 }

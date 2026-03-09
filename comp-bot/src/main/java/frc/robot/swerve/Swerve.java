@@ -47,14 +47,14 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   public static final double MAX_LINEAR_RATE = 4.75;
   private static final DoubleSubscriber MAX_LINEAR_RATE_SHOOTING =
-      DogLog.tunable("Swerve/MaxLinearRateShooting", 2.0);
+      DogLog.tunable("Swerve/MaxLinearRateShooting", 1.5);
 
   private static final DoubleSubscriber SNAKE_MODE_AGRESSIVENESS =
       DogLog.tunable("Swerve/SnakeModeAgressiveness", 0.25);
 
   private static final double MAX_ANGULAR_RATE = Units.rotationsToRadians(4);
   private static final DoubleSubscriber MAX_ANGULAR_RATE_SHOOTING =
-      DogLog.tunable("Swerve/MaxAngularRateShootingRot", 0.4);
+      DogLog.tunable("Swerve/MaxAngularRateShootingRot", 0.5);
   public static final Rotation2d TELEOP_MAX_ANGULAR_RATE = Rotation2d.fromRotations(2);
 
   private static final double SIM_LOOP_PERIOD = Units.millisecondsToSeconds(5);
@@ -160,7 +160,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private boolean ableToBumpAssist = false;
   private boolean ableToTrenchAssist = false;
   private boolean ableToWallSnap = false;
-  private boolean ableToDirectionSnap = false;
+  private boolean ableToSnakeMode = false;
   private boolean inWallSnapCorner = false;
   private boolean previouslyInWallSnapCorner = false;
   private boolean enteredWallSnapCorner = false;
@@ -295,11 +295,9 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                       * MathHelpers.getLinearVelocity(driveSource.getRequestedSpeeds()))
                   / teleopDriveSource.maxLinearVelocity);
 
-      ableToDirectionSnap =
-          FeatureFlags.INTAKE_DIRECTIONAL_SNAPS.getAsBoolean()
-              && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
-              && SwerveAssist.ableToDirectionSnap(
-                  fieldRelativeSpeeds, teleopDriveSource.getRightY());
+      ableToSnakeMode =
+          driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
+              && SwerveAssist.ableToSnakeMode(fieldRelativeSpeeds, teleopDriveSource.getRightY());
     }
 
     var requestedSpeeds = driveSource.getRequestedSpeeds();
@@ -427,7 +425,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
                       .withVelocityX(speeds.vxMetersPerSecond)
                       .withVelocityY(speeds.vyMetersPerSecond),
                   wallSnapAngle));
-        } else if (ableToDirectionSnap) {
+        } else if (ableToSnakeMode) {
           DogLog.timestamp("Swerve/DirectionSnaps/Snapping");
           var swerveSnapsRequest =
               driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP

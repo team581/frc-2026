@@ -63,7 +63,7 @@ public class SwerveAssist {
     }
   }
 
-  public static boolean ableToDirectionSnap(
+  public static boolean ableToSnakeMode(
       ChassisSpeeds fieldRelativeSpeeds, double controllerRightYValue) {
     if (Math.abs(controllerRightYValue) < 0.75) {
       return false;
