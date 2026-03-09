@@ -40,6 +40,19 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
     return actualHubActive;
   }
 
+  public Color getHubStateColor() {
+    if (getTOFBasedHubActive()) {
+      if (getActualHubActive()) {
+        return Color.kLimeGreen;
+      } else {
+        boolean isGreen = Math.floor(teleopTimer.get() / 0.1) % 2 == 0;
+        return isGreen ? Color.kLimeGreen : Color.kBlack;
+      }
+    } else {
+      return Color.kRed;
+    }
+  }
+
   public boolean getTOFBasedHubActive() {
     return tofBasedHubActive;
   }
@@ -60,9 +73,7 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
       return true;
     }
 
-    return FmsUtil.isHubActive(
-        timeSinceMatchStart,
-        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
+    return FmsUtil.isHubActive(timeSinceMatchStart, DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
   }
 
   private boolean calculateTOFBasedHubActive() {
@@ -112,18 +123,4 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
     DogLog.log("HubActivity/ActualHubActive", actualHubActive);
     DogLog.log("HubActivity/TOFBasedHubActive", tofBasedHubActive);
   }
-
-  public Color getHubStateColor() {
-    if (getTOFBasedHubActive()) {
-      if (getActualHubActive()) {
-        return Color.kLimeGreen;
-      } else {
-        boolean isGreen = Math.floor(teleopTimer.get() / 0.1) % 2 == 0;
-        return isGreen ? Color.kLimeGreen : Color.kBlack;
-      }
-    } else {
-      return Color.kRed;
-    }
-  }
 }
-
