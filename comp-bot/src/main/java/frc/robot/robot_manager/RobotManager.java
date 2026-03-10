@@ -907,6 +907,14 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         deploy.getPosition(),
         climber.getHeight(),
         dyeRotor.getAngle());
+
+    MechanismVisualizer.updateShotSimulation(
+        robotPose,
+        turret.getAngle(),
+        shooterHood.getAngle(),
+        shooter.getRpm(),
+        dyeRotor.isShooting(),
+        dyeRotor.getBps());
   }
 
   private void smartTurretHoodIdleRequest() {

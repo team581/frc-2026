@@ -3,6 +3,7 @@ package frc.robot.shooter;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
+import com.team581.math.MathHelpers;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
@@ -217,6 +218,10 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
                     .addMotor(rightMotor, ChassisReference.Clockwise_Positive));
 
     shooterSimulation.update();
+  }
+
+  public double getRpm() {
+    return MathHelpers.average(leftMotorRpm, rightMotorRpm);
   }
 
   public double getScoreTimeOfFlight(double distance) {
