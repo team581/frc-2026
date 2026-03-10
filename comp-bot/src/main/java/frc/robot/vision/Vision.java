@@ -10,7 +10,6 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.imu.Imu;
 import frc.robot.turret.TurretConfig;
@@ -21,11 +20,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 
 public class Vision extends StateMachineSubsystem<VisionState> {
-  private final Debouncer seeingTagDebouncer = new Debouncer(1.0, DebounceType.kFalling);
   private final Debouncer seeingHubTagDebouncer = new Debouncer(0.5, DebounceType.kFalling);
-
-  private final Debouncer seeingTagForPoseResetDebouncer =
-      new Debouncer(5.0, DebounceType.kFalling);
 
   private final TimeInterpolatableBuffer<Double> turretBuffer =
       TimeInterpolatableBuffer.createDoubleBuffer(2.0);
@@ -53,7 +48,6 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   private boolean seeingTag = false;
   private boolean seeingTagDebounced = false;
 
-  private boolean seenTagRecentlyForReset = true;
   private boolean seeingHubTags = false;
 
   public Vision(
@@ -92,12 +86,6 @@ public class Vision extends StateMachineSubsystem<VisionState> {
       seeingTag = true;
     } else {
       seeingTag = false;
-    }
-    seeingTagDebounced = seeingTagDebouncer.calculate(seeingTag);
-    if (DriverStation.isDisabled()) {
-      seenTagRecentlyForReset = true;
-    } else {
-      seenTagRecentlyForReset = seeingTagForPoseResetDebouncer.calculate(seeingTag);
     }
 
     seeingHubTags =
@@ -175,11 +163,6 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     return seeingTagDebounced || RobotBase.isSimulation();
   }
 
-  public boolean seenTagRecentlyForReset() {
-    DogLog.log("Vision/SeenTagRecentlyForReset", seenTagRecentlyForReset);
-    return seenTagRecentlyForReset || RobotBase.isSimulation();
-  }
-
   public boolean seeingTag() {
     return seeingTag || RobotBase.isSimulation();
   }
@@ -249,7 +232,6 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     backLimelight.sendImuData(robotHeading, robotAngularVelocity, 0.0, 0.0, 0.0, 0.0);
 
     DogLog.log("Vision/SeeingTag", seeingTag);
-    DogLog.log("Vision/SeeingTagLast5Seconds", seenTagRecentlyForReset);
 
     switch (currentState) {
       case CALIBRATE_STATIC_TURRET -> {

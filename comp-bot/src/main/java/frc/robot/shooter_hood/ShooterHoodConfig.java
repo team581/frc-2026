@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team581.math.PolynomialRegression;
 import com.team581.util.tuning.TunableInterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import frc.robot.config.RobotKind;
 import java.util.Map;
 
 public class ShooterHoodConfig {
@@ -41,18 +42,24 @@ public class ShooterHoodConfig {
           .withVoltage(new VoltageConfigs().withPeakForwardVoltage(10).withPeakReverseVoltage(-10))
           .withMotorOutput(
               new MotorOutputConfigs()
-                  // TODO: Change to brake after bringup completed
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.CounterClockwise_Positive))
           .withSlot0(new Slot0Configs().withKP(350).withKV(0).withKS(0));
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE =
-      TunableInterpolatingDoubleTreeMap.ofEntries(
-          "ShooterHood/DistanceToScore",
-          Map.entry(5.551, 37.0),
-          Map.entry(3.42, 30.0),
-          Map.entry(2.33, 25.0),
-          Map.entry(1.41, 23.0));
+      RobotKind.IS_COMP_BOT
+          ? TunableInterpolatingDoubleTreeMap.ofEntries(
+              "ShooterHood/DistanceToScore",
+              Map.entry(5.551, 37.0),
+              Map.entry(4.25, 30.0),
+              Map.entry(1.89, 25.0),
+              Map.entry(1.25, 21.3))
+          : TunableInterpolatingDoubleTreeMap.ofEntries(
+              "ShooterHood/DistanceToScore",
+              Map.entry(5.551, 37.0),
+              Map.entry(3.42, 30.0),
+              Map.entry(2.33, 25.0),
+              Map.entry(1.41, 23.0));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "ShooterHood/DistanceToFeed",

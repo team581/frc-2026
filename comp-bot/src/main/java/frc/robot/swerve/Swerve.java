@@ -33,7 +33,6 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.DSOptions;
-import frc.robot.config.FeatureFlags;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
 import frc.robot.turret.TurretConfig;
@@ -160,6 +159,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private boolean ableToBumpAssist = false;
   private boolean ableToTrenchAssist = false;
   private boolean ableToWallSnap = false;
+  private boolean intakeAssistControllerInput = false;
   private boolean ableToSnakeMode = false;
   private boolean inWallSnapCorner = false;
   private boolean previouslyInWallSnapCorner = false;
@@ -241,6 +241,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
         ChassisSpeeds.fromRobotRelativeSpeeds(
             robotRelativeSpeeds, drivetrainState.Pose.getRotation());
 
+    // Make sure right stick Y is either 75% up or down
+    intakeAssistControllerInput = Math.abs(teleopDriveSource.getRightY()) > 0.75;
     ableToTrenchAssist =
         DSOptions.USE_SWERVE_ASSIST.get()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
@@ -252,12 +254,16 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             && health.isLocalizationHealthy()
             && SwerveAssist.ableToBumpAssist(drivetrainState.Pose, fieldRelativeSpeeds);
     ableToWallSnap =
-        FeatureFlags.WALL_SNAPS.getAsBoolean()
-            && !DriverStation.isAutonomous()
+        DriverStation.isTeleop()
             && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
             && health.isLocalizationHealthy()
+            && intakeAssistControllerInput
             && SwerveAssist.ableToWallSnap(
                 drivetrainState.Pose, fieldRelativeSpeeds, enteredWallSnapCorner);
+    ableToSnakeMode =
+        driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
+            && intakeAssistControllerInput
+            && SwerveAssist.ableToSnakeMode(fieldRelativeSpeeds);
 
     // Wall snap logic if we are in a corner
     inWallSnapCorner =
@@ -294,10 +300,6 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               (SNAKE_MODE_AGRESSIVENESS.get()
                       * MathHelpers.getLinearVelocity(driveSource.getRequestedSpeeds()))
                   / teleopDriveSource.maxLinearVelocity);
-
-      ableToSnakeMode =
-          driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP
-              && SwerveAssist.ableToSnakeMode(fieldRelativeSpeeds, teleopDriveSource.getRightY());
     }
 
     var requestedSpeeds = driveSource.getRequestedSpeeds();

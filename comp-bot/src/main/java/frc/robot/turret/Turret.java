@@ -4,7 +4,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.team581.math.MathHelpers;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
@@ -17,6 +16,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.config.DSOptions;
+import frc.robot.config.FeatureFlags;
+import frc.robot.util.AimParameterUtil.AimingParameters;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.Vision;
 
@@ -164,25 +165,22 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     switch (getState()) {
       case SCORE, FEED -> {
         afterTransition(getState());
-        DogLog.clearFault("Turret is not homed");
       }
-      case UNHOMED -> {
-        DogLog.logFault("Turret is not homed", AlertType.kError);
-      }
-      default -> {
-        DogLog.clearFault("Turret is not homed");
-      }
+      default -> {}
     }
-    if (DriverStation.isDisabled()) {
-      if (getState() != TurretState.UNHOMED) {
-        if (!MathUtil.isNear(setpoint, MathHelpers.angleModulus(currentAngle), 10.0)) {
-          DogLog.logFault("Turret is misaligned", AlertType.kWarning);
-        } else {
-          DogLog.clearFault("Turret is misaligned");
-        }
-      }
+
+    if (getState() == TurretState.UNHOMED) {
+      DogLog.logFault("Turret is not homed", AlertType.kError);
     } else {
-      // Clear the misalignment fault once teleop starts
+      DogLog.clearFault("Turret is not homed");
+    }
+
+    if (getState() != TurretState.UNHOMED
+        && DriverStation.isDisabled()
+        && DriverStation.isAutonomous()
+        && !MathUtil.isNear(setpoint, currentAngle, 10.0)) {
+      DogLog.logFault("Turret is misaligned", AlertType.kWarning);
+    } else {
       DogLog.clearFault("Turret is misaligned");
     }
   }
@@ -248,6 +246,9 @@ public class Turret extends StateMachineSubsystem<TurretState> {
   }
 
   public boolean atGoal(double tolerance) {
+    if (FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()) {
+      return true;
+    }
     return switch (getState()) {
       case UNHOMED -> false;
       case STUCK -> true;
@@ -255,7 +256,14 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     };
   }
 
+  public boolean atGoal(AimingParameters aimingParameters) {
+    return atGoal(aimingParameters.turretTolerance(), aimingParameters.upcomingTurretAngle());
+  }
+
   public boolean atGoal(double tolerance, double upcomingAngle) {
+    if (FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()) {
+      return true;
+    }
     return switch (getState()) {
       case UNHOMED -> false;
       case STUCK -> true;

@@ -6,14 +6,11 @@ import com.team581.swerve.SwerveAssist;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
-import com.team581.util.FmsUtil;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Hardware;
 import frc.robot.climber.ClimbLocation;
@@ -24,6 +21,7 @@ import frc.robot.config.FeatureFlags;
 import frc.robot.deploy.Deploy;
 import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.health.HealthManager;
+import frc.robot.hub_activity.HubActivity;
 import frc.robot.intake.GenericIntake;
 import frc.robot.localization.Localization;
 import frc.robot.shooter.Shooter;
@@ -50,6 +48,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private final Vision vision;
   public final XboxController driverController;
   private final HealthManager health;
+  private final HubActivity hubActivity;
   private final Trailblazer trailblazer;
   public final ClusterMap clusterMap;
   private final Climber climber;
@@ -65,16 +64,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private boolean isMoving = false;
   private boolean drivingToIntake = false;
 
-  private double timeSinceMatchStart = 0.0;
-  private double timeUntilNextShift = 0.0;
-  private boolean isHubActive = true;
   private boolean isInScoringZone = false;
   private boolean isInAllianceZone = false;
-  private final DoubleSubscriber tunableHubStateOffset =
-      DogLog.tunable("RobotManager/MatchTimeOffset", 0.0);
-  private final Timer teleopTimer = new Timer();
 
   private FeedLocation feedLocation = FeedLocation.CLOSEST;
+  private AimingParameters fallbackFeedingParameters = new AimingParameters(0, 0, 0, 0, 0);
 
   public RobotManager(
       ShooterHood shooterHood,
@@ -88,6 +82,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       Vision vision,
       XboxController driverController,
       HealthManager health,
+      HubActivity hubActivity,
       Trailblazer trailblazer,
       Climber climber,
       ClusterMap clusterMap,
@@ -104,18 +99,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     this.vision = vision;
     this.driverController = driverController;
     this.health = health;
+    this.hubActivity = hubActivity;
     this.trailblazer = trailblazer;
     this.clusterMap = clusterMap;
     this.climber = climber;
 
     this.hardware = hardware;
-    teleopTimer.start();
-  }
-
-  @Override
-  public void teleopInit() {
-    teleopTimer.reset();
-    timeSinceMatchStart = FmsUtil.MATCH_TIME_AT_TELEOP_START;
   }
 
   @Override
@@ -139,16 +128,16 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           STOP_SHOOTING_FEED ->
           dyeRotor.isReset() ? RobotState.IDLE : currentState;
       case PREPARE_FORCE_SCORE -> {
-        if ((FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()
-                || turret.atGoal(
-                    scoringParameters.turretTolerance(), scoringParameters.upcomingTurretAngle()))
-            && (shooter.atGoal() && !dyeRotor.isJammed() && shooterHood.atGoal())) {
+        if (turret.atGoal(scoringParameters)
+            && shooter.atGoal()
+            && !dyeRotor.isJammed()
+            && shooterHood.atGoal()) {
           yield RobotState.FORCE_SCORE;
         }
         yield currentState;
       }
       case IDLE -> {
-        if (DSOptions.AUTO_SCORE.getAsBoolean() && isHubActive) {
+        if (DSOptions.AUTO_SCORE.getAsBoolean() && hubActivity.getTOFBasedHubActive()) {
           yield RobotState.PREPARE_SCORE;
         }
         yield currentState;
@@ -156,34 +145,32 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case PREPARE_SCORE -> {
         logScoringTransition();
 
-        if (DSOptions.AUTO_SCORE.getAsBoolean() && !isHubActive) {
+        if (DSOptions.AUTO_SCORE.getAsBoolean() && !hubActivity.getTOFBasedHubActive()) {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
-        if ((FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()
-                || turret.atGoal(
-                    scoringParameters.turretTolerance(), scoringParameters.upcomingTurretAngle()))
-            && (shooter.atGoal()
-                && localization.isTrustworthy()
-                && FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
-                && !dyeRotor.isJammed()
-                && shooterHood.atGoal()
-                && isHubActive
-                && isInScoringZone)) {
+        if ((FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())
+                && localization.isTrustworthy())
+            && (((FeatureFlags.IGNORE_TURRET_AT_GOAL.getAsBoolean()
+                        || turret.atGoal(scoringParameters.turretTolerance()))
+                    && (shooter.atGoal()
+                        && !dyeRotor.isJammed()
+                        && shooterHood.atGoal()
+                        && hubActivity.getTOFBasedHubActive()
+                        && isInScoringZone))
+                || hubActivity.ableToForceScoreTransitionEndOfActiveHub())) {
           yield RobotState.SCORE;
         }
         yield currentState;
       }
-      case PREPARE_PRESET_SCORE -> {
-        if (shooter.atGoal()
-            && !dyeRotor.isJammed()
-            && turret.atGoal(
-                scoringParameters.turretTolerance(), scoringParameters.upcomingTurretAngle())
-            && shooterHood.atGoal()
-            && !isMoving) {
-          yield RobotState.PRESET_SCORE;
-        }
-        yield currentState;
-      }
+      case PREPARE_PRESET_SCORE, PRESET_SCORE ->
+          !isMoving
+                  && ((shooter.atGoal()
+                          && !dyeRotor.isJammed()
+                          && turret.atGoal(scoringParameters)
+                          && shooterHood.atGoal())
+                      || hubActivity.ableToForceScoreTransitionEndOfActiveHub())
+              ? RobotState.PRESET_SCORE
+              : RobotState.PREPARE_PRESET_SCORE;
       case CLIMB_7_PREPARE_SCORING_L3 -> {
         if (shooter.atGoal()
             && turret.atGoal(1.0)
@@ -193,13 +180,13 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         }
         yield currentState;
       }
-      case PREPARE_PRESET_FEED ->
+      case PREPARE_PRESET_FEED, PRESET_FEED ->
           shooter.atGoal()
                   && !dyeRotor.isJammed()
                   && turret.atGoal(1, feedingParameters.upcomingTurretAngle())
                   && shooterHood.atGoal()
               ? RobotState.PRESET_FEED
-              : currentState;
+              : RobotState.PREPARE_PRESET_FEED;
 
       case PREPARE_FEED -> {
         logFeedTransition();
@@ -209,8 +196,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             && (health.isLocalizationHealthy()
                 ? !FieldUtil.isRobotInNoFeedZone(TurretCalculator.getTurretPose(robotPose))
                 : true)
-            && turret.atGoal(
-                feedingParameters.turretTolerance(), feedingParameters.upcomingTurretAngle())
+            && turret.atGoal(feedingParameters)
             && shooterHood.atGoal()) {
 
           yield RobotState.FEED;
@@ -220,10 +206,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       case SCORE -> {
         logScoringTransition();
-        // If we are not in the alliance zone while vision is online, stop tracking the
-        // hub.
-        // Otherwise, if vision is dead and we cannot reliable track whether we are in
-        // the alliance
+        // If we are not in the alliance zone while vision is online, stop tracking the hub.
+        // Otherwise, if vision is dead and we cannot reliable track whether we are in the alliance
         // zone, we still want to be able to score
         if (health.isLocalizationHealthy()
             && !FieldUtil.isRobotInAllianceZone(robotPose.getTranslation())) {
@@ -231,7 +215,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
 
-        if (!isHubActive) {
+        if (!hubActivity.getTOFBasedHubActive()) {
           yield RobotState.STOP_SHOOTING_SCORE;
         }
 
@@ -239,33 +223,15 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             || (shooter.atGoal()
                 && localization.isTrustworthy()
                 && !dyeRotor.isJammed()
-                && turret.atGoal(
-                    scoringParameters.turretTolerance(), scoringParameters.upcomingTurretAngle())
+                && turret.atGoal(scoringParameters)
                 && shooterHood.atGoal()
-                && isInScoringZone)) {
+                && isInScoringZone)
+            || hubActivity.ableToForceScoreTransitionEndOfActiveHub()) {
           yield currentState;
         }
 
         yield RobotState.PREPARE_SCORE;
       }
-      case PRESET_SCORE -> {
-        if (shooter.atGoal()
-            && !dyeRotor.isJammed()
-            && turret.atGoal(
-                scoringParameters.turretTolerance(), scoringParameters.upcomingTurretAngle())
-            && shooterHood.atGoal()
-            && !isMoving) {
-          yield currentState;
-        }
-        yield RobotState.PREPARE_PRESET_SCORE;
-      }
-      case PRESET_FEED ->
-          shooter.atGoal()
-                  && !dyeRotor.isJammed()
-                  && turret.atGoal(1, feedingParameters.upcomingTurretAngle())
-                  && shooterHood.atGoal()
-              ? currentState
-              : RobotState.PREPARE_PRESET_FEED;
       case FEED -> {
         logFeedTransition();
         if (!FeatureFlags.CANCEL_IN_PROGRESS_SHOT.getAsBoolean()
@@ -273,8 +239,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 && (health.isLocalizationHealthy()
                     ? !FieldUtil.isRobotInNoFeedZone(TurretCalculator.getTurretPose(robotPose))
                     : true)
-                && turret.atGoal(
-                    feedingParameters.turretTolerance(), feedingParameters.upcomingTurretAngle())
+                && turret.atGoal(feedingParameters)
                 && shooterHood.atGoal())) {
 
           yield currentState;
@@ -464,9 +429,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         shooter.feedRequest(PRESET_FEED_DISTANCE);
         shooterHood.feedRequest(PRESET_FEED_DISTANCE);
         dyeRotor.idleRequest();
-
-        // TODO: Update to use fallback feeding parameters
-        turret.feedRequest(0, 0);
+        turret.feedRequest(
+            fallbackFeedingParameters.turretAngle(),
+            fallbackFeedingParameters.turretFeedForwardRadians());
         // Deploy is controlled separately
         // Intake is controlled separately
         swerve.normalDriveRequest();
@@ -479,7 +444,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
         // TODO: Update to use fallback feeding parameters
         dyeRotor.feedRequest(feedingParameters.distance());
-        turret.feedRequest(0, 0);
+        turret.feedRequest(
+            fallbackFeedingParameters.turretAngle(),
+            fallbackFeedingParameters.turretFeedForwardRadians());
 
         if (intake.getState().isIntaking()) {
           intake.shootThenIntakeRequest();
@@ -496,7 +463,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         dyeRotor.resetToIdleRequest();
 
         // TODO: Update to use fallback feeding parameters
-        turret.feedRequest(0, 0);
+        turret.feedRequest(
+            fallbackFeedingParameters.turretAngle(),
+            fallbackFeedingParameters.turretFeedForwardRadians());
 
         deploy.stopShootingRequest();
         intake.stopShootingRequest();
@@ -704,8 +673,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         shooter.climbScoreRequest(climbLocationIsLeft);
         shooterHood.climbScoreRequest(climbLocationIsLeft);
         dyeRotor.idleRequest();
-
-        // TODO: Use an actual feed forward
         turret.climbScoreRequest(climbLocationIsLeft, 0);
         deploy.stowRequest();
         intake.idleRequest();
@@ -717,8 +684,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         shooter.climbScoreRequest(climbLocationIsLeft);
         shooterHood.climbScoreRequest(climbLocationIsLeft);
         dyeRotor.scoreRequest(scoringParameters.distance());
-
-        // TODO: Use an actual feed forward
         turret.climbScoreRequest(climbLocationIsLeft, 0);
         deploy.stowRequest();
         intake.shootRequest();
@@ -878,7 +843,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       case PREPARE_PRESET_FEED -> {
         // TODO: Use fallback feeding parameters
-        turret.feedRequest(0, 0);
+        turret.feedRequest(
+            fallbackFeedingParameters.turretAngle(),
+            fallbackFeedingParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
           swerve.intakeDriveRequest();
         } else {
@@ -887,7 +854,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       case PRESET_FEED -> {
         // TODO: Use fallback feeding parameters
-        turret.feedRequest(0, 0);
+        turret.feedRequest(
+            fallbackFeedingParameters.turretAngle(),
+            fallbackFeedingParameters.turretFeedForwardRadians());
         if (intake.getState().isIntaking()) {
           swerve.intakeDriveRequest();
         } else {
@@ -929,12 +898,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/Feeding/FeedParameters", feedingParameters);
     DogLog.log("RobotManager/Scoring/ScoringParameters", scoringParameters);
 
-    DogLog.log("RobotManager/Scoring/ScoreTransition/IsHubActive", isHubActive);
-    DogLog.log("RobotManager/TimeSinceMatchStart", timeSinceMatchStart);
-    DogLog.log("RobotManager/TimeSinceTeleopEnable", teleopTimer.get());
-
-    DogLog.log("RobotManager/TimeUntilNextShift", timeUntilNextShift);
-    DogLog.log("RobotManager/HubActive", getIsHubActive());
     DogLog.log("RobotManager/DrivingToIntake", drivingToIntake);
 
     MechanismVisualizer.log(
@@ -1065,7 +1028,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   public void prepareScoreOrFeedRequest() {
     var shouldScore = isInAllianceZone;
     if (!health.isLocalizationHealthy()) {
-      shouldScore = isHubActive;
+      shouldScore = hubActivity.getTOFBasedHubActive();
     }
 
     if (shouldScore) {
@@ -1220,8 +1183,11 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
   @Override
   protected void collectInputs() {
+    hubActivity.updateShooterScoringTOF(shooter.getScoreTimeOfFlight(scoringParameters.distance()));
+
     robotPose = localization.getPose();
     double robotRotation = robotPose.getRotation().getDegrees();
+    clusterMap.setDeployFullyExtended(deploy.isFullyExtended());
     vision.setEstimatedPoseAngle(robotRotation);
 
     if (!DSOptions.USE_TURRET.getAsBoolean()) {
@@ -1264,22 +1230,13 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
               swerve.getFieldRelativeSpeeds());
     }
 
-    shooter.getScoreTimeOfFlight(scoringParameters.distance());
-    if (!health.isLocalizationHealthy()) {
-      feedingParameters =
-          AimParameterUtil.getFallbackFeedingParameters(
-              feedLocation, robotPose, swerve.getFieldRelativeSpeeds());
-    } else {
-      feedingParameters =
-          AimParameterUtil.getFeedingParameters(
-              feedLocation, robotPose, swerve.getFieldRelativeSpeeds());
-    }
+    feedingParameters =
+        AimParameterUtil.getFeedingParameters(
+            feedLocation, robotPose, swerve.getFieldRelativeSpeeds());
 
-    timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
+    fallbackFeedingParameters =
+        AimParameterUtil.getFallbackFeedingParameters(feedLocation, robotPose, speeds);
 
-    isHubActive = getIsHubActiveOrNotUsingState();
-    timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
-    DogLog.log("RobotManager/CurrentShift", FmsUtil.currentShift(timeSinceMatchStart));
     var swerveVector = MathHelpers.getDriveDirection(speeds);
     double driveDirection = swerveVector.getDegrees();
     drivingToIntake =
@@ -1295,28 +1252,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             TurretCalculator.getTurretPose(robotPose).getTranslation());
   }
 
-  private boolean getIsHubActiveOrNotUsingState() {
-    if (!DSOptions.USE_HUB_STATE.get() || DriverStation.isAutonomous()) {
-      return true;
-    }
-
-    return getIsHubActive();
-  }
-
-  private boolean getIsHubActive() {
-    if (FeatureFlags.LOOKAHEAD_SCORING.getAsBoolean()) {
-      return FmsUtil.isHubActive(
-          timeSinceMatchStart
-              + shooter.getScoreTimeOfFlight(scoringParameters.distance())
-              + tunableHubStateOffset.get(),
-          DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
-    }
-
-    return FmsUtil.isHubActive(
-        timeSinceMatchStart + tunableHubStateOffset.get(),
-        DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
-  }
-
   private void logScoringTransition() {
     DogLog.log("RobotManager/Scoring/ScoreTransition/ShooterAtGoal", shooter.atGoal());
     DogLog.log(
@@ -1327,9 +1262,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         FieldUtil.isRobotInAllianceZone(robotPose.getTranslation()));
     DogLog.log("RobotManager/Scoring/ScoreTransition/DyeRotorNotJammed", !dyeRotor.isJammed());
     DogLog.log(
-        "RobotManager/Scoring/ScoreTransition/TurretAtGoal",
-        turret.atGoal(
-            scoringParameters.turretTolerance(), scoringParameters.upcomingTurretAngle()));
+        "RobotManager/Scoring/ScoreTransition/TurretAtGoal", turret.atGoal(scoringParameters));
     DogLog.log("RobotManager/Scoring/ScoreTransition/ShooterHoodAtGoal", shooterHood.atGoal());
     DogLog.log("RobotManager/Scoring/ScoreTransition/IsInScoringZone", isInScoringZone);
   }
@@ -1344,9 +1277,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         !FieldUtil.isRobotInNoFeedZone(TurretCalculator.getTurretPose(robotPose)));
     DogLog.log("RobotManager/Feeding/FeedTransition/DyeRotorNotJammed", !dyeRotor.isJammed());
     DogLog.log(
-        "RobotManager/Feeding/FeedTransition/TurretAtGoal",
-        turret.atGoal(
-            feedingParameters.turretTolerance(), feedingParameters.upcomingTurretAngle()));
+        "RobotManager/Feeding/FeedTransition/TurretAtGoal", turret.atGoal(feedingParameters));
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterHoodAtGoal", shooterHood.atGoal());
   }
 }

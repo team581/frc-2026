@@ -42,6 +42,8 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   private Localization localization;
   private Swerve swerve;
 
+  private boolean deployFullyExtended = false;
+
   private final Comparator<Pose2d> bestClusterComparator =
       comparingDouble(
           target -> {
@@ -106,8 +108,12 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
     }
   }
 
+  public void setDeployFullyExtended(boolean isFullyExtended) {
+    deployFullyExtended = isFullyExtended;
+  }
+
   private Optional<Translation2d> getRawClusterPoses() {
-    if (limelight.getState() != LimelightState.CLUSTER_MAP) {
+    if (limelight.getState() != LimelightState.CLUSTER_MAP && !deployFullyExtended) {
       return Optional.empty();
     }
 

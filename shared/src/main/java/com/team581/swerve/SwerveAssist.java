@@ -63,13 +63,9 @@ public class SwerveAssist {
     }
   }
 
-  public static boolean ableToSnakeMode(
-      ChassisSpeeds fieldRelativeSpeeds, double controllerRightYValue) {
-    if (Math.abs(controllerRightYValue) < 0.75) {
-      return false;
-    }
-    var robotVelocity = MathHelpers.getLinearVelocity(fieldRelativeSpeeds);
-    return robotVelocity > MIN_ROBOT_VELOCITY_FOR_DIRECTION_SNAPS.getAsDouble();
+  public static boolean ableToSnakeMode(ChassisSpeeds fieldRelativeSpeeds) {
+    return MathHelpers.getLinearVelocity(fieldRelativeSpeeds)
+        > MIN_ROBOT_VELOCITY_FOR_DIRECTION_SNAPS.getAsDouble();
   }
 
   public static boolean ableToTrenchAssist(Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
@@ -103,7 +99,7 @@ public class SwerveAssist {
 
   public static boolean ableToWallSnap(
       Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds, boolean enteredCorner) {
-    // Check if we are in a corner
+    // Check if we have entered a corner
     if (enteredCorner) {
       DogLog.log("SwerveAssist/WallSnaps/Checks/AbleToCornerTransition", true);
       return true;

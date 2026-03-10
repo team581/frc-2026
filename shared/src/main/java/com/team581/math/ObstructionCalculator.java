@@ -9,10 +9,13 @@ import org.apache.commons.geometry.euclidean.twod.Lines;
 import org.apache.commons.geometry.euclidean.twod.RegionBSPTree2D;
 import org.apache.commons.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.numbers.core.Precision;
+import org.hipparchus.geometry.euclidean.twod.hull.MonotoneChain;
 
 public class ObstructionCalculator {
   private static final Precision.DoubleEquivalence PRECISION =
       Precision.doubleEquivalenceOfEpsilon(1e-6);
+
+  private static final MonotoneChain MONOTONE_CHAIN = new MonotoneChain();
 
   @SafeVarargs
   public static ObstructionCalculator fromTranslations(List<Translation2d>... obstructionCorners) {
@@ -35,8 +38,17 @@ public class ObstructionCalculator {
     region = RegionBSPTree2D.empty();
 
     for (List<Vector2D> corners : obstructionCorners) {
-      ConvexArea area = ConvexArea.convexPolygonFromVertices(corners, PRECISION);
-      region.add(area);
+      List<org.hipparchus.geometry.euclidean.twod.Vector2D> math3Points =
+          corners.stream()
+              .map(p -> new org.hipparchus.geometry.euclidean.twod.Vector2D(p.getX(), p.getY()))
+              .toList();
+
+      List<Vector2D> hull =
+          Arrays.stream(MONOTONE_CHAIN.generate(math3Points).getVertices())
+              .map(v -> Vector2D.of(v.getX(), v.getY()))
+              .toList();
+
+      region.add(ConvexArea.convexPolygonFromVertices(hull, PRECISION));
     }
   }
 

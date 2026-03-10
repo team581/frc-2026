@@ -104,6 +104,10 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     }
   }
 
+  public boolean isFullyExtended() {
+    return getState() == DeployState.INTAKE && atGoal();
+  }
+
   public void homingRequest() {
     if (DriverStation.isAutonomous()) {
       setStateFromRequest(DeployState.HOME_INWARD);
@@ -139,7 +143,8 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
           yield DeployState.HOPPER_SHUFFLING_FINISH;
         }
-        if ((atGoal() || timeout(2.0)) && hopperCapacityNotHigh) {
+        if ((atGoal() && timeout(DeployConfig.HOPPER_SHUFFLING_IN_OUT_DURATION.get()))
+            && hopperCapacityNotHigh) {
           yield DeployState.HOPPER_SHUFFLING_IN;
         }
         yield currentState;
@@ -149,13 +154,14 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
         if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
           yield DeployState.HOPPER_SHUFFLING_FINISH;
         }
-        if ((atGoal() || timeout(2.0)) && hopperCapacityNotHigh) {
+        if ((atGoal() && timeout(DeployConfig.HOPPER_SHUFFLING_IN_OUT_DURATION.get()))
+            && hopperCapacityNotHigh) {
           yield DeployState.HOPPER_SHUFFLING_OUT;
         }
         yield currentState;
       }
       case HOPPER_SHUFFLING_FINISH -> {
-        if (atGoal() || timeout(2.0)) {
+        if (atGoal() && timeout(DeployConfig.HOPPER_SHUFFLING_FINISH_DURATION.get())) {
           hopperShuffleTimer.restart();
           yield DeployState.HOPPER_SHUFFLING_OUT;
         }
@@ -244,7 +250,10 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     leftSupplyCurrent = leftMotor.getSupplyCurrent().getValueAsDouble();
     rightSupplyCurrent = rightMotor.getSupplyCurrent().getValueAsDouble();
 
-    hopperCANRangeDistance = Units.metersToInches(hopperCANRange.getDistance().getValueAsDouble());
+    if (DSOptions.USE_CANRANGE.get()) {
+      hopperCANRangeDistance =
+          Units.metersToInches(hopperCANRange.getDistance().getValueAsDouble());
+    }
     filteredHopperCANRangeDistance = hopperFilter.calculate(hopperCANRangeDistance);
 
     if (filteredHopperCANRangeDistance >= DeployConfig.HIGH_CAPACITY_THRESHOLD) {

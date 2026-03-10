@@ -4,9 +4,9 @@ import com.team581.util.tuning.TunableInterpolatingDoubleTreeMap;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import java.util.Map;
-import org.apache.commons.math4.legacy.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math4.legacy.fitting.PolynomialCurveFitter;
-import org.apache.commons.math4.legacy.fitting.WeightedObservedPoint;
+import org.hipparchus.analysis.polynomials.PolynomialFunction;
+import org.hipparchus.fitting.PolynomialCurveFitter;
+import org.hipparchus.fitting.WeightedObservedPoint;
 
 public class PolynomialRegression {
   /**

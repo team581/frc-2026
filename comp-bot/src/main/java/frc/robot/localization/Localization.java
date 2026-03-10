@@ -8,8 +8,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.imu.Imu;
 import frc.robot.swerve.Swerve;
@@ -27,8 +25,6 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
   private final Imu imu;
   private final TrustFactor trustFactor = new TrustFactor();
 
-  private final Field2d field2d = new Field2d();
-
   private Pose2d robotPose = Pose2d.kZero;
 
   public Localization(Swerve swerve, TunerSwerveDrivetrain drivetrain, Vision vision, Imu imu) {
@@ -37,8 +33,6 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
     this.vision = vision;
     this.drivetrain = drivetrain;
     this.imu = imu;
-
-    SmartDashboard.putData("Field", field2d);
   }
 
   public Pose2d getLookaheadPose(double lookahead) {
@@ -84,7 +78,6 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
   public void whileInState(LocalizationState currentState) {
     DogLog.log("Localization/EstimatedPose", getPose());
     DogLog.log("Localization/TrustFactor", getTrustFactor());
-    field2d.setRobotPose(robotPose);
   }
 
   public void zeroGyro() {
@@ -98,9 +91,6 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
     for (TagResult result : results) {
       var visionPose = result.pose();
       averageTimestamp += result.timestamp();
-      if (!vision.seenTagRecentlyForReset()) {
-        resetPose(visionPose);
-      }
       swerve.drivetrain.addVisionMeasurement(
           visionPose,
           Utils.fpgaToCurrentTime(result.timestamp() - (LATENCY_CONSTANT.get() / 1000)),
