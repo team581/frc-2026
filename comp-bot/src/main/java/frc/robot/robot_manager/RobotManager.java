@@ -1072,7 +1072,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   public void stowDeployRequest() {
     intake.idleRequest();
     deploy.stowRequest();
-    if(driverWantsToIntake == true){
+    if (driverWantsToIntake == true) {
       intake.intakeRequest();
     }
   }
