@@ -46,7 +46,9 @@ public class HealthManager extends StateMachineSubsystem<HealthState> {
 
   /** Returns whether the robot's ability to localize itself is healthy. */
   public boolean isLocalizationHealthy() {
-    return localizationHealthy && DSOptions.USE_TAG_LIMELIGHTS.getAsBoolean();
+    return localizationHealthy
+        && DSOptions.USE_TAG_LIMELIGHTS.getAsBoolean()
+        && !DSOptions.USE_TAG_LIMELIGHTS.getAsBoolean();
   }
 
   @Override

@@ -53,7 +53,7 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
   }
 
   public boolean getTOFBasedHubActive() {
-    return tofBasedHubActive;
+    return DSOptions.PIT_FUNCTIONALITY.getAsBoolean() || tofBasedHubActive;
   }
 
   @Override

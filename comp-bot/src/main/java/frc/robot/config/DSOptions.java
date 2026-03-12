@@ -13,5 +13,7 @@ public final class DSOptions {
   public static final BooleanSubscriber DEFAULT_WON_AUTO = DSOption.of("DefaultWonAuto", true);
   public static final BooleanSubscriber RESET_POSE_FOR_AUTO = DSOption.of("ResetPoseForAuto", true);
 
+  public static final BooleanSubscriber PIT_FUNCTIONALITY = DSOption.of("PitFunctionality", false);
+
   private DSOptions() {}
 }

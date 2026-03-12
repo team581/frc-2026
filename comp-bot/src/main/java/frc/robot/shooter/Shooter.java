@@ -11,6 +11,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import frc.robot.config.DSOptions;
 import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
@@ -146,6 +147,11 @@ public class Shooter extends StateMachineSubsystem<ShooterState> {
   protected void collectInputs() {
     shootingRpm = Math.min(ShooterConfig.MAX_SAFE_RPM, distanceToScoringRpm(scoreDistance));
     feedingRpm = Math.min(ShooterConfig.MAX_SAFE_RPM, distanceToFeedingRpm(feedDistance));
+
+    if (DSOptions.PIT_FUNCTIONALITY.getAsBoolean()) {
+      shootingRpm = ShooterConfig.PIT_FUNCTIONALITY_RPM;
+      feedingRpm = ShooterConfig.PIT_FUNCTIONALITY_RPM;
+    }
 
     leftStatorCurrent = leftMotor.getStatorCurrent().getValueAsDouble();
     rightStatorCurrent = rightMotor.getStatorCurrent().getValueAsDouble();
