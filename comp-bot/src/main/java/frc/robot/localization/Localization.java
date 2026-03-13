@@ -17,12 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Localization extends StateMachineSubsystem<LocalizationState> {
+  public final Imu imu;
   private static final DoubleSubscriber LATENCY_CONSTANT =
       DogLog.tunable("Localization/StaticLatencyAdjustment", 10.0);
   private final Swerve swerve;
   private final TunerSwerveDrivetrain drivetrain;
   private final Vision vision;
-  private final Imu imu;
   private final TrustFactor trustFactor = new TrustFactor();
 
   private Pose2d robotPose = Pose2d.kZero;

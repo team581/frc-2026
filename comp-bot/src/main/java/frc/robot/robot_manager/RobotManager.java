@@ -179,6 +179,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 && shooter.atGoalDebounced()
                 && shooterHood.atGoal()
                 && localization.isTrustworthy()
+                && localization.imu.isFlatDebounced()
                 && hubActivity.getTOFBasedHubActive()
                 && isInSafeScoringLocation
                 && !nearTrench)
@@ -205,6 +206,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 || (localization.isTrustworthy()
                     && turret.atGoal(scoringParameters)
                     && shooterHood.atGoal()
+                    && localization.imu.isFlatDebounced()
                     && localization.isTrustworthy()
                     && isInSafeScoringLocation)
                 || hubActivity.ableToForceScoreTransitionEndOfActiveHub())
@@ -223,6 +225,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
         if (shooter.atGoalDebounced()
             && isInSafeFeedingLocation
+            && localization.imu.isFlatDebounced()
             && turret.atGoal(feedingParameters)
             && shooterHood.atGoal()
             && health.isLocalizationHealthy()
@@ -242,6 +245,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if (!FeatureFlags.CANCEL_IN_PROGRESS_SHOT.getAsBoolean()
             || (isInSafeFeedingLocation
                 && turret.atGoal(feedingParameters)
+                && localization.imu.isFlatDebounced()
                 && shooterHood.atGoal()
                 && health.isLocalizationHealthy()
                 && !nearTrench)) {
