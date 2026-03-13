@@ -1298,6 +1298,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log(
         "RobotManager/Scoring/ScoreTransition/LocalizationTrustworthy",
         localization.isTrustworthy());
+            DogLog.log("RobotManager/Scoring/ScoreTransition/ImuFlat", localization.imu.isFlatDebounced());
+
     DogLog.log(
         "RobotManager/Scoring/ScoreTransition/HubActive", hubActivity.getTOFBasedHubActive());
     DogLog.log("RobotManager/Scoring/ScoreTransition/IsInScoringZone", isInSafeScoringLocation);
@@ -1305,7 +1307,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   }
 
   private void logFeedTransition() {
-    DogLog.log("RobotManager/Feeding/ScoreTransition/NotInAllianceZone", !isInAllianceZone);
+    DogLog.log("RobotManager/Feeding/FeedTransition/NotInAllianceZone", !isInAllianceZone);
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterAtGoal", shooter.atGoalDebounced());
     DogLog.log("RobotManager/Feeding/FeedTransition/SafeFeedLocation", isInSafeFeedingLocation);
     DogLog.log(
@@ -1313,6 +1315,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterHoodAtGoal", shooterHood.atGoal());
     DogLog.log(
         "RobotManager/Feeding/FeedTransition/LocalizationHealthy", health.isLocalizationHealthy());
+    DogLog.log("RobotManager/Feeding/FeedTransition/ImuFlat", localization.imu.isFlatDebounced());
     DogLog.log("RobotManager/Feeding/ScoreTransition/NotNearTrench", !nearTrench);
   }
 }
