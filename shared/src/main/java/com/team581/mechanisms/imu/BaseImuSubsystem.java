@@ -14,7 +14,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 
 public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
-  private static final double IS_FLAT_THRESHOLD = 4.0;
+  private static final double IS_FLAT_THRESHOLD = 5.0;
 
   protected final SwerveDrivetrain<?, ?, ?> drivetrain;
   private final Debouncer isFlatDebouncer = new Debouncer(0.5, DebounceType.kRising);
