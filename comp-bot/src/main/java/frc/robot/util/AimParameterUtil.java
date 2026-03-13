@@ -4,6 +4,7 @@ import com.team581.math.MathHelpers;
 import com.team581.math.ShootOnTheMove;
 import com.team581.util.FeedLocation;
 import com.team581.util.FieldUtil;
+import com.team581.util.FmsUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,31 +26,21 @@ public class AimParameterUtil {
 
   private static final double SCORING_TURRET_TOLERANCE = Units.inchesToMeters(20);
 
-  private static final double FALLBACK_FEEDING_TURRET_TOLERANCE = 1;
   private static final double FEEDING_FALLBACK_DISTANCE_TO_GOAL = 8.0;
 
   private static final DoubleSubscriber UPCOMING_TURRET_ANGLE_LOOKAHEAD =
       DogLog.tunable("AimingParameters/UpcomingTurretAngleLookahead", 0.5);
 
-  public static AimingParameters getFallbackFeedingParameters(
-      FeedLocation feedLocation, Pose2d robotPose, ChassisSpeeds fieldRelativeSpeeds) {
-
-    var turretAngle =
-        TurretCalculator.calculateTurretAimingAngle(
-            robotPose, robotPose.plus(new Transform2d(-1, 0, Rotation2d.kZero)).getTranslation());
-
-    var upcomingTurretAngle =
-        TurretCalculator.calculateTurretAimingAngle(
-            MathHelpers.getLookaheadPose(
-                robotPose, fieldRelativeSpeeds, UPCOMING_TURRET_ANGLE_LOOKAHEAD.get()),
-            robotPose.plus(new Transform2d(-1, 0, Rotation2d.kZero)).getTranslation());
+  public static AimingParameters getFallbackFeedingParameters(Rotation2d robotRotation) {
+    var fieldRelativeGoal = FmsUtil.isRedAlliance() ? Rotation2d.kZero : Rotation2d.k180deg;
+    var turretAngle = fieldRelativeGoal.minus(robotRotation);
 
     return new AimingParameters(
-        turretAngle,
+        turretAngle.getDegrees(),
         FEEDING_FALLBACK_DISTANCE_TO_GOAL,
-        FALLBACK_FEEDING_TURRET_TOLERANCE,
-        -fieldRelativeSpeeds.omegaRadiansPerSecond,
-        upcomingTurretAngle);
+        5,
+        0,
+        0);
   }
 
   public static AimingParameters getFeedingParameters(

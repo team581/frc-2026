@@ -846,7 +846,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         }
       }
       case PREPARE_PRESET_FEED -> {
-        // TODO: Use fallback feeding parameters
         turret.feedRequest(
             fallbackFeedingParameters.turretAngle(),
             fallbackFeedingParameters.turretFeedForwardRadians());
@@ -857,7 +856,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         }
       }
       case PRESET_FEED -> {
-        // TODO: Use fallback feeding parameters
         turret.feedRequest(
             fallbackFeedingParameters.turretAngle(),
             fallbackFeedingParameters.turretFeedForwardRadians());
@@ -1242,7 +1240,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             feedLocation, robotPose, swerve.getFieldRelativeSpeeds());
 
     fallbackFeedingParameters =
-        AimParameterUtil.getFallbackFeedingParameters(feedLocation, robotPose, speeds);
+        AimParameterUtil.getFallbackFeedingParameters(robotPose.getRotation());
 
     var swerveVector = MathHelpers.getDriveDirection(speeds);
     double driveDirection = swerveVector.getDegrees();
