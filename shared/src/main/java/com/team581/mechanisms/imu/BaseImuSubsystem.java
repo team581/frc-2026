@@ -3,6 +3,8 @@ package com.team581.mechanisms.imu;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
+import org.apache.commons.numbers.angle.Angle.Deg;
+
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.team581.math.MathHelpers;
@@ -49,6 +51,8 @@ public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
   public void whileInState(ImuState currentState) {
     DogLog.log("Imu/RobotHeading", robotHeading, Degrees);
     DogLog.log("Imu/AngularVelocity", robotAngularVelocity, DegreesPerSecond);
+        DogLog.log("Imu/Pitch", pitch, Degrees);
+    DogLog.log("Imu/Roll", roll, Degrees);
   }
 
   @Override
