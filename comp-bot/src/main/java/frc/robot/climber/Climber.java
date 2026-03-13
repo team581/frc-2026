@@ -7,6 +7,7 @@ import com.team581.simkit.SimKit;
 import com.team581.util.tuning.TunablePid;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Servo;
 
 public class Climber extends GenericClimber {
 
@@ -14,8 +15,15 @@ public class Climber extends GenericClimber {
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withEnableFOC(false);
   private double motorPosition;
 
-  public Climber(TalonFX motor) {
+  private final Servo servoLeft;
+  private final Servo servoRight;
+  private final Servo servoBrake;
+
+  public Climber(TalonFX motor, Servo servoLeft, Servo servoRight, Servo servoBrake) {
     this.motor = motor;
+    this.servoLeft = servoLeft;
+    this.servoRight = servoRight;
+    this.servoBrake = servoBrake;
 
     motor.getConfigurator().apply(ClimberConfig.MOTOR_CONFIG);
 
@@ -85,6 +93,11 @@ public class Climber extends GenericClimber {
 
   @Override
   protected void afterTransition(ClimberState newState) {
+    // TODO: Integrate servos for other states
+    switch (newState) {
+      case STOWED, L3_HANG -> servoBrake.set(1);
+      default -> servoBrake.set(0);
+    }
     motor.setControl(positionRequest.withPosition(newState.height));
   }
 

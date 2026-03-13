@@ -8,6 +8,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
 import com.ctre.phoenix6.mechanisms.SimpleDifferentialMechanism;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.RobotKind;
 import frc.robot.deploy.DeployConfig;
@@ -30,6 +32,10 @@ public class Hardware {
   public final TalonFX verticalMotor = new TalonFX(20, rio);
   public final TalonFX intakeLeftMotor = new TalonFX(21, rio);
   public final TalonFX intakeRightMotor = RobotKind.IS_COMP_BOT ? new TalonFX(27) : intakeLeftMotor;
+
+  public final Servo servoLeft = new Servo(1);
+  public final Servo servoRight = new Servo(2);
+  public final Servo servoBrake = new Servo(3);
 
   public final SimpleDifferentialMechanism<TalonFX> deployDifferentialMechanism =
       new SimpleDifferentialMechanism<>(
