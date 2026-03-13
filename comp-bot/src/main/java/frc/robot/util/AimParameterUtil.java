@@ -8,7 +8,6 @@ import com.team581.util.FmsUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
@@ -36,11 +35,7 @@ public class AimParameterUtil {
     var turretAngle = fieldRelativeGoal.minus(robotRotation);
 
     return new AimingParameters(
-        turretAngle.getDegrees(),
-        FEEDING_FALLBACK_DISTANCE_TO_GOAL,
-        5,
-        0,
-        0);
+        turretAngle.getDegrees(), FEEDING_FALLBACK_DISTANCE_TO_GOAL, 5, 0, 0);
   }
 
   public static AimingParameters getFeedingParameters(
