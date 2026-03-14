@@ -48,7 +48,7 @@ public class HealthManager extends StateMachineSubsystem<HealthState> {
   public boolean isLocalizationHealthy() {
     return localizationHealthy
         && DSOptions.USE_TAG_LIMELIGHTS.getAsBoolean()
-        && !DSOptions.USE_TAG_LIMELIGHTS.getAsBoolean();
+        && !DSOptions.PIT_FUNCTIONALITY.getAsBoolean();
   }
 
   @Override

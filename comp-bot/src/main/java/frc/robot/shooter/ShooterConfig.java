@@ -33,7 +33,7 @@ public class ShooterConfig {
 
   public static final double IDLE_RPM = 400;
 
-  public static final double PIT_FUNCTIONALITY_RPM = 600;
+  public static final double PIT_FUNCTIONALITY_RPM = 800;
 
   public static final double TEST_VOLTAGE = 6.0;
 
