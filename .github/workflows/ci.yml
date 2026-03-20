@@ -89,6 +89,26 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
       - name: Check formatting
         run: ./gradlew spotlessCheck
+  style-windows:
+    name: Check formatting (Windows)
+
+    runs-on: windows-latest
+
+    needs:
+      - assemble
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+      - name: Check formatting
+        run: ./gradlew spotlessCheck
   ruff:
     name: Lint Python
 
