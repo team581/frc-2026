@@ -8,18 +8,16 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 /** Refaster rules to prefer {@link Pose2d} constants over factory methods for common values. */
 class Pose2dRules {
-  private Pose2dRules() {}
-
   /** Prefer {@link Pose2d#kZero} over equivalent constructors. */
   static class Pose2dZero {
-    @BeforeTemplate
-    Pose2d constructorNoArg() {
-      return new Pose2d();
+    @AfterTemplate
+    Pose2d after() {
+      return Pose2d.kZero;
     }
 
     @BeforeTemplate
-    Pose2d constructorWithTranslationAndRotation(Translation2d translation) {
-      return new Pose2d(Translation2d.kZero, Rotation2d.kZero);
+    Pose2d constructorNoArg() {
+      return new Pose2d();
     }
 
     @BeforeTemplate
@@ -27,9 +25,11 @@ class Pose2dRules {
       return new Pose2d(0.0, 0.0, rotation);
     }
 
-    @AfterTemplate
-    Pose2d after() {
-      return Pose2d.kZero;
+    @BeforeTemplate
+    Pose2d constructorWithTranslationAndRotation(Translation2d translation) {
+      return new Pose2d(Translation2d.kZero, Rotation2d.kZero);
     }
   }
+
+  private Pose2dRules() {}
 }

@@ -3,23 +3,21 @@ package frc.robot.intake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team581.mechanisms.PowerManaged;
 import com.team581.util.state_machines.StateMachineSubsystem;
-
 import dev.doglog.DogLog;
 import frc.robot.util.scheduling.SubsystemPriority;
 
-public class Intake extends StateMachineSubsystem<IntakeState> implements PowerManaged{
+public class Intake extends StateMachineSubsystem<IntakeState> implements PowerManaged {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
 
   public Intake(TalonFX leftMotor, TalonFX rightMotor) {
-        super(SubsystemPriority.INTAKE, IntakeState.IDLE);
+    super(SubsystemPriority.INTAKE, IntakeState.IDLE);
 
     leftMotor.getConfigurator().apply(IntakeConfig.LEFT_MOTOR_CONFIG);
     rightMotor.getConfigurator().apply(IntakeConfig.RIGHT_MOTOR_CONFIG);
     this.leftMotor = leftMotor;
     this.rightMotor = rightMotor;
   }
-
 
   public void shootRequest() {
     if (getState() == IntakeState.INTAKE) {
@@ -28,11 +26,9 @@ public class Intake extends StateMachineSubsystem<IntakeState> implements PowerM
     setStateFromRequest(IntakeState.SHOOT);
   }
 
-
   public void shootThenIntakeRequest() {
     setStateFromRequest(IntakeState.SHOOT_THEN_INTAKE);
   }
-
 
   public void stopShootingRequest() {
     switch (getState()) {
@@ -42,23 +38,20 @@ public class Intake extends StateMachineSubsystem<IntakeState> implements PowerM
     }
   }
 
-
   public void intakeRequest() {
     setStateFromRequest(IntakeState.INTAKE);
   }
-
 
   public void intakeAutoRequest() {
     setStateFromRequest(IntakeState.INTAKE_AUTO);
   }
 
-
   public void idleRequest() {
     setStateFromRequest(IntakeState.IDLE);
   }
 
-
-  @Override protected void afterTransition(IntakeState newState) {
+  @Override
+  protected void afterTransition(IntakeState newState) {
     switch (newState) {
       case IDLE -> {
         leftMotor.disable();
@@ -90,8 +83,8 @@ public class Intake extends StateMachineSubsystem<IntakeState> implements PowerM
     DogLog.log("Intake/Voltage", getState().getVoltage());
   }
 
-
-  @Override public void applyCurrentLimits(double supplyCurrentLimit) {
+  @Override
+  public void applyCurrentLimits(double supplyCurrentLimit) {
     leftMotor
         .getConfigurator()
         .apply(
