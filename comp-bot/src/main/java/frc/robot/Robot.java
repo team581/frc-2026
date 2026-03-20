@@ -72,8 +72,7 @@ public class Robot extends Base581Robot {
           hardware.shooterLeftMotor, hardware.shooterRightMotor, hardware.shooterMiddleMotor);
   private final Intake intake =
            new Intake(hardware.intakeLeftMotor, hardware.intakeRightMotor);
-  private final Deploy deploy =
-      new Deploy(hardware.deployDifferentialMechanism, hardware.hopperCANRange);
+  private final Deploy deploy = new Deploy(hardware.deployDifferentialMechanism);
   private final DyeRotor dyeRotor =
       new DyeRotor(hardware.rotorMotor, hardware.horizontalMotor, hardware.verticalMotor);
   private final Vision vision =

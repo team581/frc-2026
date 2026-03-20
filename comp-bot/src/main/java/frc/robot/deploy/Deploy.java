@@ -1,7 +1,6 @@
 package frc.robot.deploy;
 
 import com.ctre.phoenix6.controls.DifferentialMotionMagicVoltage;
-import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.SimpleDifferentialMechanism;
 import com.ctre.phoenix6.sim.ChassisReference;
@@ -11,25 +10,16 @@ import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
-import frc.robot.config.DSOptions;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class Deploy extends StateMachineSubsystem<DeployState> implements PowerManaged {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
   private final SimpleDifferentialMechanism<TalonFX> differentialMechanism;
-  private final CANrange hopperCANRange;
-  private final LinearFilter hopperFilter = LinearFilter.movingAverage(5);
   private final DifferentialMotionMagicVoltage differentialPositionVoltageRequest =
       new DifferentialMotionMagicVoltage(0, 0).withEnableFOC(false);
 
-  private HopperCapacity hopperCapacity = HopperCapacity.LOW;
   private double differentialMechanismPosition = 0.0;
   private double leftMotorPosition = 0.0;
   private double rightMotorPosition = 0.0;
@@ -37,26 +27,12 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
   private double rightStatorCurrent = 0.0;
   private double leftSupplyCurrent = 0.0;
   private double rightSupplyCurrent = 0.0;
-  private double hopperCANRangeDistance = 0.0;
-  private double previousCanRangeDistance = 0.0;
-  private double filteredHopperCANRangeDistance;
-  private boolean hopperCapacityNotHigh = false;
 
-  private final Timer hopperShuffleTimer = new Timer();
-  private final Timer canRangeUpdateTimer = new Timer();
-
-  public Deploy(
-      SimpleDifferentialMechanism<TalonFX> differentialMechanism, CANrange hopperCANRange) {
+  public Deploy(SimpleDifferentialMechanism<TalonFX> differentialMechanism) {
     super(SubsystemPriority.DEPLOY, DeployState.UNHOMED);
     this.differentialMechanism = differentialMechanism;
     this.leftMotor = differentialMechanism.getLeader();
     this.rightMotor = differentialMechanism.getFollower();
-    this.hopperCANRange = hopperCANRange;
-
-    hopperShuffleTimer.start();
-    canRangeUpdateTimer.start();
-
-    hopperCANRange.getConfigurator().apply(DeployConfig.CAN_RANGE_CONFIG);
 
     TunablePid.register("Deploy/Left", leftMotor, DeployConfig.LEFT_MOTOR_CONFIG);
     TunablePid.register("Deploy/Right", rightMotor, DeployConfig.RIGHT_MOTOR_CONFIG);
@@ -80,33 +56,12 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
     }
   }
 
-  public void shuffleRequest() {
-    switch (getState()) {
-      case UNHOMED,
-          HOME_INWARD,
-          HOME_OUTWARD,
-          HOPPER_SHUFFLING_FINISH,
-          HOPPER_SHUFFLING_IN,
-          HOPPER_SHUFFLING_OUT -> {
-        // Do nothing, we aren't homed or are already shuffling
-      }
-      default -> {
-        setStateFromRequest(DeployState.HOPPER_SHUFFLING_OUT);
-        hopperShuffleTimer.restart();
-      }
-    }
-  }
-
   public void stopShootingRequest() {
-    switch (getState()) {
-      case HOPPER_SHUFFLING_OUT, HOPPER_SHUFFLING_IN, HOPPER_SHUFFLING_FINISH ->
-          setStateFromRequest(DeployState.INTAKE);
-      default -> {}
-    }
+    setStateFromRequest(DeployState.STOW);
   }
 
   public boolean isFullyExtended() {
-    return getState() == DeployState.INTAKE && atGoal();
+    return atGoal(DeployState.INTAKE);
   }
 
   public void homingRequest() {
@@ -144,34 +99,8 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
           yield currentState;
         }
       }
-      case HOPPER_SHUFFLING_OUT -> {
-        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
-          yield DeployState.HOPPER_SHUFFLING_FINISH;
-        }
-        if ((atGoal() || timeout(DeployConfig.HOPPER_SHUFFLING_IN_OUT_DURATION.get()))
-            && hopperCapacityNotHigh) {
-          yield DeployState.HOPPER_SHUFFLING_IN;
-        }
-        yield currentState;
-      }
-
-      case HOPPER_SHUFFLING_IN -> {
-        if (hopperShuffleTimer.hasElapsed(DeployConfig.HOPPER_SHUFFLE_DURATION.get())) {
-          yield DeployState.HOPPER_SHUFFLING_FINISH;
-        }
-        if ((atGoal() || timeout(DeployConfig.HOPPER_SHUFFLING_IN_OUT_DURATION.get()))
-            && hopperCapacityNotHigh) {
-          yield DeployState.HOPPER_SHUFFLING_OUT;
-        }
-        yield currentState;
-      }
-      case HOPPER_SHUFFLING_FINISH -> {
-        if (atGoal() || timeout(DeployConfig.HOPPER_SHUFFLING_FINISH_DURATION.get())) {
-          hopperShuffleTimer.restart();
-          yield DeployState.HOPPER_SHUFFLING_OUT;
-        }
-        yield currentState;
-      }
+      case HOPPER_COMPACTION_FINISH -> atGoal() ? DeployState.STOW : currentState;
+      case HOPPER_COMPACTION_IN -> atGoal() ? DeployState.HOPPER_COMPACTION_FINISH : currentState;
     };
   }
 
@@ -208,10 +137,6 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
     DogLog.log("Deploy/RightMotor/Position", rightMotorPosition);
     DogLog.log("Deploy/GoalPosition", getState().getLength());
     DogLog.log("Deploy/DifferentialPosition", differentialMechanismPosition);
-    DogLog.log("Deploy/AbleToHopperShuffle", hopperCapacityNotHigh);
-    DogLog.log("Deploy/Capacity", hopperCapacity);
-    DogLog.log("Hopper/RawDistance", hopperCANRangeDistance);
-    DogLog.log("Hopper/FilteredDistance", filteredHopperCANRangeDistance);
     DogLog.log("Deploy/LeftMotor/StatorCurrent", leftStatorCurrent);
     DogLog.log("Deploy/LeftMotor/SupplyCurrent", leftSupplyCurrent);
     DogLog.log("Deploy/RightMotor/StatorCurrent", rightStatorCurrent);
@@ -222,25 +147,30 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
     DogLog.log("Deploy/LeftMotor/Voltage", leftMotor.getMotorVoltage().getValueAsDouble());
     DogLog.log("Deploy/LeftMotor/Slot", leftMotor.getClosedLoopSlot().getValueAsDouble());
     DogLog.log("Deploy/RightMotor/Slot", rightMotor.getClosedLoopSlot().getValueAsDouble());
-
-    // TODO: Remove after bringup
-    afterTransition(state);
   }
 
   public double getPosition() {
     return differentialMechanismPosition;
   }
 
-  private boolean atGoal() {
-    return atGoal(getState().getLength());
+  public boolean atGoal() {
+    return atGoal(getState());
   }
 
-  public boolean atGoal(double goalDistance) {
-    return switch (getState()) {
+  public void hopperCompactionRequest() {
+    switch (getState()) {
+      case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {}
+      default -> setStateFromRequest(DeployState.HOPPER_COMPACTION_IN);
+    }
+  }
+
+  public boolean atGoal(DeployState state) {
+    return switch (state) {
       case UNHOMED, HOME_INWARD, HOME_OUTWARD -> false;
       default ->
-          MathUtil.isNear(goalDistance, leftMotorPosition, DeployConfig.POSITION_TOLERANCE)
-              && MathUtil.isNear(goalDistance, rightMotorPosition, DeployConfig.POSITION_TOLERANCE);
+          MathUtil.isNear(state.getLength(), leftMotorPosition, DeployConfig.POSITION_TOLERANCE)
+              && MathUtil.isNear(
+                  state.getLength(), rightMotorPosition, DeployConfig.POSITION_TOLERANCE);
     };
   }
 
@@ -253,43 +183,6 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
     rightStatorCurrent = rightMotor.getStatorCurrent().getValueAsDouble();
     leftSupplyCurrent = leftMotor.getSupplyCurrent().getValueAsDouble();
     rightSupplyCurrent = rightMotor.getSupplyCurrent().getValueAsDouble();
-
-    if (DSOptions.USE_CANRANGE.get()) {
-      hopperCANRangeDistance =
-          Units.metersToInches(hopperCANRange.getDistance().getValueAsDouble());
-    }
-    filteredHopperCANRangeDistance = hopperFilter.calculate(hopperCANRangeDistance);
-
-    if (filteredHopperCANRangeDistance >= DeployConfig.HIGH_CAPACITY_THRESHOLD) {
-      hopperCapacity = HopperCapacity.HIGH;
-    } else if (filteredHopperCANRangeDistance >= DeployConfig.MEDIUM_CAPACITY_THRESHOLD) {
-      hopperCapacity = HopperCapacity.MEDIUM;
-    } else {
-      hopperCapacity = HopperCapacity.LOW;
-    }
-
-    if (RobotBase.isSimulation()) {
-      hopperCapacityNotHigh = true;
-    } else {
-      hopperCapacityNotHigh =
-          !DSOptions.USE_CANRANGE.getAsBoolean() || hopperCapacity != HopperCapacity.HIGH;
-    }
-  }
-
-  @Override
-  public void robotPeriodic() {
-    super.robotPeriodic();
-    if (previousCanRangeDistance != hopperCANRangeDistance) {
-      canRangeUpdateTimer.reset();
-    }
-    previousCanRangeDistance = hopperCANRangeDistance;
-
-    if (canRangeUpdateTimer.hasElapsed(DeployConfig.NOT_UPDATING_TIMEOUT)
-        && DSOptions.USE_CANRANGE.get()) {
-      DogLog.logFault("CANrange distance not updating", AlertType.kError);
-    } else {
-      DogLog.clearFault("CANrange distance not updating");
-    }
   }
 
   @Override
