@@ -39,6 +39,8 @@ public abstract class Base581Robot extends TimedRobot {
     DogLog.log("Metadata/RoborioSerialNumber", RobotController.getSerialNumber());
 
     ElasticLayoutUtil.onBoot();
+
+    RobotController.setBrownoutVoltage(5.5);
   }
 
   @Override

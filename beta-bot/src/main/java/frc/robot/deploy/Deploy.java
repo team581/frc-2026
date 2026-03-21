@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.SimpleDifferentialMechanism;
 import com.ctre.phoenix6.sim.ChassisReference;
+import com.team581.mechanisms.PowerManaged;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
@@ -19,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.config.DSOptions;
 import frc.robot.util.scheduling.SubsystemPriority;
 
-public class Deploy extends StateMachineSubsystem<DeployState> {
+public class Deploy extends StateMachineSubsystem<DeployState> implements PowerManaged {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
   private final SimpleDifferentialMechanism<TalonFX> differentialMechanism;
@@ -316,5 +317,19 @@ public class Deploy extends StateMachineSubsystem<DeployState> {
     }
 
     deploySimulation.update(clamp(getState().getLength()));
+  }
+
+  @Override
+  public void applyCurrentLimits(double supplyCurrentLimit) {
+    leftMotor
+        .getConfigurator()
+        .apply(
+            DeployConfig.LEFT_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                supplyCurrentLimit));
+    rightMotor
+        .getConfigurator()
+        .apply(
+            DeployConfig.RIGHT_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                supplyCurrentLimit));
   }
 }

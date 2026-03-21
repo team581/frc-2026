@@ -8,11 +8,9 @@ import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
 import com.ctre.phoenix6.mechanisms.SimpleDifferentialMechanism;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.config.RobotKind;
 import frc.robot.deploy.DeployConfig;
 import frc.robot.generated.CompTunerConstants;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
-import frc.robot.generated.PracticeTunerConstants;
 
 public class Hardware {
   public final XboxController driverController = new XboxController(0);
@@ -24,12 +22,8 @@ public class Hardware {
   public final TalonFX shooterLeftMotor = new TalonFX(15, rio);
   public final TalonFX shooterRightMotor = new TalonFX(16, rio);
   public final TalonFX shooterMiddleMotor = new TalonFX(40, rio);
-  public final TalonFX rotorMotor = new TalonFX(18, canivore);
-  public final TalonFX horizontalMotor = new TalonFX(19, rio);
-  public final TalonFX verticalMotor = new TalonFX(20, rio);
   public final TalonFX intakeLeftMotor = new TalonFX(21, rio);
-  public final TalonFX intakeRightMotor =
-      RobotKind.IS_COMP_BOT ? new TalonFX(27, rio) : intakeLeftMotor;
+  public final TalonFX intakeRightMotor = new TalonFX(27, rio);
 
   public final SimpleDifferentialMechanism<TalonFX> deployDifferentialMechanism =
       new SimpleDifferentialMechanism<>(
@@ -44,8 +38,6 @@ public class Hardware {
               .withFollowerUsesCommonLeaderConfigs(true));
   public final TalonFX shooterHoodMotor = new TalonFX(24, rio);
 
-  public final TalonFX climbMotor = new TalonFX(25, canivore);
-
   public final CANrange hopperCANRange = new CANrange(28, canivore);
 
   public final TalonFX kickerLeftMotor = new TalonFX(29, canivore);
@@ -55,17 +47,10 @@ public class Hardware {
   public final TalonFX conveyorRightMotor = new TalonFX(33, canivore);
 
   public final TunerSwerveDrivetrain drivetrain =
-      RobotKind.IS_COMP_BOT
-          ? new TunerSwerveDrivetrain(
-              CompTunerConstants.DrivetrainConstants,
-              CompTunerConstants.FrontLeft,
-              CompTunerConstants.FrontRight,
-              CompTunerConstants.BackLeft,
-              CompTunerConstants.BackRight)
-          : new TunerSwerveDrivetrain(
-              PracticeTunerConstants.DrivetrainConstants,
-              PracticeTunerConstants.FrontLeft,
-              PracticeTunerConstants.FrontRight,
-              PracticeTunerConstants.BackLeft,
-              PracticeTunerConstants.BackRight);
+      new TunerSwerveDrivetrain(
+          CompTunerConstants.DrivetrainConstants,
+          CompTunerConstants.FrontLeft,
+          CompTunerConstants.FrontRight,
+          CompTunerConstants.BackLeft,
+          CompTunerConstants.BackRight);
 }

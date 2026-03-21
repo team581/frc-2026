@@ -64,4 +64,13 @@ public class Intake extends GenericIntake {
     DogLog.log("Intake/VelocityRPM", motor.getVelocity().getValueAsDouble() * 60.0);
     DogLog.log("Intake/Voltage", getState().getVoltage());
   }
+
+  @Override
+  public void applyCurrentLimits(double supplyCurrentLimit) {
+    motor
+        .getConfigurator()
+        .apply(
+            IntakeConfig.LEFT_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                supplyCurrentLimit));
+  }
 }

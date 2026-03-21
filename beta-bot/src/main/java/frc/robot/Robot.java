@@ -29,6 +29,7 @@ import frc.robot.intake.GenericIntake;
 import frc.robot.intake.Intake;
 import frc.robot.intake.IntakeTwoMotor;
 import frc.robot.localization.Localization;
+import frc.robot.power_manager.PowerManager;
 import frc.robot.robot_manager.RobotManager;
 import frc.robot.shooter.Shooter;
 import frc.robot.shooter_hood.ShooterHood;
@@ -84,6 +85,9 @@ public class Robot extends Base581Robot {
   private final ClusterMap clusterMap = new ClusterMap(localization, swerve, groundLimelight);
   private final HubActivity hubActivity = new HubActivity();
 
+  private final PowerManager powerManager =
+      new PowerManager(shooterHood, swerve, shooter, dyeRotor, turret, intake, deploy);
+
   private final RobotManager robotManager =
       new RobotManager(
           shooterHood,
@@ -101,7 +105,8 @@ public class Robot extends Base581Robot {
           trailblazer,
           climber,
           clusterMap,
-          hardware);
+          hardware,
+          powerManager);
 
   @SuppressWarnings("unused") // Registers itself as a subsystem
   private final Autos autos = new Autos(robotManager, trailblazer);

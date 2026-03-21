@@ -14,7 +14,7 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
   public final Feeder feeder;
 
   public HopperManager(Deploy deploy, Intake intake, Conveyor conveyor, Feeder feeder) {
-    super(SubsystemPriority.GROUND_MANAGER, HopperState.IDLE);
+    super(SubsystemPriority.HOPPER_MANAGER, HopperState.IDLE);
     this.deploy = deploy;
     this.intake = intake;
     this.conveyor = conveyor;
@@ -95,7 +95,8 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
   public void idleRequest() {
     setStateFromRequest(HopperState.IDLE);
   }
-  public void rehomeDeployRequest(){
+
+  public void rehomeDeployRequest() {
     setStateFromRequest(HopperState.REHOME_DEPLOY);
   }
 }

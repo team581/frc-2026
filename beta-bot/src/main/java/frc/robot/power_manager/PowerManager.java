@@ -3,47 +3,44 @@ package frc.robot.power_manager;
 import com.team581.mechanisms.PowerManaged;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
-import frc.robot.conveyor.Conveyor;
 import frc.robot.deploy.Deploy;
-import frc.robot.feeder.Feeder;
-import frc.robot.intake.Intake;
-import frc.robot.kicker.Kicker;
+import frc.robot.dye_rotor.DyeRotor;
+import frc.robot.intake.GenericIntake;
 import frc.robot.shooter.Shooter;
 import frc.robot.shooter_hood.ShooterHood;
 import frc.robot.swerve.Swerve;
+import frc.robot.turret.Turret;
 import frc.robot.util.scheduling.SubsystemPriority;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PowerManager extends StateMachineSubsystem<PowerManagerState> {
   private final ExecutorService executor = Executors.newSingleThreadExecutor();
+  private final PowerManaged shooterHood;
+  private final PowerManaged swerve;
   private final PowerManaged shooter;
+  private final PowerManaged dyeRotor;
+  private final PowerManaged turret;
   private final PowerManaged intake;
   private final PowerManaged deploy;
-  private final PowerManaged shooterHood;
-  private final PowerManaged kicker;
-  private final PowerManaged feeder;
-  private final PowerManaged conveyor;
-  private final PowerManaged swerve;
 
   public PowerManager(
-      Shooter shooter,
-      Intake intake,
-      Deploy deploy,
       ShooterHood shooterHood,
-      Kicker kicker,
-      Feeder feeder,
-      Conveyor conveyor,
-      Swerve swerve) {
+      Swerve swerve,
+      Shooter shooter,
+      DyeRotor dyeRotor,
+      Turret turret,
+      GenericIntake intake,
+      Deploy deploy) {
     super(SubsystemPriority.POWER_MANAGER, PowerManagerState.IDLE);
+
+    this.shooterHood = shooterHood;
+    this.swerve = swerve;
     this.shooter = shooter;
+    this.dyeRotor = dyeRotor;
+    this.turret = turret;
     this.intake = intake;
     this.deploy = deploy;
-    this.shooterHood = shooterHood;
-    this.kicker = kicker;
-    this.feeder = feeder;
-    this.conveyor = conveyor;
-    this.swerve = swerve;
   }
 
   public void idleRequest() {
@@ -59,14 +56,13 @@ public class PowerManager extends StateMachineSubsystem<PowerManagerState> {
     executor.execute(
         () -> {
           DogLog.timestamp("PowerManager/UpdatedCurrentsAt");
+          shooterHood.applyCurrentLimits(newState.shooterHoodSupplyCurrent);
+          swerve.applyCurrentLimits(newState.swerveSupplyCurrent);
           shooter.applyCurrentLimits(newState.shooterSupplyCurrent);
+          dyeRotor.applyCurrentLimits(newState.dyeRotorSupplyCurrent);
+          turret.applyCurrentLimits(newState.turretSupplyCurrent);
           intake.applyCurrentLimits(newState.intakeSupplyCurrent);
           deploy.applyCurrentLimits(newState.deploySupplyCurrent);
-          shooterHood.applyCurrentLimits(newState.shooterHoodSupplyCurrent);
-          kicker.applyCurrentLimits(newState.kickerSupplyCurrent);
-          feeder.applyCurrentLimits(newState.feederSupplyCurrent);
-          conveyor.applyCurrentLimits(newState.conveyorSupplyCurrent);
-          swerve.applyCurrentLimits(newState.swerveSupplyCurrent);
         });
   }
 }

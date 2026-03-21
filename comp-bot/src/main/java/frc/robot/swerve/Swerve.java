@@ -9,6 +9,7 @@ import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.team581.autos.Point;
 import com.team581.math.CircularFilter;
 import com.team581.math.MathHelpers;
+import com.team581.mechanisms.PowerManaged;
 import com.team581.swerve.DriveSource;
 import com.team581.swerve.DriveSourceType;
 import com.team581.swerve.SwerveAssist;
@@ -33,13 +34,14 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.DSOptions;
+import frc.robot.generated.CompTunerConstants;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
-public class Swerve extends StateMachineSubsystem<SwerveState> {
+public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerManaged {
 
   public static final double TRANSLATION_STD_DEV = 0.01;
 
@@ -567,5 +569,38 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               drivetrain.updateSimState(deltaTime, RobotController.getBatteryVoltage());
             });
     simNotifier.startPeriodic(SIM_LOOP_PERIOD);
+  }
+
+  @Override
+  public void applyCurrentLimits(double supplyCurrentLimit) {
+    drivetrain
+        .getModule(0)
+        .getDriveMotor()
+        .getConfigurator()
+        .apply(
+            CompTunerConstants.FrontLeft.DriveMotorInitialConfigs.CurrentLimits
+                .withSupplyCurrentLimit(supplyCurrentLimit));
+    drivetrain
+        .getModule(1)
+        .getDriveMotor()
+        .getConfigurator()
+        .apply(
+            CompTunerConstants.FrontRight.DriveMotorInitialConfigs.CurrentLimits
+                .withSupplyCurrentLimit(supplyCurrentLimit));
+    drivetrain
+        .getModule(2)
+        .getDriveMotor()
+        .getConfigurator()
+        .apply(
+            CompTunerConstants.BackLeft.DriveMotorInitialConfigs.CurrentLimits
+                .withSupplyCurrentLimit(supplyCurrentLimit));
+
+    drivetrain
+        .getModule(3)
+        .getDriveMotor()
+        .getConfigurator()
+        .apply(
+            CompTunerConstants.BackRight.DriveMotorInitialConfigs.CurrentLimits
+                .withSupplyCurrentLimit(supplyCurrentLimit));
   }
 }

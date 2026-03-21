@@ -11,7 +11,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team581.math.PolynomialRegression;
 import com.team581.util.tuning.TunableInterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import frc.robot.config.RobotKind;
 import java.util.Map;
 
 public class ShooterHoodConfig {
@@ -51,31 +50,18 @@ public class ShooterHoodConfig {
 
   // TODO: Update interpolating map numbers later
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE =
-      RobotKind.IS_COMP_BOT
-          ? TunableInterpolatingDoubleTreeMap.ofEntries(
-              "ShooterHood/DistanceToScore",
-              Map.entry(5.5 + 0.25 + 0.15, 32.0),
-              Map.entry(3.54 + 0.25 + 0.15, 27.0),
-              Map.entry(2.42 + 0.25 + 0.15, 23.5),
-              Map.entry(1.36 + 0.25 + 0.15, 21.5))
-          : TunableInterpolatingDoubleTreeMap.ofEntries(
-              "ShooterHood/DistanceToScore",
-              Map.entry(5.551, 37.0),
-              Map.entry(3.42, 30.0),
-              Map.entry(2.33, 25.0),
-              Map.entry(1.41, 23.0));
+      TunableInterpolatingDoubleTreeMap.ofEntries(
+          "ShooterHood/DistanceToScore",
+          Map.entry(5.5 + 0.25 + 0.15, 32.0),
+          Map.entry(3.54 + 0.25 + 0.15, 27.0),
+          Map.entry(2.42 + 0.25 + 0.15, 23.5),
+          Map.entry(1.36 + 0.25 + 0.15, 21.5));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEED =
-      RobotKind.IS_COMP_BOT
-          ? TunableInterpolatingDoubleTreeMap.ofEntries(
-              "ShooterHood/DistanceToFeed",
-              Map.entry(6.0, 30.0),
-              Map.entry(8.71, 35.0),
-              Map.entry(13.6, 43.0))
-          : TunableInterpolatingDoubleTreeMap.ofEntries(
-              "ShooterHood/DistanceToFeed",
-              Map.entry(9.56, 39.0),
-              Map.entry(3.56, 30.0),
-              Map.entry(1.69, 21.5));
+      TunableInterpolatingDoubleTreeMap.ofEntries(
+          "ShooterHood/DistanceToFeed",
+          Map.entry(6.0, 30.0),
+          Map.entry(8.71, 35.0),
+          Map.entry(13.6, 43.0));
   public static final PolynomialRegression SCORING_REGRESSION_MODEL =
       PolynomialRegression.quadratic("ShooterHood/ScoringRegression", DISTANCE_TO_SCORE);
   public static final PolynomialRegression FEEDING_REGRESSION_MODEL =

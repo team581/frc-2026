@@ -8,7 +8,7 @@ public enum HopperState {
   SCORE_AND_INTAKE,
   REHOME_DEPLOY;
 
-   public boolean isIntaking() {
+  public boolean isIntaking() {
     return this == INTAKE || this == SCORE_AND_INTAKE;
   }
 }

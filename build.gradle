@@ -100,7 +100,11 @@ spotless {
 	lineEndings = 'UNIX'
 
 	java {
-		target subprojects.collect { "${it.name}/**/*.java" }
+		target subprojects.collect {
+			fileTree(it.projectDir) {
+				include '**/*.java'
+			}
+		}
 		eclipse().configFile('eclipse-formatter.properties').sortMembersEnabled(true).sortMembersVisibilityOrderEnabled(true)
 		googleJavaFormat()
 		licenseHeader ''

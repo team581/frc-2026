@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team581.mechanisms.PowerManaged;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
@@ -20,7 +21,7 @@ import frc.robot.util.AimParameterUtil.AimingParameters;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.Vision;
 
-public class Turret extends StateMachineSubsystem<TurretState> {
+public class Turret extends StateMachineSubsystem<TurretState> implements PowerManaged {
   private final TalonFX motor;
   private final CANcoder encoder;
   private double currentAngle = 0.0;
@@ -296,5 +297,12 @@ public class Turret extends StateMachineSubsystem<TurretState> {
     }
 
     turretSimulation.update();
+  }
+
+  @Override
+  public void applyCurrentLimits(double supplyCurrentLimit) {
+    motor
+        .getConfigurator()
+        .apply(TurretConfig.MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(supplyCurrentLimit));
   }
 }

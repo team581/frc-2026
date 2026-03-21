@@ -170,15 +170,11 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     LimelightHelpers.setPipelineIndex(limelightTableName, getState().pipelineIndex);
     switch (getState()) {
       case TAGS -> {
-        if (limelightTimer.hasElapsed(5.0)) {
-          LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
-        }
+        LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
         updateHealth(tagResult);
       }
       case HUB_TAGS -> {
-        if (limelightTimer.hasElapsed(5.0)) {
-          LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, HUB_TAGS);
-        }
+        LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, HUB_TAGS);
         updateHealth(tagResult);
       }
       default -> {}
@@ -189,18 +185,8 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
 
   @Override
   public void autonomousInit() {
-    if (config.model() != LimelightModel.THREE) {
-      LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
-    }
     seedImuTimer.reset();
     seedImuTimer.start();
-  }
-
-  @Override
-  public void teleopInit() {
-    if (config.model() != LimelightModel.THREE) {
-      LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
-    }
   }
 
   private void updateHealth(ReusableOptional<?> result) {

@@ -13,15 +13,10 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autos.Autos;
-import frc.robot.climber.Climber;
-import frc.robot.climber.GenericClimber;
-import frc.robot.climber.StubClimber;
 import frc.robot.cluster_map.ClusterMap;
 import frc.robot.config.FeatureFlags;
-import frc.robot.config.RobotKind;
 import frc.robot.conveyor.Conveyor;
 import frc.robot.deploy.Deploy;
-import frc.robot.dye_rotor.DyeRotor;
 import frc.robot.feeder.Feeder;
 import frc.robot.generated.BuildConstants;
 import frc.robot.health.HealthManager;
@@ -60,7 +55,8 @@ public class Robot extends Base581Robot {
       new Limelight("right", LimelightState.TAGS, CameraConfigs.RIGHT);
   private final Limelight groundLimelight =
       new Limelight("ground", LimelightState.CLUSTER_MAP, CameraConfigs.GROUND);
-  private final HealthManager health = new HealthManager(frontLimelight, groundLimelight);
+  private final HealthManager health =
+      new HealthManager(frontLimelight, leftLimelight, rightLimelight, groundLimelight);
   private final Swerve swerve =
       new Swerve(hardware.drivetrain, health, hardware.driverController, trailblazer);
   private final Imu imu = new Imu(swerve.drivetrain);
@@ -70,17 +66,12 @@ public class Robot extends Base581Robot {
   private final Shooter shooter =
       new Shooter(
           hardware.shooterLeftMotor, hardware.shooterRightMotor, hardware.shooterMiddleMotor);
-  private final Intake intake =
-           new Intake(hardware.intakeLeftMotor, hardware.intakeRightMotor);
+  private final Intake intake = new Intake(hardware.intakeLeftMotor, hardware.intakeRightMotor);
   private final Deploy deploy = new Deploy(hardware.deployDifferentialMechanism);
-  private final DyeRotor dyeRotor =
-      new DyeRotor(hardware.rotorMotor, hardware.horizontalMotor, hardware.verticalMotor);
   private final Vision vision =
       new Vision(imu, frontLimelight, leftLimelight, rightLimelight, groundLimelight);
   private final Localization localization =
       new Localization(swerve, hardware.drivetrain, vision, imu);
-  private final GenericClimber climber =
-      RobotKind.IS_COMP_BOT ? new StubClimber() : new Climber(hardware.climbMotor);
   private final Kicker kicker = new Kicker(hardware.kickerLeftMotor, hardware.kickerRightMotor);
   private final Feeder feeder = new Feeder(hardware.feederMotor);
   private final Conveyor conveyor =
@@ -90,12 +81,12 @@ public class Robot extends Base581Robot {
   private final HubActivity hubActivity = new HubActivity();
 
   private final PowerManager powerManager =
-      new PowerManager(shooter, intake, deploy, shooterHood, kicker, feeder, conveyor);
+      new PowerManager(shooter, intake, deploy, shooterHood, kicker, feeder, conveyor, swerve);
   private final HopperManager hopperManager = new HopperManager(deploy, intake, conveyor, feeder);
 
   private final RobotManager robotManager =
       new RobotManager(
-        hopperManager,
+          hopperManager,
           shooterHood,
           localization,
           swerve,
@@ -159,13 +150,6 @@ public class Robot extends Base581Robot {
     var operator =
         new ControllerBindings(buttonBindingsLoop, enabledEvent, hardware.operatorController);
 
-    // if (!RobotKind.IS_COMP_BOT) {
-    //   driver
-    //       .start()
-    //       .onPress(robotManager::startTeleopAutoClimbSequence)
-    //       .onRelease(robotManager::stopTeleopAutoClimbAlignment);
-    // }
-
     driver.back().onPress(localization::zeroGyro);
 
     driver
@@ -192,11 +176,6 @@ public class Robot extends Base581Robot {
         .rightTrigger()
         .onPress(robotManager::prepareScoreRequest)
         .onRelease(robotManager::idleRequest);
-
-    // Use as idle button when not climbing, otherwise does sequence and eventually
-    // gets back to
-    // idle
-   // operator.a().onPress(robotManager::manualClimbSequenceBackwardOrIdleRequest);
 
     operator
         .leftTrigger()

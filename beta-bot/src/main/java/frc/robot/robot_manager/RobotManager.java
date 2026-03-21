@@ -24,6 +24,7 @@ import frc.robot.health.HealthManager;
 import frc.robot.hub_activity.HubActivity;
 import frc.robot.intake.GenericIntake;
 import frc.robot.localization.Localization;
+import frc.robot.power_manager.PowerManager;
 import frc.robot.shooter.Shooter;
 import frc.robot.shooter_hood.ShooterHood;
 import frc.robot.swerve.Swerve;
@@ -52,6 +53,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   private final Trailblazer trailblazer;
   public final ClusterMap clusterMap;
   private final GenericClimber climber;
+
+  private final PowerManager powerManager;
 
   private Pose2d robotPose = Pose2d.kZero;
   private boolean nearTrench = false;
@@ -89,7 +92,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       Trailblazer trailblazer,
       GenericClimber climber,
       ClusterMap clusterMap,
-      Hardware hardware) {
+      Hardware hardware,
+      PowerManager powerManager) {
     super(SubsystemPriority.ROBOT_MANAGER, RobotState.IDLE);
     this.shooterHood = shooterHood;
     this.localization = localization;
@@ -106,6 +110,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     this.trailblazer = trailblazer;
     this.clusterMap = clusterMap;
     this.climber = climber;
+    this.powerManager = powerManager;
 
     this.hardware = hardware;
   }
@@ -328,6 +333,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   protected void afterTransition(RobotState newState) {
     switch (newState) {
       case IDLE -> {
+        powerManager.idleRequest();
         vision.setState(VisionState.HUB_TAGS);
         shooter.idleRequest();
         // Set hood behavior separately while idling
@@ -400,6 +406,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         climber.stowRequest();
       }
       case PREPARE_SCORE -> {
+        powerManager.shootingRequest();
+
         vision.setState(VisionState.HUB_TAGS);
         shooter.scoreRequest(scoringParameters.distance());
         dyeRotor.idleRequest();
@@ -411,6 +419,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         climber.stowRequest();
       }
       case SCORE -> {
+        powerManager.shootingRequest();
+
         vision.setState(VisionState.HUB_TAGS);
         shooter.scoreRequest(scoringParameters.distance());
         shooterHood.scoreRequest(scoringParameters.distance());
@@ -765,7 +775,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case PREPARE_SCORE, STOP_SHOOTING_SCORE -> {
         smartTurretHoodPrepareScoreRequest();
         if (!DSOptions.USE_TURRET.getAsBoolean()) {
-          swerve.turretStuckAimRequest(scoringParameters.turretAngle());
+          swerve.turretStuckAimRequest(
+              scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         } else if (intake.getState().isIntaking()) {
           swerve.intakeRateLimitedDriveRequest();
         } else {
@@ -778,7 +789,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         shooterHood.scoreRequest(scoringParameters.distance());
         if (!DSOptions.USE_TURRET.getAsBoolean()) {
-          swerve.turretStuckAimRequest(scoringParameters.turretAngle());
+          swerve.turretStuckAimRequest(
+              scoringParameters.turretAngle(), scoringParameters.turretFeedForwardRadians());
         } else if (intake.getState().isIntaking()) {
           swerve.intakeRateLimitedDriveRequest();
         } else {
@@ -796,7 +808,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case PREPARE_FEED -> {
         smartTurretHoodPrepareFeedRequest();
         if (!DSOptions.USE_TURRET.getAsBoolean()) {
-          swerve.turretStuckAimRequest(feedingParameters.turretAngle());
+          swerve.turretStuckAimRequest(
+              feedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
         } else if (intake.getState().isIntaking()) {
           swerve.intakeRateLimitedDriveRequest();
         } else {
@@ -808,7 +821,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             feedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
         shooterHood.feedRequest(feedingParameters.distance());
         if (!DSOptions.USE_TURRET.getAsBoolean()) {
-          swerve.turretStuckAimRequest(feedingParameters.turretAngle());
+          swerve.turretStuckAimRequest(
+              feedingParameters.turretAngle(), feedingParameters.turretFeedForwardRadians());
         } else if (intake.getState().isIntaking()) {
           swerve.intakeRateLimitedDriveRequest();
         } else {

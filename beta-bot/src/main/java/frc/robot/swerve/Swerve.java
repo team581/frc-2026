@@ -1,5 +1,7 @@
 package frc.robot.swerve;
 
+import static edu.wpi.first.units.Units.Radians;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -9,6 +11,7 @@ import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.team581.autos.Point;
 import com.team581.math.CircularFilter;
 import com.team581.math.MathHelpers;
+import com.team581.mechanisms.PowerManaged;
 import com.team581.swerve.DriveSource;
 import com.team581.swerve.DriveSourceType;
 import com.team581.swerve.SwerveAssist;
@@ -22,6 +25,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -33,6 +37,8 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.config.DSOptions;
+import frc.robot.config.FeatureFlags;
+import frc.robot.generated.CompTunerConstants;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.health.HealthManager;
 import frc.robot.turret.TurretConfig;
@@ -40,7 +46,7 @@ import frc.robot.util.scheduling.SubsystemPriority;
 import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
-public class Swerve extends StateMachineSubsystem<SwerveState> {
+public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerManaged {
 
   public static final double TRANSLATION_STD_DEV = 0.01;
 
@@ -89,7 +95,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
           .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
           .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
           .withDeadband(0.07)
-          .withRotationalDeadband(0.5)
+          .withRotationalDeadband(0.00)
           .withHeadingPID(
               ORIGINAL_HEADING_PID.getP(), ORIGINAL_HEADING_PID.getI(), ORIGINAL_HEADING_PID.getD())
           .withMaxAbsRotationalRate(MAX_ANGULAR_RATE)
@@ -171,6 +177,9 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
   private Rotation2d filteredLastDriveDirection = Rotation2d.kZero;
   private boolean ableToXSwerve = false;
 
+  private final Debouncer X_SWERVE_DEBOUNCER = new Debouncer(0.1);
+  private double aimingFeedForward = 0.0;
+
   public Swerve(
       TunerSwerveDrivetrain drivetrain,
       HealthManager health,
@@ -231,8 +240,9 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
     setStateFromRequest(SwerveState.INTAKE_RATE_LIMITED);
   }
 
-  public void turretStuckAimRequest(double snapAngle) {
+  public void turretStuckAimRequest(double snapAngle, double feedForward) {
     turretStuckAimingAngle = snapAngle;
+    aimingFeedForward = feedForward;
     setStateFromRequest(SwerveState.TURRET_STUCK_SCORE);
   }
 
@@ -244,13 +254,19 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
         ChassisSpeeds.fromRobotRelativeSpeeds(
             robotRelativeSpeeds, drivetrainState.Pose.getRotation());
 
+    // TODO: Evaluate which states we should actually X swerve in
     ableToXSwerve =
-        isAimed()
+        FeatureFlags.X_SWERVE.getAsBoolean()
             && (getState() == SwerveState.MANUAL_RATE_LIMITED
                 || getState() == SwerveState.TURRET_STUCK_SCORE)
-            && MathHelpers.getLinearVelocity(driveSource.getRequestedSpeeds()) < 1e-5
-            && driveSource.getRequestedSpeeds().omegaRadiansPerSecond < 1e-5;
-    DogLog.log("Swerve/AbleToXSwerve", ableToXSwerve);
+            && X_SWERVE_DEBOUNCER.calculate(
+                MathUtil.isNear(
+                    Math.toDegrees(drivePerspectiveSnapsOpenLoop.HeadingController.getSetpoint()),
+                    drivetrainState.Pose.getRotation().getDegrees(),
+                    5.0,
+                    -180.0,
+                    180.0))
+            && MathHelpers.getLinearVelocity(driveSource.getRequestedSpeeds()) < 1e-5;
 
     // Make sure right stick Y is either 50% up or down
     intakeAssistControllerInput = Math.abs(teleopDriveSource.getRightY()) > 0.5;
@@ -365,7 +381,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
 
   public boolean isAimed() {
     return MathUtil.isNear(
-        turretStuckAimingAngle, drivetrainState.Pose.getRotation().getDegrees(), 8.0, -180, 180);
+        turretStuckAimingAngle, drivetrainState.Pose.getRotation().getDegrees(), 5.0, -180, 180);
   }
 
   @Override
@@ -469,10 +485,11 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
           } else {
             drivetrain.setControl(
                 withFieldRelativeTargetDirection(
-                    drivePerspectiveIntakeSnapsOpenLoop
-                        .withVelocityX(speeds.vxMetersPerSecond)
-                        .withVelocityY(speeds.vyMetersPerSecond),
-                    Rotation2d.fromDegrees(turretStuckAimingAngle)));
+                        drivePerspectiveSnapsOpenLoop
+                            .withVelocityX(speeds.vxMetersPerSecond)
+                            .withVelocityY(speeds.vyMetersPerSecond),
+                        Rotation2d.fromDegrees(turretStuckAimingAngle))
+                    .withTargetRateFeedforward(aimingFeedForward));
           }
         }
       }
@@ -529,6 +546,32 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
             .getDegrees());
     DogLog.log("SwerveAssist/WallSnaps/CornerSnapAngle", cornerSnapAngle.getDegrees());
     DogLog.log("SwerveAssist/WallSnaps/ChosenAngle", wallSnapAngle.getDegrees());
+
+    // Temporary logging for X swerve feature flag
+    if (FeatureFlags.X_SWERVE.getAsBoolean()) {
+      DogLog.log(
+          "Swerve/X/SpeedsNear0",
+          MathHelpers.getLinearVelocity(driveSource.getRequestedSpeeds()) < 1e-5);
+      DogLog.log(
+          "Swerve/X/HeadingController/Setpoint",
+          drivePerspectiveSnapsOpenLoop.HeadingController.getSetpoint());
+      DogLog.log("Swerve/X/AbleToXSwerve", ableToXSwerve);
+      DogLog.log(
+          "Swerve/X/ManualAtSetpoint",
+          MathUtil.isNear(
+              Math.toDegrees(drivePerspectiveSnapsOpenLoop.HeadingController.getSetpoint()),
+              drivetrainState.RawHeading.getDegrees(),
+              1.0,
+              -180.0,
+              180.0));
+      DogLog.log(
+          "Swerve/X/ManualAtSetpoint/ControllerSetpoint",
+          Math.toDegrees(drivePerspectiveSnapsOpenLoop.HeadingController.getSetpoint()));
+      DogLog.log(
+          "Swerve/X/ManualAtSetpoint/RobotHeading",
+          drivetrainState.Pose.getRotation().getDegrees());
+    }
+    DogLog.log("Swerve/FeedForward", aimingFeedForward, Radians);
   }
 
   @Override
@@ -555,5 +598,38 @@ public class Swerve extends StateMachineSubsystem<SwerveState> {
               drivetrain.updateSimState(deltaTime, RobotController.getBatteryVoltage());
             });
     simNotifier.startPeriodic(SIM_LOOP_PERIOD);
+  }
+
+  @Override
+  public void applyCurrentLimits(double supplyCurrentLimit) {
+    drivetrain
+        .getModule(0)
+        .getDriveMotor()
+        .getConfigurator()
+        .apply(
+            CompTunerConstants.FrontLeft.DriveMotorInitialConfigs.CurrentLimits
+                .withSupplyCurrentLimit(supplyCurrentLimit));
+    drivetrain
+        .getModule(1)
+        .getDriveMotor()
+        .getConfigurator()
+        .apply(
+            CompTunerConstants.FrontRight.DriveMotorInitialConfigs.CurrentLimits
+                .withSupplyCurrentLimit(supplyCurrentLimit));
+    drivetrain
+        .getModule(2)
+        .getDriveMotor()
+        .getConfigurator()
+        .apply(
+            CompTunerConstants.BackLeft.DriveMotorInitialConfigs.CurrentLimits
+                .withSupplyCurrentLimit(supplyCurrentLimit));
+
+    drivetrain
+        .getModule(3)
+        .getDriveMotor()
+        .getConfigurator()
+        .apply(
+            CompTunerConstants.BackRight.DriveMotorInitialConfigs.CurrentLimits
+                .withSupplyCurrentLimit(supplyCurrentLimit));
   }
 }

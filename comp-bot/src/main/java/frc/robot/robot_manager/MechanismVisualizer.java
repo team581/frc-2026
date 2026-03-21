@@ -20,9 +20,7 @@ public final class MechanismVisualizer {
   private static final double DEPLOY_ANGLE_FROM_HORIZONTAL = 15.327113;
 
   public static void log(
-      Pose2d robotPose,
-      double shooterHoodAngleDegrees,
-      double deployLengthInches) {
+      Pose2d robotPose, double shooterHoodAngleDegrees, double deployLengthInches) {
     var shooterHoodPose =
         Pose3d.kZero.rotateAround(
             SHOOTER_HOOD_PIVOT_POINT,
@@ -37,8 +35,7 @@ public final class MechanismVisualizer {
             Rotation3d.kZero);
 
     DogLog.log(
-        "SuperstructureVisualization/Components",
-        new Pose3d[] {shooterHoodPose, deployPose});
+        "SuperstructureVisualization/Components", new Pose3d[] {shooterHoodPose, deployPose});
   }
 
   private MechanismVisualizer() {}

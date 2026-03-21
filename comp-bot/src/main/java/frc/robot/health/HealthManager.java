@@ -10,7 +10,9 @@ import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.vision.limelight.Limelight;
 
 public class HealthManager extends StateMachineSubsystem<HealthState> {
-  private final Limelight backLimelight;
+  private final Limelight frontLimelight;
+  private final Limelight leftLimelight;
+  private final Limelight rightLimelight;
   private final Limelight groundLimelight;
 
   private boolean localizationHealthy = true;
@@ -24,10 +26,16 @@ public class HealthManager extends StateMachineSubsystem<HealthState> {
   private final BlinkingBooleanBox allCamerasBlinkingBooleanBox =
       new BlinkingBooleanBox("Health/AllCamerasHealthyBox", false, true);
 
-  public HealthManager(Limelight backLimelight, Limelight groundLimelight) {
+  public HealthManager(
+      Limelight frontLimelight,
+      Limelight leftLimelight,
+      Limelight rightLimelight,
+      Limelight groundLimelight) {
     super(SubsystemPriority.HEALTH, HealthState.DEFAULT_STATE);
 
-    this.backLimelight = backLimelight;
+    this.frontLimelight = frontLimelight;
+    this.leftLimelight = leftLimelight;
+    this.rightLimelight = rightLimelight;
     this.groundLimelight = groundLimelight;
   }
 
@@ -51,12 +59,17 @@ public class HealthManager extends StateMachineSubsystem<HealthState> {
   @Override
   protected void collectInputs() {
     localizationHealthy =
-        RobotBase.isSimulation() || backLimelight.getCameraHealth() != CameraHealth.OFFLINE;
+        RobotBase.isSimulation()
+            || frontLimelight.getCameraHealth() != CameraHealth.OFFLINE
+            || leftLimelight.getCameraHealth() != CameraHealth.OFFLINE
+            || rightLimelight.getCameraHealth() != CameraHealth.OFFLINE;
     fuelDetectionHealthy =
         RobotBase.isSimulation() || groundLimelight.getCameraHealth() != CameraHealth.OFFLINE;
     allCamerasHealthy =
         RobotBase.isSimulation()
-            || (backLimelight.getCameraHealth() != CameraHealth.OFFLINE
+            || (frontLimelight.getCameraHealth() != CameraHealth.OFFLINE
+                && leftLimelight.getCameraHealth() != CameraHealth.OFFLINE
+                && rightLimelight.getCameraHealth() != CameraHealth.OFFLINE
                 && groundLimelight.getCameraHealth() != CameraHealth.OFFLINE);
   }
 

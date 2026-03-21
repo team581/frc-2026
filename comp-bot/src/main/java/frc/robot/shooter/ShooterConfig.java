@@ -13,7 +13,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team581.math.PolynomialRegression;
 import com.team581.util.tuning.TunableInterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import frc.robot.config.RobotKind;
 import java.util.Map;
 
 public class ShooterConfig {
@@ -40,32 +39,18 @@ public class ShooterConfig {
   public static final double MAX_SAFE_RPM = 6000;
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_RPM =
-      RobotKind.IS_COMP_BOT
-          ? TunableInterpolatingDoubleTreeMap.ofEntries(
-              "Shooter/DistanceToScoreRPM",
-              Map.entry(5.5 + 0.25 + 0.15, 2350.0),
-              Map.entry(3.54 + 0.25 + 0.15, 1950.0),
-              Map.entry(2.42 + 0.25 + 0.15, 1800.0),
-              Map.entry(1.36 + 0.25 + 0.15, 1550.0))
-          : TunableInterpolatingDoubleTreeMap.ofEntries(
-              "Shooter/DistanceToScoreRPM",
-              Map.entry(5.551, 2350.0),
-              Map.entry(3.42, 2000.0),
-              Map.entry(2.33, 1850.0),
-              Map.entry(1.41, 1650.0));
+      TunableInterpolatingDoubleTreeMap.ofEntries(
+          "Shooter/DistanceToScoreRPM",
+          Map.entry(5.5 + 0.25 + 0.15, 2350.0),
+          Map.entry(3.54 + 0.25 + 0.15, 1950.0),
+          Map.entry(2.42 + 0.25 + 0.15, 1800.0),
+          Map.entry(1.36 + 0.25 + 0.15, 1550.0));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEEDING_RPM =
-      RobotKind.IS_COMP_BOT
-          ? TunableInterpolatingDoubleTreeMap.ofEntries(
-              "Shooter/DistanceToFeedingRPM",
-              Map.entry(6.0, 2500.0),
-              Map.entry(8.71, 2700.0),
-              Map.entry(13.6, 5500.0))
-          : TunableInterpolatingDoubleTreeMap.ofEntries(
-              "Shooter/DistanceToFeedingRPM",
-              Map.entry(5.551, 2000.0),
-              Map.entry(3.42, 1500.0),
-              Map.entry(2.33, 1000.0),
-              Map.entry(1.41, 700.0));
+      TunableInterpolatingDoubleTreeMap.ofEntries(
+          "Shooter/DistanceToFeedingRPM",
+          Map.entry(6.0, 2500.0),
+          Map.entry(8.71, 2700.0),
+          Map.entry(13.6, 5500.0));
   public static final PolynomialRegression SCORING_REGRESSION_MODEL =
       PolynomialRegression.quadratic("Shooter/ScoringRegression", DISTANCE_TO_SCORE_RPM);
   public static final PolynomialRegression FEEDING_REGRESSION_MODEL =
@@ -108,9 +93,7 @@ public class ShooterConfig {
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.CounterClockwise_Positive))
           .withSlot0(
-              new Slot0Configs()
-                  .withKP(RobotKind.IS_COMP_BOT ? 0.4 : 0.7)
-                  .withKV(RobotKind.IS_COMP_BOT ? 0.12 : 0.127)
+              new Slot0Configs().withKP(0.4).withKV(0.12)
               // .withKD(0.00015)
               )
           .withVoltage(new VoltageConfigs().withPeakReverseVoltage(0))
@@ -136,7 +119,7 @@ public class ShooterConfig {
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.Clockwise_Positive))
           .withSlot0(
-              new Slot0Configs().withKP(RobotKind.IS_COMP_BOT ? 0.55 : 0.7).withKV(0.127)
+              new Slot0Configs().withKP(0.55).withKV(0.127)
               // .withKD(0.00015)
               )
           .withVoltage(new VoltageConfigs().withPeakReverseVoltage(0))
@@ -163,9 +146,7 @@ public class ShooterConfig {
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.CounterClockwise_Positive))
           .withSlot0(
-              new Slot0Configs()
-                  .withKP(RobotKind.IS_COMP_BOT ? 0.4 : 0.7)
-                  .withKV(RobotKind.IS_COMP_BOT ? 0.12 : 0.127)
+              new Slot0Configs().withKP(0.4).withKV(0.1)
               // .withKD(0.00015)
               )
           .withVoltage(new VoltageConfigs().withPeakReverseVoltage(0))

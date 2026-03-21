@@ -9,24 +9,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /** Refaster rules to prefer {@link MathHelpers} utility methods. */
 class MathHelpersRules {
-  private MathHelpersRules() {}
-
-  /**
-   * Prefer {@link MathHelpers#getLinearVelocity(ChassisSpeeds)} over manually computing {@code
-   * Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond)}.
-   */
-  static class ChassisSpeedsLinearVelocity {
-    @BeforeTemplate
-    double before(ChassisSpeeds speeds) {
-      return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-    }
-
-    @AfterTemplate
-    double after(ChassisSpeeds speeds) {
-      return MathHelpers.getLinearVelocity(speeds);
-    }
-  }
-
   /**
    * Prefer {@link MathHelpers#angleModulus(double)} over {@code MathUtil.inputModulus(angle, -180,
    * 180)}.
@@ -38,7 +20,7 @@ class MathHelpersRules {
     }
 
     @AfterTemplate
-    double after(double angleDegrees) {
+    double replacement(double angleDegrees) {
       return MathHelpers.angleModulus(angleDegrees);
     }
   }
@@ -51,8 +33,24 @@ class MathHelpersRules {
     }
 
     @AfterTemplate
-    double after(double a, double b) {
+    double replacement(double a, double b) {
       return MathHelpers.average(a, b);
+    }
+  }
+
+  /**
+   * Prefer {@link MathHelpers#getLinearVelocity(ChassisSpeeds)} over manually computing {@code
+   * Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond)}.
+   */
+  static class ChassisSpeedsLinearVelocity {
+    @BeforeTemplate
+    double before(ChassisSpeeds speeds) {
+      return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    }
+
+    @AfterTemplate
+    double replacement(ChassisSpeeds speeds) {
+      return MathHelpers.getLinearVelocity(speeds);
     }
   }
 
@@ -67,8 +65,10 @@ class MathHelpersRules {
     }
 
     @AfterTemplate
-    Rotation2d after(double x, double y) {
+    Rotation2d replacement(double x, double y) {
       return MathHelpers.rotation2d(x, y);
     }
   }
+
+  private MathHelpersRules() {}
 }

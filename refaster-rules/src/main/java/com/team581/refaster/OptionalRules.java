@@ -18,7 +18,18 @@ import java.util.OptionalLong;
  * library.
  */
 class OptionalRules {
-  private OptionalRules() {}
+  /** Prefer {@link OptionalDouble#empty()} over {@code Optional.<Double>empty()}. */
+  static class OptionalDoubleEmpty {
+    @BeforeTemplate
+    Optional<Double> before() {
+      return Optional.<Double>empty();
+    }
+
+    @AfterTemplate
+    OptionalDouble replacement() {
+      return OptionalDouble.empty();
+    }
+  }
 
   /** Prefer {@link OptionalDouble#of(double)} over {@code Optional.of(Double)}. */
   static class OptionalDoubleOf {
@@ -28,47 +39,8 @@ class OptionalRules {
     }
 
     @AfterTemplate
-    OptionalDouble after(double value) {
+    OptionalDouble replacement(double value) {
       return OptionalDouble.of(value);
-    }
-  }
-
-  /** Prefer {@link OptionalInt#of(int)} over {@code Optional.of(Integer)}. */
-  static class OptionalIntOf {
-    @BeforeTemplate
-    Optional<Integer> before(int value) {
-      return Optional.of(value);
-    }
-
-    @AfterTemplate
-    OptionalInt after(int value) {
-      return OptionalInt.of(value);
-    }
-  }
-
-  /** Prefer {@link OptionalLong#of(long)} over {@code Optional.of(Long)}. */
-  static class OptionalLongOf {
-    @BeforeTemplate
-    Optional<Long> before(long value) {
-      return Optional.of(value);
-    }
-
-    @AfterTemplate
-    OptionalLong after(long value) {
-      return OptionalLong.of(value);
-    }
-  }
-
-  /** Prefer {@link OptionalDouble#empty()} over {@code Optional.<Double>empty()}. */
-  static class OptionalDoubleEmpty {
-    @BeforeTemplate
-    Optional<Double> before() {
-      return Optional.<Double>empty();
-    }
-
-    @AfterTemplate
-    OptionalDouble after() {
-      return OptionalDouble.empty();
     }
   }
 
@@ -80,8 +52,21 @@ class OptionalRules {
     }
 
     @AfterTemplate
-    OptionalInt after() {
+    OptionalInt replacement() {
       return OptionalInt.empty();
+    }
+  }
+
+  /** Prefer {@link OptionalInt#of(int)} over {@code Optional.of(Integer)}. */
+  static class OptionalIntOf {
+    @BeforeTemplate
+    Optional<Integer> before(int value) {
+      return Optional.of(value);
+    }
+
+    @AfterTemplate
+    OptionalInt replacement(int value) {
+      return OptionalInt.of(value);
     }
   }
 
@@ -93,8 +78,23 @@ class OptionalRules {
     }
 
     @AfterTemplate
-    OptionalLong after() {
+    OptionalLong replacement() {
       return OptionalLong.empty();
     }
   }
+
+  /** Prefer {@link OptionalLong#of(long)} over {@code Optional.of(Long)}. */
+  static class OptionalLongOf {
+    @BeforeTemplate
+    Optional<Long> before(long value) {
+      return Optional.of(value);
+    }
+
+    @AfterTemplate
+    OptionalLong replacement(long value) {
+      return OptionalLong.of(value);
+    }
+  }
+
+  private OptionalRules() {}
 }

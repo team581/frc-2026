@@ -3,6 +3,7 @@ package frc.robot.shooter_hood;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
+import com.team581.mechanisms.PowerManaged;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.util.tuning.TunablePid;
@@ -12,7 +13,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
 
-public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
+public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> implements PowerManaged {
   private static double distanceToScoringAngle(double distance) {
     return FeatureFlags.REGRESSION_MODEL.getAsBoolean()
         ? ShooterHoodConfig.SCORING_REGRESSION_MODEL.calculate(distance)
@@ -187,5 +188,14 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> {
     }
 
     shooterHoodSimulation.update();
+  }
+
+  @Override
+  public void applyCurrentLimits(double supplyCurrentLimit) {
+    motor
+        .getConfigurator()
+        .apply(
+            ShooterHoodConfig.MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                supplyCurrentLimit));
   }
 }

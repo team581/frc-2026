@@ -1,9 +1,11 @@
 package frc.robot.intake;
 
+import com.team581.mechanisms.PowerManaged;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 
-public abstract class GenericIntake extends StateMachineSubsystem<IntakeState> {
+public abstract class GenericIntake extends StateMachineSubsystem<IntakeState>
+    implements PowerManaged {
   protected GenericIntake() {
     super(SubsystemPriority.INTAKE, IntakeState.IDLE);
   }

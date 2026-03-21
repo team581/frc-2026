@@ -4,6 +4,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.math.MathHelpers;
+import com.team581.mechanisms.PowerManaged;
 import com.team581.mechanisms.VelocityDetector;
 import com.team581.simkit.SimKit;
 import com.team581.util.state_machines.StateMachineSubsystem;
@@ -14,7 +15,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.util.Units;
 import frc.robot.util.scheduling.SubsystemPriority;
 
-public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
+public class DyeRotor extends StateMachineSubsystem<DyeRotorState> implements PowerManaged {
   private final LinearFilter currentFilter = LinearFilter.movingAverage(10);
 
   private final TalonFX rotorMotor;
@@ -255,5 +256,24 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> {
     rotorSimulation.update();
     horizontalSimulation.update();
     verticalSimulation.update();
+  }
+
+  @Override
+  public void applyCurrentLimits(double supplyCurrentLimit) {
+    rotorMotor
+        .getConfigurator()
+        .apply(
+            DyeRotorConfig.ROTOR_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                supplyCurrentLimit));
+    horizontalMotor
+        .getConfigurator()
+        .apply(
+            DyeRotorConfig.HORIZONTAL_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                supplyCurrentLimit));
+    verticalMotor
+        .getConfigurator()
+        .apply(
+            DyeRotorConfig.VERTICAL_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                supplyCurrentLimit));
   }
 }

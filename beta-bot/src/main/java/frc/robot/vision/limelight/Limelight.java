@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.team581.config.CameraConfig;
 import com.team581.config.LimelightModel;
 import com.team581.mechanisms.vision.CameraHealth;
+import com.team581.util.FmsUtil;
 import com.team581.util.ReusableOptional;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import com.team581.vision.limelight.LimelightHelpers;
@@ -33,20 +34,20 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
         26, 27, 28, 29, 30, 31, 32
       };
 
-  private static final int[] HUB_TAGS = new int[] {2, 3, 4, 5, 8, 9, 10, 11};
-  private static final Set<Integer> HUB_TAGS_SET = Set.of(2, 3, 4, 5, 8, 9, 10, 11);
-  private static final Set<Integer> RED_HUB_TAGS = ImmutableSet.of(2, 3, 4, 5);
-  private static final Set<Integer> BLUE_HUB_TAGS = ImmutableSet.of(8, 9, 10, 11);
+  private static final Set<Integer> RED_HUB_TAGS_SET = ImmutableSet.of(2, 3, 4, 5);
+  private static final Set<Integer> BLUE_HUB_TAGS_SET = ImmutableSet.of(8, 9, 10, 11);
+  private static final int[] RED_HUB_TAGS =
+      RED_HUB_TAGS_SET.stream().mapToInt(Integer::intValue).toArray();
+  private static final int[] BLUE_HUB_TAGS =
+      BLUE_HUB_TAGS_SET.stream().mapToInt(Integer::intValue).toArray();
   private static final double IS_OFFLINE_TIMEOUT = 3;
 
-  public Set<Integer> getActiveHubTags() {
-    var alliance = edu.wpi.first.wpilibj.DriverStation.getAlliance();
-    if (alliance.isPresent()) {
-      return alliance.orElseThrow() == edu.wpi.first.wpilibj.DriverStation.Alliance.Red
-          ? RED_HUB_TAGS
-          : BLUE_HUB_TAGS;
-    }
-    return ImmutableSet.of();
+  private Set<Integer> getActiveHubTagsSet() {
+    return FmsUtil.isRedAlliance() ? RED_HUB_TAGS_SET : BLUE_HUB_TAGS_SET;
+  }
+
+  private int[] getActiveHubTags() {
+    return FmsUtil.isRedAlliance() ? RED_HUB_TAGS : BLUE_HUB_TAGS;
   }
 
   public final String limelightTableName;
@@ -200,15 +201,11 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     LimelightHelpers.setPipelineIndex(limelightTableName, getState().pipelineIndex);
     switch (getState()) {
       case TAGS -> {
-        if (limelightTimer.hasElapsed(5.0)) {
-          LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
-        }
+        LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
         updateHealth(tagResult);
       }
       case HUB_TAGS -> {
-        if (limelightTimer.hasElapsed(5.0)) {
-          LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, HUB_TAGS);
-        }
+        LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, getActiveHubTags());
         updateHealth(tagResult);
       }
       default -> {}
@@ -219,18 +216,8 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
 
   @Override
   public void autonomousInit() {
-    if (config.model() != LimelightModel.THREE) {
-      LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
-    }
     seedImuTimer.reset();
     seedImuTimer.start();
-  }
-
-  @Override
-  public void teleopInit() {
-    if (config.model() != LimelightModel.THREE) {
-      LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
-    }
   }
 
   private void updateHealth(ReusableOptional<?> result) {
@@ -282,7 +269,7 @@ public class Limelight extends StateMachineSubsystem<LimelightState> {
     }
 
     for (RawFiducial fiducial : latestEstimate.rawFiducials) {
-      if (HUB_TAGS_SET.contains(Integer.valueOf(fiducial.id))) {
+      if (getActiveHubTagsSet().contains(fiducial.id)) {
         return true;
       }
     }

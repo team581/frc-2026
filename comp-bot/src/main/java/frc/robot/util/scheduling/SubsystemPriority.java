@@ -6,7 +6,7 @@ public enum SubsystemPriority implements SubsystemPriorityBase {
   // 20-30 is for manager subsystems
   AUTOS(30),
   ROBOT_MANAGER(29),
-  GROUND_MANAGER(29),
+  HOPPER_MANAGER(29),
   HEALTH(28),
   POWER_MANAGER(28),
 
@@ -19,14 +19,11 @@ public enum SubsystemPriority implements SubsystemPriorityBase {
 
   // 0-9 is for actuator subsystems
   DEPLOY(0),
-  LIGHTS(0),
-  DYE_ROTOR(0),
   SWERVE(0),
   SHOOTER_HOOD(0),
   INTAKE(0),
   SHOOTER(0),
   RUMBLE_CONTROLLER(0),
-  CLIMBER(0),
   KICKER(0),
   FEEDER(0),
   CONVEYOR(0);
