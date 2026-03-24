@@ -17,7 +17,7 @@ jobs:
           distribution: "temurin"
           java-version: 21
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Assemble
         run: ./gradlew assemble
   build:
@@ -38,7 +38,7 @@ jobs:
           distribution: "temurin"
           java-version: 21
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Build
         run: ./gradlew build
   test:
@@ -58,7 +58,7 @@ jobs:
           distribution: "temurin"
           java-version: 21
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Run tests
         run: ./gradlew test
       - name: Notify Slack if tests fail
@@ -86,7 +86,7 @@ jobs:
           distribution: "temurin"
           java-version: 21
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Check formatting
         run: ./gradlew spotlessCheck
   ruff:
