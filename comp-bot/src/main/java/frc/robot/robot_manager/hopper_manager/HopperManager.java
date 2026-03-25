@@ -39,8 +39,8 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
   private double hopperDistance = 0.0;
   private double filteredDistance = 0.0;
   private double previousCanRangeDistance = 0.0;
-  public static double HIGH_CAPACITY_THRESHOLD = 5;
-  public static double MEDIUM_CAPACITY_THRESHOLD = 10;
+  public static final double HIGH_CAPACITY_THRESHOLD = 5;
+  public static final double MEDIUM_CAPACITY_THRESHOLD = 10;
 
   private HopperCapacity hopperCapacity = HopperCapacity.LOW;
 
@@ -53,7 +53,7 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
       Feeder feeder,
       CANrange hopperCANRange,
       DigitalInput towerSensor) {
-    super(SubsystemPriority.HOPPER_MANAGER, HopperState.IDLE);
+    super(SubsystemPriority.HOPPER_MANAGER, HopperState.IDLE_DEPLOYED);
     this.deploy = deploy;
     this.intake = intake;
     this.conveyor = conveyor;
@@ -65,37 +65,88 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
     canRangeUpdateTimer.start();
   }
 
+  private boolean shouldFillBalls() {
+    return ((intake.hasBeenIntaking() && !DSOptions.USE_CANRANGE.get())
+            || (hopperCapacity == HopperCapacity.MEDIUM || hopperCapacity == HopperCapacity.HIGH))
+        && !towerSensorRaw;
+  }
+
   @Override
   protected HopperState getNextState(HopperState currentState) {
     return switch (currentState) {
-      case SHOOT -> currentState;
-      case IDLE -> {
-        if (((intake.hasBeenIntaking() && !DSOptions.USE_CANRANGE.get())
-                || (hopperCapacity == HopperCapacity.MEDIUM
-                    || hopperCapacity == HopperCapacity.HIGH))
-            && !towerSensorRaw) {
+      case SHOOT, SHOOT_AND_INTAKE, EJECTING -> currentState;
+      case IDLE_DEPLOYED, IDLE_STOWED -> {
+        if (shouldFillBalls()) {
           yield HopperState.BALL_FILLING;
+        }
+        yield currentState;
+      }
+      case INTAKING -> {
+        if (shouldFillBalls()) {
+          yield HopperState.BALL_FILLING_INTAKING;
         }
         yield currentState;
       }
       case BALL_FILLING -> {
         if (towerSensorDebounced) {
-          yield HopperState.IDLE;
+          yield HopperState.IDLE_DEPLOYED;
+        }
+        if (driverWantsIntake) {
+          yield HopperState.BALL_FILLING_INTAKING;
         }
         yield currentState;
       }
-      case REHOME_DEPLOY -> deploy.getState().isHoming() ? currentState : HopperState.IDLE;
+      case BALL_FILLING_INTAKING -> {
+        if (towerSensorDebounced) {
+          yield HopperState.IDLE_DEPLOYED;
+        }
+        if (!driverWantsIntake) {
+          yield HopperState.BALL_FILLING;
+        }
+        yield currentState;
+      }
+      case REHOME_DEPLOY -> deploy.getState().isHoming() ? currentState : HopperState.IDLE_DEPLOYED;
     };
   }
 
   @Override
   protected void afterTransition(HopperState newState) {
     switch (newState) {
-      case IDLE -> {
+      case IDLE_DEPLOYED -> {
         deploy.intakeRequest();
         intake.idleRequest();
         conveyor.idleRequest();
         feeder.idleRequest();
+      }
+      case IDLE_STOWED -> {
+        deploy.stowRequest();
+        intake.idleRequest();
+        conveyor.idleRequest();
+        feeder.idleRequest();
+      }
+      case INTAKING -> {
+        deploy.intakeRequest();
+        intake.intakeRequest();
+        conveyor.idleRequest();
+        feeder.idleRequest();
+      }
+      case EJECTING -> {
+        deploy.intakeRequest();
+        intake.ejectRequest();
+        conveyor.ejectRequest();
+        feeder.idleRequest();
+      }
+      case BALL_FILLING -> {
+        deploy.intakeRequest();
+        intake.idleRequest();
+        conveyor.ballFillingRequest();
+        feeder.ballFillingRequest();
+      }
+      case BALL_FILLING_INTAKING -> {
+        deploy.intakeRequest();
+        intake.intakeRequest();
+        conveyor.ballFillingRequest();
+        feeder.ballFillingRequest();
       }
       case SHOOT -> {
         deploy.hopperCompactionRequest();
@@ -103,11 +154,11 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
         conveyor.shootRequest();
         feeder.shootRequest();
       }
-      case BALL_FILLING -> {
+      case SHOOT_AND_INTAKE -> {
         deploy.intakeRequest();
         intake.intakeRequest();
-        conveyor.ballFillingRequest();
-        feeder.ballFillingRequest();
+        conveyor.shootRequest();
+        feeder.shootRequest();
       }
       case REHOME_DEPLOY -> {
         deploy.homingRequest();
@@ -120,81 +171,6 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
 
   @Override
   protected void whileInState(HopperState state) {
-    switch (state) {
-      default -> {}
-      case BALL_FILLING -> {
-        if (driverWantsEject) {
-          DogLog.log("HopperManager/HopperActivity", "EJECTING");
-          deploy.intakeRequest();
-          intake.ejectRequest();
-          conveyor.ballFillingRequest();
-          feeder.idleRequest();
-        } else if (driverWantsIntake) {
-          DogLog.log("HopperManager/HopperActivity", "BALL FILLING");
-          deploy.intakeRequest();
-          intake.intakeRequest();
-          conveyor.ballFillingRequest();
-          feeder.ballFillingRequest();
-        } else {
-          DogLog.log("HopperManager/HopperActivity", "IDLE_FILLING");
-          deploy.intakeRequest();
-          intake.idleRequest();
-          conveyor.ballFillingRequest();
-          feeder.ballFillingRequest();
-        }
-      }
-      case IDLE -> {
-        if (driverWantsEject) {
-          DogLog.log("HopperManager/HopperActivity", "EJECTING");
-          deploy.intakeRequest();
-          intake.ejectRequest();
-          conveyor.ejectRequest();
-          feeder.ejectRequest();
-        } else if (driverWantsIntake) {
-          DogLog.log("HopperManager/HopperActivity", "INTAKING");
-          conveyor.idleRequest();
-          intake.intakeRequest();
-          deploy.intakeRequest();
-          feeder.idleRequest();
-          if (operatorWantsStow) {
-            DogLog.log("HopperManager/HopperActivity", "INTAKING_AND_STOW");
-            conveyor.idleRequest();
-            intake.intakeRequest();
-            deploy.stowRequest();
-            feeder.idleRequest();
-          }
-        } else if (operatorWantsStow) {
-          DogLog.log("HopperManager/HopperActivity", "STOW");
-          conveyor.idleRequest();
-          intake.idleRequest();
-          deploy.stowRequest();
-          feeder.idleRequest();
-        } else {
-          DogLog.log("HopperManager/HopperActivity", "IDLE");
-          conveyor.idleRequest();
-          intake.idleRequest();
-          deploy.intakeRequest();
-          feeder.idleRequest();
-        }
-      }
-      case SHOOT -> {
-        if (driverWantsEject) {
-          deploy.intakeRequest();
-          intake.ejectRequest();
-          conveyor.ejectRequest();
-          feeder.ejectRequest();
-        } else {
-          feeder.shootRequest();
-          conveyor.shootRequest();
-          intake.intakeRequest();
-          if (driverWantsIntake) {
-            deploy.intakeRequest();
-          } else {
-            deploy.hopperCompactionRequest();
-          }
-        }
-      }
-    }
     if (previousCanRangeDistance != hopperDistance) {
       canRangeUpdateTimer.reset();
     }
@@ -221,19 +197,48 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
     }
   }
 
-  public boolean stillShooting() {
-    return towerSensorDebounced && getState() == HopperState.SHOOT;
+  private boolean isBallFilling() {
+    return getState() == HopperState.BALL_FILLING
+        || getState() == HopperState.BALL_FILLING_INTAKING;
+  }
+
+  private HopperState resolveIdleState() {
+    if (driverWantsEject) {
+      return HopperState.EJECTING;
+    }
+
+    if (driverWantsIntake) {
+      return HopperState.INTAKING;
+    }
+
+    if (operatorWantsStow) {
+      return HopperState.IDLE_STOWED;
+    }
+
+    return HopperState.IDLE_DEPLOYED;
+  }
+
+  private HopperState resolveScoreState() {
+    if (driverWantsEject) {
+      return HopperState.EJECTING;
+    }
+
+    if (driverWantsIntake) {
+      return HopperState.SHOOT_AND_INTAKE;
+    }
+
+    return HopperState.SHOOT;
   }
 
   public void scoreRequest() {
-    setState(HopperState.SHOOT);
+    setState(resolveScoreState());
   }
 
   public void idleRequest() {
-    if (getState() == HopperState.BALL_FILLING) {
+    if (isBallFilling()) {
       return;
     }
-    setState(HopperState.IDLE);
+    setState(resolveIdleState());
   }
 
   public void homeDeployRequest() {
@@ -252,10 +257,6 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
     operatorWantsStow = wantsStow;
   }
 
-  public boolean isIntaking() {
-    return driverWantsIntake && !driverWantsEject;
-  }
-
   @Override
   protected void collectInputs() {
     towerSensorRaw = towerSensor.get();
@@ -268,8 +269,8 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
       hopperDistance = 20;
       towerSensorRaw =
           switch (getState()) {
-            case BALL_FILLING -> timeout(1.5);
-            case IDLE -> !timeout(5);
+            case BALL_FILLING, BALL_FILLING_INTAKING -> timeout(1.5);
+            case IDLE_DEPLOYED, IDLE_STOWED -> !timeout(5);
             default -> false;
           };
     }
