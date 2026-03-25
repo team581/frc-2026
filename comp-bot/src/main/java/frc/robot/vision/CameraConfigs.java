@@ -6,21 +6,21 @@ import edu.wpi.first.math.util.Units;
 
 public class CameraConfigs {
 
-  public static final CameraConfig FRONT =
+  public static final CameraConfig SHOOTER =
       new CameraConfig(
           LimelightModel.FOUR,
           true,
           true,
           // Forward
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(-12.6378),
           // Right
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(-0.0002),
           // Up
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(16.0558),
           // Pitch
-          0.0,
+          20.0,
           // Yaw
-          0.0,
+          180.0,
           // Roll
           0.0);
 
@@ -30,11 +30,11 @@ public class CameraConfigs {
           true,
           true,
           // Forward
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(-7.5115),
           // Right
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(-13.9087),
           // Up
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(16.5995),
           // Pitch
           0.0,
           // Yaw
@@ -48,11 +48,11 @@ public class CameraConfigs {
           true,
           true,
           // Forward
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(-7.5111),
           // Right
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(13.9087),
           // Up
-          Units.inchesToMeters(0.0),
+          Units.inchesToMeters(16.5995),
           // Pitch
           0.0,
           // Yaw

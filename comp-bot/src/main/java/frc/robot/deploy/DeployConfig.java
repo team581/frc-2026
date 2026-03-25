@@ -24,7 +24,6 @@ public class DeployConfig {
       new TalonFXConfiguration()
           .withFeedback(
               new FeedbackConfigs()
-                  // TODO: UPDATE RATIO
                   .withSensorToMechanismRatio((40.0 / 8.0) * (1 / (Math.PI * (2 * 0.5)))))
           .withMotorOutput(
               new MotorOutputConfigs()

@@ -1,5 +1,7 @@
 package frc.robot.intake;
 
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team581.mechanisms.PowerManaged;
 import com.team581.util.state_machines.StateMachineSubsystem;
@@ -9,6 +11,8 @@ import frc.robot.util.scheduling.SubsystemPriority;
 public class Intake extends StateMachineSubsystem<IntakeState> implements PowerManaged {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
+  private final NeutralOut neutralRequest = new NeutralOut();
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   public Intake(TalonFX leftMotor, TalonFX rightMotor) {
     super(SubsystemPriority.INTAKE, IntakeState.IDLE);
@@ -61,12 +65,12 @@ public class Intake extends StateMachineSubsystem<IntakeState> implements PowerM
   protected void afterTransition(IntakeState newState) {
     switch (newState) {
       case IDLE -> {
-        leftMotor.disable();
-        rightMotor.disable();
+        leftMotor.setControl(neutralRequest);
+        rightMotor.setControl(neutralRequest);
       }
       default -> {
-        leftMotor.setVoltage(newState.voltage);
-        rightMotor.setVoltage(newState.voltage);
+        leftMotor.setControl(voltageRequest.withOutput(newState.voltage));
+        rightMotor.setControl(voltageRequest.withOutput(newState.voltage));
       }
     }
   }

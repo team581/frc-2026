@@ -1,11 +1,15 @@
 package frc.robot.intake;
 
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import dev.doglog.DogLog;
 
 public class IntakeTwoMotor extends GenericIntake {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
+  private final NeutralOut neutralRequest = new NeutralOut();
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   public IntakeTwoMotor(TalonFX leftMotor, TalonFX rightMotor) {
     leftMotor.getConfigurator().apply(IntakeConfig.LEFT_MOTOR_CONFIG);
@@ -55,20 +59,20 @@ public class IntakeTwoMotor extends GenericIntake {
   protected void afterTransition(IntakeState newState) {
     switch (newState) {
       case IDLE -> {
-        leftMotor.disable();
-        rightMotor.disable();
+        leftMotor.setControl(neutralRequest);
+        rightMotor.setControl(neutralRequest);
       }
       case INTAKE -> {
-        leftMotor.setVoltage(newState.getVoltage());
-        rightMotor.setVoltage(newState.getVoltage());
+        leftMotor.setControl(voltageRequest.withOutput(newState.getVoltage()));
+        rightMotor.setControl(voltageRequest.withOutput(newState.getVoltage()));
       }
       case INTAKE_AUTO -> {
-        leftMotor.setVoltage(newState.getVoltage());
-        rightMotor.setVoltage(newState.getVoltage());
+        leftMotor.setControl(voltageRequest.withOutput(newState.getVoltage()));
+        rightMotor.setControl(voltageRequest.withOutput(newState.getVoltage()));
       }
       case SHOOT, SHOOT_THEN_INTAKE -> {
-        leftMotor.setVoltage(newState.getVoltage());
-        rightMotor.setVoltage(newState.getVoltage());
+        leftMotor.setControl(voltageRequest.withOutput(newState.getVoltage()));
+        rightMotor.setControl(voltageRequest.withOutput(newState.getVoltage()));
       }
     }
   }

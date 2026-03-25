@@ -15,13 +15,13 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   private final Debouncer seeingHubTagDebouncer = new Debouncer(0.5, DebounceType.kFalling);
 
   private final Imu imu;
-  private final Limelight frontLimelight;
+  private final Limelight shooterLimelight;
   private final Limelight leftLimelight;
   private final Limelight rightLimelight;
 
   private final Limelight groundLimelight;
 
-  private OptionalTagResult frontResult = new OptionalTagResult();
+  private OptionalTagResult shooterResult = new OptionalTagResult();
   private OptionalTagResult leftResult = new OptionalTagResult();
   private OptionalTagResult rightResult = new OptionalTagResult();
 
@@ -36,13 +36,13 @@ public class Vision extends StateMachineSubsystem<VisionState> {
 
   public Vision(
       Imu imu,
-      Limelight frontLimelight,
+      Limelight shooterLimelight,
       Limelight leftLimelight,
       Limelight rightLimelight,
       Limelight groundLimelight) {
     super(SubsystemPriority.VISION, VisionState.TAGS);
     this.imu = imu;
-    this.frontLimelight = frontLimelight;
+    this.shooterLimelight = shooterLimelight;
     this.leftLimelight = leftLimelight;
     this.rightLimelight = rightLimelight;
     this.groundLimelight = groundLimelight;
@@ -65,11 +65,11 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   protected void collectInputs() {
     robotAngularVelocity = imu.getRobotAngularVelocity();
 
-    frontResult = frontLimelight.getTagResult();
+    shooterResult = shooterLimelight.getTagResult();
     leftResult = leftLimelight.getTagResult();
     rightResult = rightLimelight.getTagResult();
 
-    if (frontResult.isPresent() || leftResult.isPresent() || rightResult.isPresent()) {
+    if (shooterResult.isPresent() || leftResult.isPresent() || rightResult.isPresent()) {
       hasSeenTag = true;
       seeingTag = true;
     } else {
@@ -78,7 +78,7 @@ public class Vision extends StateMachineSubsystem<VisionState> {
 
     seeingHubTags =
         seeingHubTagDebouncer.calculate(
-            frontLimelight.seeingHubTag()
+            shooterLimelight.seeingHubTag()
                 || leftLimelight.seeingHubTag()
                 || rightLimelight.seeingHubTag());
   }
@@ -87,8 +87,8 @@ public class Vision extends StateMachineSubsystem<VisionState> {
     this.robotHeading = robotHeading;
   }
 
-  public OptionalTagResult getFrontLimelightTagResult() {
-    return frontResult;
+  public OptionalTagResult getShooterLimelightTagResult() {
+    return shooterResult;
   }
 
   public OptionalTagResult getLeftLimelightTagResult() {
@@ -122,20 +122,20 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   protected void afterTransition(VisionState newState) {
     switch (newState) {
       case TAGS -> {
-        frontLimelight.setState(LimelightState.TAGS);
+        shooterLimelight.setState(LimelightState.TAGS);
         leftLimelight.setState(LimelightState.TAGS);
         rightLimelight.setState(LimelightState.TAGS);
 
         groundLimelight.setState(LimelightState.CLUSTER_MAP);
       }
       case HUB_TAGS -> {
-        frontLimelight.setState(LimelightState.HUB_TAGS);
+        shooterLimelight.setState(LimelightState.HUB_TAGS);
         leftLimelight.setState(LimelightState.HUB_TAGS);
         rightLimelight.setState(LimelightState.HUB_TAGS);
         groundLimelight.setState(LimelightState.CLUSTER_MAP);
       }
       case WAITING_FOR_HUB_TAGS -> {
-        frontLimelight.setState(LimelightState.TAGS);
+        shooterLimelight.setState(LimelightState.TAGS);
         leftLimelight.setState(LimelightState.TAGS);
         rightLimelight.setState(LimelightState.TAGS);
         groundLimelight.setState(LimelightState.CLUSTER_MAP);
@@ -147,7 +147,7 @@ public class Vision extends StateMachineSubsystem<VisionState> {
   @Override
   public void whileInState(VisionState currentState) {
     // Send IMU data to all limelights
-    frontLimelight.sendImuData(robotHeading, robotAngularVelocity, 0.0, 0.0, 0.0, 0.0);
+    shooterLimelight.sendImuData(robotHeading, robotAngularVelocity, 0.0, 0.0, 0.0, 0.0);
     leftLimelight.sendImuData(robotHeading, robotAngularVelocity, 0.0, 0.0, 0.0, 0.0);
     rightLimelight.sendImuData(robotHeading, robotAngularVelocity, 0.0, 0.0, 0.0, 0.0);
 

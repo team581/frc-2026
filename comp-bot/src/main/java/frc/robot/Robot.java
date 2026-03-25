@@ -46,8 +46,8 @@ public class Robot extends Base581Robot {
           new HeuristicPathTracker(new PoseErrorTolerance(0.5, 10)),
           new PidPathFollower(new PIDController(3.5, 0, 0), new PIDController(4.0, 0, 0)));
 
-  private final Limelight frontLimelight =
-      new Limelight("front", LimelightState.TAGS, CameraConfigs.FRONT);
+  private final Limelight shooterLimelight =
+      new Limelight("shooter", LimelightState.TAGS, CameraConfigs.SHOOTER);
   private final Limelight leftLimelight =
       new Limelight("left", LimelightState.TAGS, CameraConfigs.LEFT);
   private final Limelight rightLimelight =
@@ -55,7 +55,7 @@ public class Robot extends Base581Robot {
   private final Limelight groundLimelight =
       new Limelight("ground", LimelightState.CLUSTER_MAP, CameraConfigs.GROUND);
   private final HealthManager health =
-      new HealthManager(frontLimelight, leftLimelight, rightLimelight, groundLimelight);
+      new HealthManager(shooterLimelight, leftLimelight, rightLimelight, groundLimelight);
   private final Swerve swerve =
       new Swerve(hardware.drivetrain, health, hardware.driverController, trailblazer);
   private final Imu imu = new Imu(swerve.drivetrain);
@@ -71,7 +71,7 @@ public class Robot extends Base581Robot {
   private final Intake intake = new Intake(hardware.intakeLeftMotor, hardware.intakeRightMotor);
   private final Deploy deploy = new Deploy(hardware.deployMotor);
   private final Vision vision =
-      new Vision(imu, frontLimelight, leftLimelight, rightLimelight, groundLimelight);
+      new Vision(imu, shooterLimelight, leftLimelight, rightLimelight, groundLimelight);
   private final Localization localization =
       new Localization(swerve, hardware.drivetrain, vision, imu);
   private final Feeder feeder = new Feeder(hardware.leftFeederMotor, hardware.rightFeederMotor);

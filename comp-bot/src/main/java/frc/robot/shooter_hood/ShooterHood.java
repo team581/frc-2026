@@ -1,6 +1,8 @@
 package frc.robot.shooter_hood;
 
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.mechanisms.PowerManaged;
@@ -29,6 +31,8 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> impleme
   private final TalonFX motor;
   private final PositionVoltage positionVoltageRequest =
       new PositionVoltage(0).withEnableFOC(false);
+  private final NeutralOut neutralRequest = new NeutralOut();
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   private double scoreDistance = 0;
   private double feedDistance = 0;
@@ -129,9 +133,9 @@ public class ShooterHood extends StateMachineSubsystem<ShooterHoodState> impleme
   @Override
   protected void afterTransition(ShooterHoodState newState) {
     switch (newState) {
-      case HOMING -> motor.setVoltage(ShooterHoodConfig.HOMING_VOLTAGE);
+      case HOMING -> motor.setControl(voltageRequest.withOutput(ShooterHoodConfig.HOMING_VOLTAGE));
 
-      case UNHOMED -> motor.disable();
+      case UNHOMED -> motor.setControl(neutralRequest);
 
       default ->
           motor.setControl(

@@ -1,6 +1,9 @@
 package com.team581.simkit.internal;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.StrictFollower;
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -10,12 +13,33 @@ import java.util.OptionalDouble;
 
 /** Predicts a simple velocity-controlled mechanism using TalonFX configuration state. */
 public final class VelocityMechanism {
+  private static SimMotor getLeader(ControlRequest controlRequest, List<SimMotor> devices) {
+    if (controlRequest instanceof Follower f) {
+      return devices.stream()
+          .filter(d -> d.motor().getDeviceID() == f.LeaderID)
+          .findFirst()
+          .orElseThrow();
+    } else if (controlRequest instanceof StrictFollower f) {
+      return devices.stream()
+          .filter(d -> d.motor().getDeviceID() == f.LeaderID)
+          .findFirst()
+          .orElseThrow();
+    } else {
+      throw new IllegalStateException("Unexpected control request type");
+    }
+  }
+
   private static double desiredMechanismVelocity(List<SimMotor> devices) {
     return devices.stream()
         .mapToDouble(
             device -> {
               return switch (device.motor().getControlMode().getValue()) {
                 case CoastOut, DisabledOutput, MusicTone, NeutralOut, StaticBrake -> 0;
+                case Follower ->
+                    getLeader(device.motor().getAppliedControl(), devices)
+                        .motor()
+                        .getClosedLoopReference()
+                        .getValueAsDouble();
                 default -> device.motor().getClosedLoopReference().getValueAsDouble();
               };
             })

@@ -1,5 +1,7 @@
 package frc.robot.conveyor;
 
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team581.mechanisms.PowerManaged;
 import com.team581.util.state_machines.StateMachineSubsystem;
@@ -10,6 +12,8 @@ public class Conveyor extends StateMachineSubsystem<ConveyorState> implements Po
 
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
+  private final NeutralOut neutralRequest = new NeutralOut();
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   public Conveyor(TalonFX leftMotor, TalonFX rightMotor) {
     super(SubsystemPriority.CONVEYOR, ConveyorState.IDLE);
@@ -40,12 +44,12 @@ public class Conveyor extends StateMachineSubsystem<ConveyorState> implements Po
   protected void afterTransition(ConveyorState newState) {
     switch (newState) {
       case IDLE -> {
-        leftMotor.disable();
-        rightMotor.disable();
+        leftMotor.setControl(neutralRequest);
+        rightMotor.setControl(neutralRequest);
       }
       default -> {
-        leftMotor.setVoltage(newState.getVoltage());
-        rightMotor.setVoltage(newState.getVoltage());
+        leftMotor.setControl(voltageRequest.withOutput(newState.getVoltage()));
+        rightMotor.setControl(voltageRequest.withOutput(newState.getVoltage()));
       }
     }
   }

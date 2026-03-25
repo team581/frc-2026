@@ -1,6 +1,7 @@
 package frc.robot.dye_rotor;
 
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.math.MathHelpers;
@@ -23,6 +24,8 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> implements Po
   private final TalonFX verticalMotor;
 
   private final VelocityVoltage rotorVelocityRequest = new VelocityVoltage(0).withEnableFOC(false);
+  private final VoltageOut horizontalVoltageRequest = new VoltageOut(0).withEnableFOC(false);
+  private final VoltageOut verticalVoltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   private final LinearFilter velocityAverage = LinearFilter.movingAverage(8);
   private double averageRotorRpm = 0.0;
@@ -162,21 +165,27 @@ public class DyeRotor extends StateMachineSubsystem<DyeRotorState> implements Po
                 ? DyeRotorState.bpsToRpm(DyeRotorConfig.FULL_SPEED_BPS)
                 : currentState.getRotorRPM(DyeRotorConfig.DISTANCE_TO_SCORE_BPS.get(scoreDistance));
         rotorMotor.setControl(rotorVelocityRequest.withVelocity(wantedRPM / 60.0));
-        horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
-        verticalMotor.setVoltage(currentState.getVerticalVoltage());
+        horizontalMotor.setControl(
+            horizontalVoltageRequest.withOutput(currentState.getHorizontalVoltage()));
+        verticalMotor.setControl(
+            verticalVoltageRequest.withOutput(currentState.getVerticalVoltage()));
       }
       case FEED -> {
         rotorMotor.setControl(
             rotorVelocityRequest.withVelocity(
                 currentState.getRotorRPM(DyeRotorConfig.DISTANCE_TO_FEED_BPS.get(feedDistance))
                     / 60.0));
-        horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
-        verticalMotor.setVoltage(currentState.getVerticalVoltage());
+        horizontalMotor.setControl(
+            horizontalVoltageRequest.withOutput(currentState.getHorizontalVoltage()));
+        verticalMotor.setControl(
+            verticalVoltageRequest.withOutput(currentState.getVerticalVoltage()));
       }
       default -> {
         rotorMotor.setControl(rotorVelocityRequest.withVelocity(currentState.getRotorRPM() / 60.0));
-        horizontalMotor.setVoltage(currentState.getHorizontalVoltage());
-        verticalMotor.setVoltage(currentState.getVerticalVoltage());
+        horizontalMotor.setControl(
+            horizontalVoltageRequest.withOutput(currentState.getHorizontalVoltage()));
+        verticalMotor.setControl(
+            verticalVoltageRequest.withOutput(currentState.getVerticalVoltage()));
       }
     }
 

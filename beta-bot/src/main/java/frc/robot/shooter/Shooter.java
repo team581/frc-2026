@@ -1,6 +1,8 @@
 package frc.robot.shooter;
 
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.math.MathHelpers;
@@ -32,8 +34,10 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
 
-  private final VelocityVoltage voltageRequest =
+  private final VelocityVoltage velocityRequest =
       new VelocityVoltage(0).withLimitReverseMotion(true).withEnableFOC(false);
+  private final NeutralOut neutralRequest = new NeutralOut();
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   private double scoreDistance = 0;
   private double climbScoreRpm = 0;
@@ -103,43 +107,43 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     switch (state) {
       case IDLE -> {
         var setpoint = ShooterConfig.IDLE_RPM / 60.0;
-        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
-        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
+        leftMotor.setControl(velocityRequest.withVelocity(setpoint));
+        rightMotor.setControl(velocityRequest.withVelocity(setpoint));
 
         DogLog.log("Shooter/RpmSetpoint", shootingRpm);
       }
       case SCORE -> {
         var setpoint = shootingRpm / 60.0;
-        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
-        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
+        leftMotor.setControl(velocityRequest.withVelocity(setpoint));
+        rightMotor.setControl(velocityRequest.withVelocity(setpoint));
 
         DogLog.log("Shooter/RpmSetpoint", shootingRpm);
       }
       case CLIMB_SCORE -> {
         var setpoint = climbScoreRpm / 60.0;
-        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
-        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
+        leftMotor.setControl(velocityRequest.withVelocity(setpoint));
+        rightMotor.setControl(velocityRequest.withVelocity(setpoint));
 
         DogLog.log("Shooter/RpmSetpoint", climbScoreRpm);
       }
       case FEEDING -> {
         var setpoint = feedingRpm / 60.0;
-        leftMotor.setControl(voltageRequest.withVelocity(setpoint));
-        rightMotor.setControl(voltageRequest.withVelocity(setpoint));
+        leftMotor.setControl(velocityRequest.withVelocity(setpoint));
+        rightMotor.setControl(velocityRequest.withVelocity(setpoint));
 
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
       }
       case SELF_TEST_STOP_MOTORS -> {
-        leftMotor.stopMotor();
-        rightMotor.stopMotor();
+        leftMotor.setControl(neutralRequest);
+        rightMotor.setControl(neutralRequest);
       }
       case SELF_TEST_LEFT_MOTOR -> {
-        leftMotor.setVoltage(ShooterConfig.TEST_VOLTAGE);
-        rightMotor.stopMotor();
+        leftMotor.setControl(voltageRequest.withOutput(ShooterConfig.TEST_VOLTAGE));
+        rightMotor.setControl(neutralRequest);
       }
       case SELF_TEST_RIGHT_MOTOR -> {
-        rightMotor.setVoltage(ShooterConfig.TEST_VOLTAGE);
-        leftMotor.stopMotor();
+        rightMotor.setControl(voltageRequest.withOutput(ShooterConfig.TEST_VOLTAGE));
+        leftMotor.setControl(neutralRequest);
       }
     }
   }

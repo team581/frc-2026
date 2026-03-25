@@ -103,7 +103,7 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
   @Override
   protected void collectInputs() {
     List<TagResult> presentList = new ArrayList<>(3);
-    vision.getFrontLimelightTagResult().ifPresent(presentList::add);
+    vision.getShooterLimelightTagResult().ifPresent(presentList::add);
     vision.getLeftLimelightTagResult().ifPresent(presentList::add);
     vision.getRightLimelightTagResult().ifPresent(presentList::add);
 

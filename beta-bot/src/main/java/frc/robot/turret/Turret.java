@@ -1,6 +1,7 @@
 package frc.robot.turret;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -34,6 +35,7 @@ public class Turret extends StateMachineSubsystem<TurretState> implements PowerM
   private double stuckAngle = 0.0;
 
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withEnableFOC(false);
+  private final NeutralOut neutralRequest = new NeutralOut();
 
   private final Vision vision;
 
@@ -108,7 +110,7 @@ public class Turret extends StateMachineSubsystem<TurretState> implements PowerM
   @Override
   protected void whileInState(TurretState currentState) {
     switch (currentState) {
-      case UNHOMED -> motor.disable();
+      case UNHOMED -> motor.setControl(neutralRequest);
       case STUCK -> {
         motor.setControl(
             positionRequest.withPosition(

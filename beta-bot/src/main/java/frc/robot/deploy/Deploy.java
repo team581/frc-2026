@@ -1,6 +1,8 @@
 package frc.robot.deploy;
 
 import com.ctre.phoenix6.controls.DifferentialMotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.SimpleDifferentialMechanism;
@@ -27,7 +29,9 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
   private final CANrange hopperCANRange;
   private final LinearFilter hopperFilter = LinearFilter.movingAverage(5);
   private final DifferentialMotionMagicVoltage differentialPositionVoltageRequest =
-      new DifferentialMotionMagicVoltage(0, 0).withEnableFOC(false);
+      new DifferentialMotionMagicVoltage(0, 0).withEnableFOC(true);
+  private final NeutralOut neutralRequest = new NeutralOut();
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
 
   private HopperCapacity hopperCapacity = HopperCapacity.LOW;
   private double differentialMechanismPosition = 0.0;
@@ -181,16 +185,16 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
   protected void afterTransition(DeployState newState) {
     switch (newState) {
       case UNHOMED -> {
-        leftMotor.disable();
-        rightMotor.disable();
+        leftMotor.setControl(neutralRequest);
+        rightMotor.setControl(neutralRequest);
       }
       case HOME_INWARD -> {
-        leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_INWARD);
-        rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_INWARD);
+        leftMotor.setControl(voltageRequest.withOutput(DeployConfig.HOMING_VOLTAGE_INWARD));
+        rightMotor.setControl(voltageRequest.withOutput(DeployConfig.HOMING_VOLTAGE_INWARD));
       }
       case HOME_OUTWARD -> {
-        leftMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
-        rightMotor.setVoltage(DeployConfig.HOMING_VOLTAGE_OUTWARD);
+        leftMotor.setControl(voltageRequest.withOutput(DeployConfig.HOMING_VOLTAGE_OUTWARD));
+        rightMotor.setControl(voltageRequest.withOutput(DeployConfig.HOMING_VOLTAGE_OUTWARD));
       }
       default ->
           differentialMechanism.setControl(

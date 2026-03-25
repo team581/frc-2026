@@ -1,10 +1,14 @@
 package frc.robot.intake;
 
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import dev.doglog.DogLog;
 
 public class Intake extends GenericIntake {
   private final TalonFX motor;
+  private final NeutralOut neutralRequest = new NeutralOut();
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   public Intake(TalonFX motor) {
     motor.getConfigurator().apply(IntakeConfig.LEFT_MOTOR_CONFIG);
@@ -51,10 +55,11 @@ public class Intake extends GenericIntake {
   @Override
   protected void afterTransition(IntakeState newState) {
     switch (newState) {
-      case IDLE -> motor.disable();
-      case INTAKE -> motor.setVoltage(newState.getVoltage());
-      case INTAKE_AUTO -> motor.setVoltage(newState.getVoltage());
-      case SHOOT, SHOOT_THEN_INTAKE -> motor.setVoltage(newState.getVoltage());
+      case IDLE -> motor.setControl(neutralRequest);
+      case INTAKE -> motor.setControl(voltageRequest.withOutput(newState.getVoltage()));
+      case INTAKE_AUTO -> motor.setControl(voltageRequest.withOutput(newState.getVoltage()));
+      case SHOOT, SHOOT_THEN_INTAKE ->
+          motor.setControl(voltageRequest.withOutput(newState.getVoltage()));
     }
   }
 
