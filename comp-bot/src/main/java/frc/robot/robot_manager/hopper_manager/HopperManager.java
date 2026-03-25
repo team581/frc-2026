@@ -149,7 +149,7 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
         feeder.ballFillingRequest();
       }
       case SHOOT -> {
-        deploy.hopperCompactionRequest();
+        deploy.intakeRequest();
         intake.intakeRequest();
         conveyor.shootRequest();
         feeder.shootRequest();
@@ -171,6 +171,15 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
 
   @Override
   protected void whileInState(HopperState state) {
+    switch (state) {
+      default -> {}
+      case SHOOT -> {
+        if (timeout(HopperManagerConfig.HOPPER_COMPACTION_DELAY.getAsDouble())) {
+          deploy.hopperCompactionRequest();
+        }
+      }
+    }
+
     if (previousCanRangeDistance != hopperDistance) {
       canRangeUpdateTimer.reset();
     }
