@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public class StuckOnBallRecovery {
   private static final double STUCK_DEBOUNCE_SECONDS = 0.25;
-  private static final Debouncer stuckDebouncer = new Debouncer(STUCK_DEBOUNCE_SECONDS);
+  private static final Debouncer STUCK_DEBOUNCER = new Debouncer(STUCK_DEBOUNCE_SECONDS);
   private static final double STUCK_ANGLE_THRESHOLD = 7.0;
 
   private static final DoubleSubscriber RECOVERY_POINT_DISTANCE =
@@ -48,6 +48,6 @@ public class StuckOnBallRecovery {
   }
 
   public static boolean stuckOnBall(double pitch, double roll) {
-    return stuckDebouncer.calculate(Math.abs(Math.hypot(pitch, roll)) > STUCK_ANGLE_THRESHOLD);
+    return STUCK_DEBOUNCER.calculate(Math.abs(Math.hypot(pitch, roll)) > STUCK_ANGLE_THRESHOLD);
   }
 }
