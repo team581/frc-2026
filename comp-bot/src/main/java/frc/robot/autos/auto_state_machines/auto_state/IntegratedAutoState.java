@@ -18,5 +18,8 @@ public enum IntegratedAutoState {
   DRIVE_BACK_TO_NEUTRAL_ZONE,
   SHOOT_1,
   SHOOT_2,
-  DONE
+  DONE,
+
+  // For when we get beached on a ball
+  STUCK_ON_BALL_RECOVERY
 }

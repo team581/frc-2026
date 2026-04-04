@@ -1,6 +1,7 @@
 package frc.robot.autos.auto_state_machines;
 
 import com.team581.autos.Point;
+import com.team581.autos.StuckOnBallRecovery;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.mechanisms.imu.BumpCrossingTracker;
 import com.team581.trailblazer.AutoPoint;
@@ -271,6 +272,15 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
           .withAngularConstraints(Units.rotationsToRadians(1.0), Units.rotationsToRadians(2))
           .untilFinished(new PoseErrorTolerance(0.3, 3));
 
+  private AutoSegment stuckOnBall =
+      StuckOnBallRecovery.getRecoverySegment(
+          () -> robotManager.localization.getPose(),
+          () -> Rotation2d.fromDegrees(robotManager.localization.imu.getPitch()),
+          () -> Rotation2d.fromDegrees(robotManager.localization.imu.getRoll()));
+
+  private IntegratedAutoState storedStuckOnBallState =
+      IntegratedAutoState.DEFAULT_SECOND_INTAKE_SEGMENT;
+
   public RightIntegratedAuto(RobotManager robotManager, Trailblazer trailblazer) {
     super(IntegratedAutoState.INTAKE_ACROSS_MIDLINE, robotManager, trailblazer);
 
@@ -285,7 +295,21 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
 
   @Override
   protected IntegratedAutoState getNextState(IntegratedAutoState currentState) {
+    // TODO: Only do this in states where we are intaking and might get stuck
+    if (StuckOnBallRecovery.stuckOnBall(
+        robotManager.localization.imu.getPitch(), robotManager.localization.imu.getRoll())) {
+      return IntegratedAutoState.STUCK_ON_BALL_RECOVERY;
+    }
+
     return switch (currentState) {
+      case STUCK_ON_BALL_RECOVERY -> {
+        if (!StuckOnBallRecovery.stuckOnBall(
+            robotManager.localization.imu.getPitch(), robotManager.localization.imu.getRoll())) {
+          yield storedStuckOnBallState;
+        } else {
+          yield currentState;
+        }
+      }
       case INTAKE_ACROSS_MIDLINE -> {
         if (trailblazer.passedMarker(Markers.CANCEL_INTAKE_RQ)) {
           yield IntegratedAutoState.DRIVE_BACK_1;
@@ -371,6 +395,9 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
   @Override
   protected void whileInState(IntegratedAutoState newState) {
     switch (newState) {
+      case STUCK_ON_BALL_RECOVERY -> {
+        trailblazer.setActiveSegment(stuckOnBall);
+      }
       case INTAKE_ACROSS_MIDLINE -> {
         trailblazer.setActiveSegment(intakeAcrossMidline);
         robotManager.intakeAutoRequest();
@@ -407,6 +434,13 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
         robotManager.intakeAutoRequest();
       }
       case DONE -> {}
+    }
+  }
+
+  @Override
+  protected void beforeTransition(IntegratedAutoState oldState, IntegratedAutoState newState) {
+    if (newState == IntegratedAutoState.STUCK_ON_BALL_RECOVERY) {
+      storedStuckOnBallState = oldState;
     }
   }
 

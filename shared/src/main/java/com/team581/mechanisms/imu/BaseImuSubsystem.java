@@ -12,6 +12,8 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.RobotBase;
 
 public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
   private static final double IS_FLAT_THRESHOLD = 5.0;
@@ -26,11 +28,17 @@ public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
   protected double robotAngularVelocity = 0;
   protected double pitch = 0;
   protected double roll = 0;
+  private final DoubleSubscriber simTunablePitch = DogLog.tunable("Imu/SimTunablePitch", 0.0);
+  private final DoubleSubscriber simTunableRoll = DogLog.tunable("Imu/SimTunableRoll", 0.0);
 
   public BaseImuSubsystem(SubsystemPriorityBase priority, SwerveDrivetrain<?, ?, ?> drivetrain) {
     super(priority, ImuState.DEFAULT_STATE);
 
     this.drivetrain = drivetrain;
+  }
+
+  public double getPitch() {
+    return pitch;
   }
 
   public double getRobotAngularVelocity() {
@@ -39,6 +47,10 @@ public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
 
   public double getRobotHeading() {
     return robotHeading;
+  }
+
+  public double getRoll() {
+    return roll;
   }
 
   public boolean isFlatDebounced() {
@@ -60,8 +72,13 @@ public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
     robotHeading = MathHelpers.angleModulus(driveState.Pose.getRotation().getDegrees());
     robotAngularVelocity = Math.toDegrees(driveState.Speeds.omegaRadiansPerSecond);
 
-    pitch = drivetrain.getPigeon2().getPitch().getValueAsDouble();
-    roll = drivetrain.getPigeon2().getRoll().getValueAsDouble();
+    if (RobotBase.isSimulation()) {
+      pitch = simTunablePitch.get();
+      roll = simTunableRoll.get();
+    } else {
+      pitch = drivetrain.getPigeon2().getPitch().getValueAsDouble();
+      roll = drivetrain.getPigeon2().getRoll().getValueAsDouble();
+    }
 
     isFlatDebounced =
         isFlatDebouncer.calculate(
