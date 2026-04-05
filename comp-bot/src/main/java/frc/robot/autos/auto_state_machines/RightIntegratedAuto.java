@@ -11,6 +11,7 @@ import com.team581.util.FieldUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autos.BaseImperativeAuto;
 import frc.robot.autos.auto_state_machines.auto_state.IntegratedAutoState;
 import frc.robot.cluster_map.Lane;
@@ -401,7 +402,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
     switch (newState) {
       case STUCK_ON_BALL_RECOVERY -> {
         trailblazer.setActiveSegment(stuckOnBall);
-        if (timeout(1.0)) {
+        if (timeout(1.0) && RobotBase.isSimulation()) {
           robotManager.localization.imu.setPitch(0.0);
           robotManager.localization.imu.setRoll(0.0);
         }
@@ -410,7 +411,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
         trailblazer.setActiveSegment(intakeAcrossMidline);
         robotManager.intakeAutoRequest();
         robotManager.powerManager.firstAutoSegmentRequest();
-        if (timeout(1.5) && !firstStuckOnBall) {
+        if (timeout(1.5) && RobotBase.isSimulation() && !firstStuckOnBall) {
           firstStuckOnBall = true;
           robotManager.localization.imu.setPitch(-5.0);
           robotManager.localization.imu.setRoll(-15.0);
@@ -429,7 +430,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       case INTAKE_LANE_1 -> {
         trailblazer.setActiveSegment(lane1Segment);
         robotManager.intakeAutoRequest();
-        if (timeout(1.5) && !secondStuckOnBall) {
+        if (timeout(1.5) && RobotBase.isSimulation() && !secondStuckOnBall) {
           secondStuckOnBall = true;
           robotManager.localization.imu.setRoll(15.0);
         }
@@ -437,7 +438,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       case INTAKE_LANE_2 -> {
         trailblazer.setActiveSegment(lane2Segment);
         robotManager.intakeAutoRequest();
-        if (timeout(1.5) && !secondStuckOnBall) {
+        if (timeout(1.5) && RobotBase.isSimulation() && !secondStuckOnBall) {
           secondStuckOnBall = true;
           robotManager.localization.imu.setRoll(15.0);
         }
