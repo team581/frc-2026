@@ -57,6 +57,14 @@ public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
     return isFlatDebounced;
   }
 
+  public void setPitch(double newPitch) {
+    pitch = newPitch;
+  }
+
+  public void setRoll(double newRoll) {
+    roll = newRoll;
+  }
+
   @Override
   public void whileInState(ImuState currentState) {
     DogLog.log("Imu/RobotHeading", robotHeading, Degrees);
@@ -73,8 +81,8 @@ public class BaseImuSubsystem extends StateMachineSubsystem<ImuState> {
     robotAngularVelocity = Math.toDegrees(driveState.Speeds.omegaRadiansPerSecond);
 
     if (RobotBase.isSimulation()) {
-      pitch = simTunablePitch.get();
-      roll = simTunableRoll.get();
+      // pitch = simTunablePitch.get();
+      // roll = simTunableRoll.get();
     } else {
       pitch = drivetrain.getPigeon2().getPitch().getValueAsDouble();
       roll = drivetrain.getPigeon2().getRoll().getValueAsDouble();

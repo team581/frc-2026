@@ -281,6 +281,10 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
   private IntegratedAutoState storedStuckOnBallState =
       IntegratedAutoState.DEFAULT_SECOND_INTAKE_SEGMENT;
 
+  // For sim testing
+  private boolean firstStuckOnBall = false;
+  private boolean secondStuckOnBall = false;
+
   public RightIntegratedAuto(RobotManager robotManager, Trailblazer trailblazer) {
     super(IntegratedAutoState.INTAKE_ACROSS_MIDLINE, robotManager, trailblazer);
 
@@ -397,11 +401,20 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
     switch (newState) {
       case STUCK_ON_BALL_RECOVERY -> {
         trailblazer.setActiveSegment(stuckOnBall);
+        if (timeout(1.0)) {
+          robotManager.localization.imu.setPitch(0.0);
+          robotManager.localization.imu.setRoll(0.0);
+        }
       }
       case INTAKE_ACROSS_MIDLINE -> {
         trailblazer.setActiveSegment(intakeAcrossMidline);
         robotManager.intakeAutoRequest();
         robotManager.powerManager.firstAutoSegmentRequest();
+        if (timeout(1.5) && !firstStuckOnBall) {
+          firstStuckOnBall = true;
+          robotManager.localization.imu.setPitch(-5.0);
+          robotManager.localization.imu.setRoll(-15.0);
+        }
       }
       case DRIVE_BACK_1 -> {
         trailblazer.setActiveSegment(driveBackAndShootOne);
@@ -416,10 +429,18 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       case INTAKE_LANE_1 -> {
         trailblazer.setActiveSegment(lane1Segment);
         robotManager.intakeAutoRequest();
+        if (timeout(1.5) && !secondStuckOnBall) {
+          secondStuckOnBall = true;
+          robotManager.localization.imu.setRoll(15.0);
+        }
       }
       case INTAKE_LANE_2 -> {
         trailblazer.setActiveSegment(lane2Segment);
         robotManager.intakeAutoRequest();
+        if (timeout(1.5) && !secondStuckOnBall) {
+          secondStuckOnBall = true;
+          robotManager.localization.imu.setRoll(15.0);
+        }
       }
       case INTAKE_TRENCH_LANE -> {
         trailblazer.setActiveSegment(trenchSegment);

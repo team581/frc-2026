@@ -23,9 +23,12 @@ public class StuckOnBallRecovery {
   public static Pose2d getRecoveryPose(Pose2d robotPose, Rotation2d pitch, Rotation2d roll) {
     var headingToGetUnstuck =
         Rotation2d.fromRadians(Math.atan2(pitch.getRadians(), roll.getRadians()));
-    return robotPose
-        .transformBy(new Transform2d(0.0, -RECOVERY_POINT_DISTANCE.get(), Rotation2d.kZero))
-        .rotateAround(robotPose.getTranslation(), headingToGetUnstuck);
+    return new Pose2d(
+        robotPose
+            .transformBy(new Transform2d(0.0, -RECOVERY_POINT_DISTANCE.get(), Rotation2d.kZero))
+            .rotateAround(robotPose.getTranslation(), headingToGetUnstuck)
+            .getTranslation(),
+        robotPose.getRotation());
   }
 
   public static AutoSegment getRecoverySegment(
@@ -37,10 +40,15 @@ public class StuckOnBallRecovery {
                       Rotation2d.fromRadians(
                           Math.atan2(pitch.get().getRadians(), roll.get().getRadians()));
                   var recoveryPoint =
-                      robotPose
-                          .get()
-                          .transformBy(new Transform2d(0.0, 1.5, Rotation2d.kZero))
-                          .rotateAround(robotPose.get().getTranslation(), headingToGetUnstuck);
+                      new Pose2d(
+                          robotPose
+                              .get()
+                              .transformBy(
+                                  new Transform2d(
+                                      0.0, -RECOVERY_POINT_DISTANCE.get(), Rotation2d.kZero))
+                              .rotateAround(robotPose.get().getTranslation(), headingToGetUnstuck)
+                              .getTranslation(),
+                          robotPose.get().getRotation());
 
                   return new Point(recoveryPoint, recoveryPoint);
                 }))
