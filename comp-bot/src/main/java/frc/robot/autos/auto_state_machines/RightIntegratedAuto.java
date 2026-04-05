@@ -279,8 +279,9 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
           () -> Rotation2d.fromDegrees(robotManager.localization.imu.getPitch()),
           () -> Rotation2d.fromDegrees(robotManager.localization.imu.getRoll()));
 
-  private IntegratedAutoState storedStuckOnBallState =
-      IntegratedAutoState.DEFAULT_SECOND_INTAKE_SEGMENT;
+  private IntegratedAutoState storedStuckOnBallState = IntegratedAutoState.INTAKE_ACROSS_MIDLINE;
+
+  private AutoSegment storedStuckOnBallAutoSegment = intakeAcrossMidline;
 
   // For sim testing
   private boolean firstStuckOnBall = false;
@@ -464,25 +465,49 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
     if (newState == IntegratedAutoState.STUCK_ON_BALL_RECOVERY) {
       storedStuckOnBallState = oldState;
     }
+
+    if (oldState == IntegratedAutoState.STUCK_ON_BALL_RECOVERY) {
+      trailblazer.setActiveSegment(
+          storedStuckOnBallAutoSegment, trailblazer.getCurrentPointIndex());
+    }
   }
 
   @Override
   protected void afterTransition(IntegratedAutoState newState) {
     switch (newState) {
       case INTAKE_ACROSS_MIDLINE -> {
+        storedStuckOnBallAutoSegment = intakeAcrossMidline;
         robotManager.homeDeployInAutoRequest();
         robotManager.homeShooterHoodRequest();
       }
-      case DRIVE_BACK_1 -> {}
-      case SHOOT_1 -> {}
-      case DEFAULT_SECOND_INTAKE_SEGMENT, INTAKE_LANE_1, INTAKE_LANE_2, INTAKE_TRENCH_LANE -> {
+      case DRIVE_BACK_1, SHOOT_1 -> {
+        storedStuckOnBallAutoSegment = driveBackAndShootOne;
+      }
+      case DEFAULT_SECOND_INTAKE_SEGMENT -> {
+        storedStuckOnBallAutoSegment = defaultSecondSegment;
         robotManager.idleRequest();
       }
-      case DRIVE_BACK_2 -> {}
+      case INTAKE_LANE_1 -> {
+        storedStuckOnBallAutoSegment = lane1Segment;
+        robotManager.idleRequest();
+      }
+      case INTAKE_LANE_2 -> {
+        storedStuckOnBallAutoSegment = lane2Segment;
+        robotManager.idleRequest();
+      }
+      case INTAKE_TRENCH_LANE -> {
+        storedStuckOnBallAutoSegment = trenchSegment;
+        robotManager.idleRequest();
+      }
+      case DRIVE_BACK_2 -> {
+        storedStuckOnBallAutoSegment = driveBackAndShootTwo;
+      }
       case SHOOT_2 -> {
+        storedStuckOnBallAutoSegment = driveBackAndShootTwo;
         robotManager.cancelIntakeRequest();
       }
       case DRIVE_BACK_TO_NEUTRAL_ZONE -> {
+        storedStuckOnBallAutoSegment = driveBackToNeutralZone;
         robotManager.idleRequest();
       }
       case DONE -> {

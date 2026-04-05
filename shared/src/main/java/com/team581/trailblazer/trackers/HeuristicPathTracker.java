@@ -116,8 +116,13 @@ public class HeuristicPathTracker implements PathTracker {
 
   @Override
   public void resetAndSetPoints(List<? extends AutoPoint<?>> points) {
+    this.resetAndSetPoints(points, 0);
+  }
+
+  @Override
+  public void resetAndSetPoints(List<? extends AutoPoint<?>> points, int index) {
     this.points = points;
-    this.currentPointIndex = 0;
+    this.currentPointIndex = index;
     this.maxT = 0;
     this.transitionPose = currentPose;
   }
