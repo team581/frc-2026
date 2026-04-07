@@ -137,7 +137,6 @@ public class Trailblazer {
     DogLog.log(
         "Trailblazer/Tracker/InitialSegmentPoints",
         segment.points.stream().map(point -> point.getPose()).toArray(Pose2d[]::new));
-    DogLog.log("Trailblazer/Index", currentIndex);
   }
 
   public void setActiveSegment(AutoSegment segment, int index) {
@@ -150,6 +149,7 @@ public class Trailblazer {
     currentIndex = index;
     needsFollowerReset = true;
 
-    DogLog.log("Trailblazer/IndexChanged", currentIndex);
+    DogLog.log("Trailblazer/StoredStuckOnBall/TrailblazerInputIndex", index);
+    DogLog.log("Trailblazer/StoredStuckOnBall/IndexChanged", currentIndex);
   }
 }

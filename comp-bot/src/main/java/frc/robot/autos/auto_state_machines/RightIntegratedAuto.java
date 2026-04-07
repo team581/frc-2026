@@ -8,6 +8,7 @@ import com.team581.trailblazer.AutoPoint;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.segments.AutoSegment;
 import com.team581.util.FieldUtil;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -280,8 +281,8 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
           () -> Rotation2d.fromDegrees(robotManager.localization.imu.getRoll()));
 
   private IntegratedAutoState storedStuckOnBallState = IntegratedAutoState.INTAKE_ACROSS_MIDLINE;
-
   private AutoSegment storedStuckOnBallAutoSegment = intakeAcrossMidline;
+  private int storedStuckOnBallIndex = 0;
 
   // For sim testing
   private boolean firstStuckOnBall = false;
@@ -400,6 +401,12 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
 
   @Override
   protected void whileInState(IntegratedAutoState newState) {
+    if (getState() != IntegratedAutoState.STUCK_ON_BALL_RECOVERY) {
+      storedStuckOnBallIndex = trailblazer.getCurrentPointIndex();
+    }
+    DogLog.log("Trailblazer/StoredStuckOnBall/State", storedStuckOnBallState);
+    DogLog.log("Trailblazer/StoredStuckOnBall/Index", storedStuckOnBallIndex);
+
     switch (newState) {
       case STUCK_ON_BALL_RECOVERY -> {
         trailblazer.setActiveSegment(stuckOnBall);
@@ -467,8 +474,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
     }
 
     if (oldState == IntegratedAutoState.STUCK_ON_BALL_RECOVERY) {
-      trailblazer.setActiveSegment(
-          storedStuckOnBallAutoSegment, trailblazer.getCurrentPointIndex());
+      trailblazer.setActiveSegment(storedStuckOnBallAutoSegment, storedStuckOnBallIndex);
     }
   }
 
