@@ -302,10 +302,18 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
 
   @Override
   protected IntegratedAutoState getNextState(IntegratedAutoState currentState) {
-    // TODO: Only do this in states where we are intaking and might get stuck
-    if (StuckOnBallRecovery.stuckOnBall(
-        robotManager.localization.imu.getPitch(), robotManager.localization.imu.getRoll())) {
-      return IntegratedAutoState.STUCK_ON_BALL_RECOVERY;
+    switch (currentState) {
+      case INTAKE_ACROSS_MIDLINE,
+          DEFAULT_SECOND_INTAKE_SEGMENT,
+          INTAKE_LANE_1,
+          INTAKE_LANE_2,
+          INTAKE_TRENCH_LANE -> {
+        if (StuckOnBallRecovery.stuckOnBall(
+            robotManager.localization.imu.getPitch(), robotManager.localization.imu.getRoll())) {
+          return IntegratedAutoState.STUCK_ON_BALL_RECOVERY;
+        }
+      }
+      default -> {}
     }
 
     return switch (currentState) {
@@ -518,6 +526,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       case DONE -> {
         robotManager.idleRequest();
       }
+      case STUCK_ON_BALL_RECOVERY -> {}
     }
   }
 }
