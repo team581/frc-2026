@@ -79,7 +79,6 @@ public class HeuristicPathTracker implements PathTracker {
         t = maxT;
 
         var targetTranslation = targetPose.getTranslation();
-        Rotation2d interpolatedRotation;
 
         if (isArc) {
           var arcMid = currentPoint.arcMidpoint().orElseThrow();
@@ -92,22 +91,12 @@ public class HeuristicPathTracker implements PathTracker {
               p0.times(oneMinusT * oneMinusT)
                   .plus(p1.times(2 * oneMinusT * t))
                   .plus(p2.times(t * t));
-
-          // Two-stage rotation through the arc midpoint rotation to control direction
-          var midRotation = arcMid.getRotation();
-          if (t < 0.5) {
-            // First half: previous waypoint rotation -> mid rotation
-            interpolatedRotation = previousPose.getRotation().interpolate(midRotation, t * 2);
-          } else {
-            // Second half: mid rotation -> target rotation
-            interpolatedRotation = midRotation.interpolate(targetPose.getRotation(), (t - 0.5) * 2);
-          }
-        } else {
-          interpolatedRotation =
-              previousPose.getRotation().interpolate(targetPose.getRotation(), t);
         }
 
-        targetPose = new Pose2d(targetTranslation, interpolatedRotation);
+        // Use the current waypoint's rotation directly — the follower is responsible for
+        // pacing rotation via a dynamic angular velocity cap, rather than the tracker
+        // interpolating an intermediate heading.
+        targetPose = new Pose2d(targetTranslation, targetPose.getRotation());
       }
     }
 
