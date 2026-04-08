@@ -97,7 +97,8 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
   @Override
   protected void collectInputs() {
     timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
-    timeUntilNextShift = FmsUtil.timeUntilNextShift(timeSinceMatchStart);
+    timeUntilNextShift =
+        FmsUtil.timeUntilNextShift(timeSinceMatchStart, DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
 
     actualHubActive = calculateActualHubActive();
     tofBasedHubActive = calculateTOFBasedHubActive();

@@ -12,7 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 public class HeuristicPathTracker implements PathTracker {
   private final PoseErrorTolerance defaultTransitionTolerance;
-  private List<? extends AutoPoint<?>> points = ImmutableList.of();
+  private List<AutoPoint<?>> points = ImmutableList.of();
   private Pose2d currentPose = Pose2d.kZero;
   private int currentPointIndex = 0;
   private double maxT = 0;
@@ -115,12 +115,12 @@ public class HeuristicPathTracker implements PathTracker {
   }
 
   @Override
-  public void resetAndSetPoints(List<? extends AutoPoint<?>> points) {
+  public void resetAndSetPoints(List<AutoPoint<?>> points) {
     this.resetAndSetPoints(points, 0);
   }
 
   @Override
-  public void resetAndSetPoints(List<? extends AutoPoint<?>> points, int index) {
+  public void resetAndSetPoints(List<AutoPoint<?>> points, int index) {
     this.points = points;
     this.currentPointIndex = index;
     this.maxT = 0;

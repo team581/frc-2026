@@ -48,6 +48,9 @@ public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerM
 
   public static final double MAX_LINEAR_RATE = 4.75;
 
+  private boolean useLooseTolerance = false;
+  private static final double LOOSE_TOLERANCE = 45.0;
+
   private static final DoubleSubscriber MAX_LINEAR_RATE_SHOOTING =
       DogLog.tunable("Swerve/MaxLinearRateMovingShot", 2.0);
 
@@ -62,8 +65,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerM
   private final SlewRateLimiter maxLinearVelocityRateLimiter = new SlewRateLimiter(5.0);
   private final SlewRateLimiter maxAngularVelocityRateLimiter = new SlewRateLimiter(5.0);
 
-  private static final PhoenixPIDController ORIGINAL_HEADING_PID =
-      new PhoenixPIDController(5, 0, 0);
+  public static final PhoenixPIDController ORIGINAL_HEADING_PID = new PhoenixPIDController(5, 0, 0);
 
   public final TunerSwerveDrivetrain drivetrain;
 
@@ -248,7 +250,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerM
   private double getToleranceDegrees() {
     return switch (getState()) {
       case WARMUP_SCORE, SCORE -> scoringTolerance;
-      case WARMUP_FEED, FEED -> feedingTolerance;
+      case WARMUP_FEED, FEED -> useLooseTolerance ? LOOSE_TOLERANCE : feedingTolerance;
       default -> 0.0;
     };
   }
@@ -257,6 +259,10 @@ public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerM
     var currentSpeeds = getFieldRelativeSpeeds();
 
     return MathHelpers.getLinearVelocity(currentSpeeds) > currentMaxLinearRate;
+  }
+
+  public void setUseLooseTolerance(boolean value) {
+    useLooseTolerance = value;
   }
 
   public boolean atGoal(double lookaheadTime) {
@@ -314,7 +320,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerM
           MathUtil.isNear(
               drivetrainState.Pose.getRotation().getDegrees(),
               feedingAngle,
-              feedingTolerance,
+              useLooseTolerance ? LOOSE_TOLERANCE : feedingTolerance,
               -180,
               180);
       default -> false;

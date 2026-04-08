@@ -8,10 +8,13 @@ import com.team581.trailblazer.AutoPoint;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.segments.AutoSegment;
 import com.team581.util.FieldUtil;
+import com.team581.util.FmsUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autos.BaseImperativeAuto;
 import frc.robot.autos.auto_state_machines.auto_state.IntegratedAutoState;
@@ -25,24 +28,38 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
     CANCEL_INTAKE_RQ,
     READY_TO_SHOOT_FOR_2,
     CHECK_CLUSTER_MAP_TRENCH,
-    MAKE_CLUSTER_MAP_DECISION
+    MAKE_CLUSTER_MAP_DECISION,
+    CANCEL_CLUSTER_MAP_CHECK
   }
 
   private BumpCrossingTracker bumpCrossingTracker;
 
   private static final double BUMP_OFFSET = -0.15;
+  private static final double COLLISION_X_OFFSET = 0.5;
+  private static final double MAX_CLUSTER_MAP_OFFSET = 0.5;
+
+  private boolean collisionEverDetected = false;
 
   private final AutoSegment intakeAcrossMidline =
       Trailblazer.segment(
               AutoPoint.ofRed(
                       new Pose2d(
-                          10.489, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg))
+                          10.489, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.kCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
-              AutoPoint.ofRed(new Pose2d(8.640, 6.653, Rotation2d.fromDegrees(-134)))
+              AutoPoint.of(
+                      () ->
+                          getCollisionPoint(
+                              Point.ofRed(new Pose2d(8.640, 6.653, Rotation2d.kCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(7.983, 5.593, Rotation2d.fromDegrees(-86.0)))
+              AutoPoint.of(
+                      () ->
+                          getCollisionPoint(
+                              Point.ofRed(new Pose2d(7.983, 5.593, Rotation2d.kCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(8.280, 3.875, Rotation2d.fromDegrees(-50.0)))
+              AutoPoint.of(
+                      () ->
+                          getCollisionPoint(
+                              Point.ofRed(new Pose2d(8.280, 3.875, Rotation2d.fromDegrees(-50.0)))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(new Pose2d(9.31, 4.31, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
@@ -93,11 +110,12 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
               AutoPoint.ofRed(
                       new Pose2d(
                           13.709, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg))
+                  .withLinearConstraints(3.0, 8.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           12.5, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg))
-                  .withLinearConstraints(4.5, 8.0)
+                  .withLinearConstraints(3.0, 8.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
@@ -117,11 +135,17 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
               AutoPoint.ofRed(new Pose2d(9.5, 6.814, Rotation2d.kCW_90deg))
                   .withMarker(Markers.MAKE_CLUSTER_MAP_DECISION)
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(9.5, 4.4, Rotation2d.kCW_90deg))
+              AutoPoint.of(
+                      () ->
+                          getClusterShiftedPoint(
+                              Point.ofRed(new Pose2d(9.5, 4.4, Rotation2d.kCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.6, 100))
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.5), Units.rotationsToRadians(2.0)),
-              AutoPoint.ofRed(new Pose2d(10.575, 4.4, Rotation2d.kCCW_90deg))
+              AutoPoint.of(
+                      () ->
+                          getClusterShiftedPoint(
+                              Point.ofRed(new Pose2d(10.575, 4.4, Rotation2d.kCCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 100))
                   .withArcMidpoint(Point.ofRed(new Pose2d(9.985, 3.89, Rotation2d.kZero)))
                   .withAngularConstraints(
@@ -144,14 +168,14 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                           10.5,
                           FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY() + Units.inchesToMeters(3),
                           Rotation2d.fromDegrees(170)))
-                  .withLinearConstraints(4.0, 2.0)
+                  .withLinearConstraints(3.0, 2.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           8.5,
                           FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY() + Units.inchesToMeters(3),
                           Rotation2d.fromDegrees(170)))
-                  .withLinearConstraints(4.0, 2.0)
+                  .withLinearConstraints(3.0, 2.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.ofRed(new Pose2d(8.1, 6.814, Rotation2d.kCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
@@ -177,9 +201,15 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
 
   private final AutoSegment lane1Segment =
       Trailblazer.segment(
-              AutoPoint.ofRed(new Pose2d(8.75, 6.814, Rotation2d.kCW_90deg))
+              AutoPoint.of(
+                      () ->
+                          getClusterShiftedPoint(
+                              Point.ofRed(new Pose2d(8.75, 6.814, Rotation2d.kCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(8.75, 4.4, Rotation2d.kCW_90deg))
+              AutoPoint.of(
+                      () ->
+                          getClusterShiftedPoint(
+                              Point.ofRed(new Pose2d(8.75, 4.4, Rotation2d.kCW_90deg))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.6, 100))
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
@@ -205,11 +235,11 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(new Pose2d(7.983, 4.4, Rotation2d.kCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.6, 100))
-                  .withArcMidpoint(Point.ofRed(new Pose2d(9.35, 3.4, Rotation2d.kZero)))
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(new Pose2d(10.575, 4.4, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 100))
+                  .withArcMidpoint(Point.ofRed(new Pose2d(9.35, 3.4, Rotation2d.kZero)))
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(
@@ -296,8 +326,19 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
 
   @Override
   public Point getStartingPoint() {
-    return Point.ofRed(
-        new Pose2d(12.1, FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY(), Rotation2d.k180deg));
+    return Point.ofRed(new Pose2d(12.1, 7.6, Rotation2d.kCW_90deg));
+  }
+
+  @Override
+  protected void collectInputs() {
+    super.collectInputs();
+    if (getState() == IntegratedAutoState.INTAKE_ACROSS_MIDLINE
+        && DriverStation.isEnabled()
+        && robotManager.localization.imu.collisionDetected()) {
+      collisionEverDetected = true;
+    }
+
+    DogLog.log("RightIntegratedAuto/CollisionDetected", collisionEverDetected);
   }
 
   @Override
@@ -340,7 +381,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
         }
       }
       case SHOOT_1 -> {
-        if (timeout(3.0) && !robotManager.hopperManager.isShooting()) {
+        if ((timeout(1.0) && !robotManager.hopperManager.isShooting()) || timeout(5.0)) {
           yield IntegratedAutoState.DEFAULT_SECOND_INTAKE_SEGMENT;
         } else {
           yield currentState;
@@ -350,7 +391,8 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
         if (trailblazer.atGoal(robotManager.localization.getPose())
             && trailblazer.passedMarker(Markers.CANCEL_INTAKE_RQ)) {
           yield IntegratedAutoState.DRIVE_BACK_2;
-        } else if (trailblazer.passedMarker(Markers.MAKE_CLUSTER_MAP_DECISION)) {
+        } else if (trailblazer.passedMarker(Markers.MAKE_CLUSTER_MAP_DECISION)
+            && !trailblazer.passedMarker(Markers.CANCEL_CLUSTER_MAP_CHECK)) {
 
           Lane bestLane = robotManager.clusterMap.getBestClusterLane();
           yield switch (bestLane) {
@@ -383,7 +425,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
         }
       }
       case SHOOT_2 -> {
-        if (timeout(3.0) && !robotManager.hopperManager.isShooting()) {
+        if ((timeout(1.0) && !robotManager.hopperManager.isShooting()) || timeout(5.0)) {
           yield IntegratedAutoState.DRIVE_BACK_TO_NEUTRAL_ZONE;
         } else {
           yield currentState;
@@ -528,5 +570,39 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       }
       case STUCK_ON_BALL_RECOVERY -> {}
     }
+  }
+
+  private Point getCollisionPoint(Point point) {
+    if (collisionEverDetected) {
+      return Point.ofRed(
+          new Pose2d(
+              point.redPose().getX() + COLLISION_X_OFFSET,
+              point.redPose().getY(),
+              point.redPose().getRotation()));
+    } else {
+      return point;
+    }
+  }
+
+  // Only use for lane 0 and 1 since we don't
+  private Point getClusterShiftedPoint(Point point) {
+    var targetCluster = robotManager.clusterMap.getBestClusterPose();
+
+    if (targetCluster.isEmpty()) {
+      return point;
+    }
+
+    Pose2d clusterPose = targetCluster.orElseThrow();
+    Pose2d basePose = point.getPose();
+
+    double clampedX =
+        MathUtil.clamp(
+            clusterPose.getX(),
+            basePose.getX() - MAX_CLUSTER_MAP_OFFSET,
+            basePose.getX() + MAX_CLUSTER_MAP_OFFSET);
+
+    return FmsUtil.isRedAlliance()
+        ? Point.ofRed(new Pose2d(clampedX, basePose.getY(), basePose.getRotation()))
+        : Point.ofBlue(new Pose2d(clampedX, basePose.getY(), basePose.getRotation()));
   }
 }

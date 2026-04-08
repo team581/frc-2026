@@ -22,8 +22,8 @@ public class ShooterHoodConfig {
 
   // 33 is max without top rollers touching
   public static final double MAX_ANGLE = ANGLE_FROM_HORIZONTAL + 34.0;
-  public static final double MIN_ANGLE = ANGLE_FROM_HORIZONTAL + 1.5;
-  public static final double IDLE_ANGLE = ANGLE_FROM_HORIZONTAL + 1.5;
+  public static final double MIN_ANGLE = ANGLE_FROM_HORIZONTAL + 2.0;
+  public static final double IDLE_ANGLE = ANGLE_FROM_HORIZONTAL + 2.0;
 
   // TODO: Update Homing numbers
   public static final double HOMING_VOLTAGE = -1;

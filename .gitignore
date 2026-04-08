@@ -187,3 +187,5 @@ uv.lock
 
 # PathPlanner
 **/deploy/pathplanner
+
+.env

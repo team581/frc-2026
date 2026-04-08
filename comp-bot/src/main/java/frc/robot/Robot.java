@@ -44,7 +44,12 @@ public class Robot extends Base581Robot {
   private final Trailblazer trailblazer =
       new Trailblazer(
           new HeuristicPathTracker(new PoseErrorTolerance(0.5, 10)),
-          new PidPathFollower(new PIDController(3.5, 0, 0), new PIDController(4.0, 0, 0)));
+          new PidPathFollower(
+              new PIDController(3.5, 0, 0),
+              new PIDController(
+                  Swerve.ORIGINAL_HEADING_PID.getP(),
+                  Swerve.ORIGINAL_HEADING_PID.getI(),
+                  Swerve.ORIGINAL_HEADING_PID.getD())));
 
   private final Limelight shooterLimelight =
       new Limelight("shooter", LimelightState.TAGS, CameraConfigs.SHOOTER);

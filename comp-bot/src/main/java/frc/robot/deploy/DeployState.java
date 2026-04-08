@@ -7,7 +7,7 @@ public enum DeployState {
   INTAKE(DeployConfig.MAX_LENGTH),
   STOW(1.0),
   // placeholder values
-  HOPPER_COMPACTION_IN(1.0),
+  HOPPER_COMPACTION_IN(3.0),
   HOME_INWARD(DeployConfig.MIN_LENGTH),
   HOME_OUTWARD(DeployConfig.MAX_LENGTH),
   UNHOMED(0);

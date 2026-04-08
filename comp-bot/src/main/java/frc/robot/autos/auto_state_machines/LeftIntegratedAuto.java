@@ -22,7 +22,8 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
     CANCEL_INTAKE_RQ,
     READY_TO_SHOOT_FOR_2,
     CHECK_CLUSTER_MAP_TRENCH,
-    MAKE_CLUSTER_MAP_DECISION
+    MAKE_CLUSTER_MAP_DECISION,
+    CANCEL_CLUSTER_MAP_CHECK
   }
 
   private BumpCrossingTracker bumpCrossingTracker;
@@ -33,11 +34,11 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
       Trailblazer.segment(
               AutoPoint.ofRed(
                       new Pose2d(
-                          10.489, FieldUtil.RED_DEPOT_TRENCH_CENTER.getY(), Rotation2d.k180deg))
+                          10.489, FieldUtil.RED_DEPOT_TRENCH_CENTER.getY(), Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
-              AutoPoint.ofRed(new Pose2d(8.64, 1.416, Rotation2d.fromDegrees(134)))
+              AutoPoint.ofRed(new Pose2d(8.64, 1.416, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(7.983, 2.476, Rotation2d.fromDegrees(86)))
+              AutoPoint.ofRed(new Pose2d(7.983, 2.476, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(new Pose2d(8.28, 4.194, Rotation2d.fromDegrees(50)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
@@ -90,18 +91,19 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
               AutoPoint.ofRed(
                       new Pose2d(
                           13.709, FieldUtil.RED_DEPOT_TRENCH_CENTER.getY(), Rotation2d.k180deg))
+                  .withLinearConstraints(3.0, 8.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           12.5, FieldUtil.RED_DEPOT_TRENCH_CENTER.getY(), Rotation2d.k180deg))
-                  .withLinearConstraints(4.5, 8.0)
+                  .withLinearConstraints(3.0, 8.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           11.5,
                           FieldUtil.RED_DEPOT_TRENCH_CENTER.getY(),
                           Rotation2d.fromDegrees(180 - 20)))
-                  .withLinearConstraints(4.5, 8.0)
+                  .withLinearConstraints(3.5, 8.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
@@ -119,6 +121,7 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.5), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(new Pose2d(10.575, 3.669, Rotation2d.kCW_90deg))
+                  .withMarker(Markers.CANCEL_CLUSTER_MAP_CHECK)
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 100))
                   .withArcMidpoint(Point.ofRed(new Pose2d(9.985, 4.179, Rotation2d.kZero)))
                   .withAngularConstraints(
@@ -141,14 +144,14 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
                           10.5,
                           FieldUtil.RED_DEPOT_TRENCH_CENTER.getY() + Units.inchesToMeters(3),
                           Rotation2d.fromDegrees(-170)))
-                  .withLinearConstraints(4.0, 2.0)
+                  .withLinearConstraints(3.0, 2.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           8.5,
                           FieldUtil.RED_DEPOT_TRENCH_CENTER.getY() + Units.inchesToMeters(3),
                           Rotation2d.fromDegrees(-170)))
-                  .withLinearConstraints(4.0, 2.0)
+                  .withLinearConstraints(3.0, 2.0)
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.ofRed(new Pose2d(8.1, 1.255, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
@@ -279,8 +282,7 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
 
   @Override
   public Point getStartingPoint() {
-    return Point.ofRed(
-        new Pose2d(12.1, FieldUtil.RED_DEPOT_TRENCH_CENTER.getY(), Rotation2d.k180deg));
+    return Point.ofRed(new Pose2d(12.1, 0.5, Rotation2d.kCCW_90deg));
   }
 
   @Override
@@ -301,7 +303,7 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
         }
       }
       case SHOOT_1 -> {
-        if (timeout(3.0) && !robotManager.hopperManager.isShooting()) {
+        if ((timeout(1.0) && !robotManager.hopperManager.isShooting()) || timeout(5.0)) {
           yield IntegratedAutoState.DEFAULT_SECOND_INTAKE_SEGMENT;
         } else {
           yield currentState;
@@ -311,7 +313,8 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
         if (trailblazer.atGoal(robotManager.localization.getPose())
             && trailblazer.passedMarker(Markers.CANCEL_INTAKE_RQ)) {
           yield IntegratedAutoState.DRIVE_BACK_2;
-        } else if (trailblazer.passedMarker(Markers.MAKE_CLUSTER_MAP_DECISION)) {
+        } else if (trailblazer.passedMarker(Markers.MAKE_CLUSTER_MAP_DECISION)
+            && !trailblazer.passedMarker(Markers.CANCEL_CLUSTER_MAP_CHECK)) {
 
           Lane bestLane = robotManager.clusterMap.getBestClusterLane();
           yield switch (bestLane) {
@@ -344,7 +347,7 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
         }
       }
       case SHOOT_2 -> {
-        if (timeout(3.0) && !robotManager.hopperManager.isShooting()) {
+        if ((timeout(1.0) && !robotManager.hopperManager.isShooting()) || timeout(5.0)) {
           yield IntegratedAutoState.DRIVE_BACK_TO_NEUTRAL_ZONE;
         } else {
           yield currentState;

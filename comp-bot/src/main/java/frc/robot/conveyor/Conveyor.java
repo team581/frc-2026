@@ -40,8 +40,8 @@ public class Conveyor extends StateMachineSubsystem<ConveyorState> implements Po
     setStateFromRequest(ConveyorState.EJECT);
   }
 
-  public void slowintakemodestateRequest() {
-    setStateFromRequest(ConveyorState.SLOW_INTAKING_MODE);
+  public void intakeRequest() {
+    setStateFromRequest(ConveyorState.INTAKE);
   }
 
   @Override

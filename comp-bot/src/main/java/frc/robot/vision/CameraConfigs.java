@@ -65,9 +65,9 @@ public class CameraConfigs {
           LimelightModel.THREE,
           false,
           false,
-          Units.inchesToMeters(25.671),
+          Units.inchesToMeters(25.054733),
           Units.inchesToMeters(0.0),
-          Units.inchesToMeters(12.9525),
+          Units.inchesToMeters(12.056034),
           -20.0,
           0.0,
           0.0);

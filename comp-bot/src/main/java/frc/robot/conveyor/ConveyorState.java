@@ -8,7 +8,7 @@ public enum ConveyorState {
   BALL_FILLING(1),
   EJECT(-12),
   IDLE(0),
-  SLOW_INTAKING_MODE(0); // ;TBD
+  INTAKE(2); // ;TBD
 
   public final double voltage;
   public final DoubleSubscriber tunableVoltage;

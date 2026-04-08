@@ -1,7 +1,9 @@
 package frc.robot.shooter;
 
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.mechanisms.PowerManaged;
 import com.team581.simkit.SimKit;
@@ -34,7 +36,11 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
   public final TalonFX bottomLeftMotor;
   public final TalonFX bottomRightMotor;
 
-  private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withEnableFOC(false);
+  private final Follower topLeftFollower;
+  private final Follower bottomLeftFollower;
+  private final Follower bottomRightFollower;
+
+  private final VelocityTorqueCurrentFOC velocityRequest = new VelocityTorqueCurrentFOC(0);
 
   private double scoreDistance = 0;
   private double feedDistance = 0;
@@ -46,11 +52,6 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
   private double bottomLeftMotorRpm = 0;
   private double bottomRightMotorRpm = 0;
 
-  private double topLeftMotorAcceleration = 0;
-  private double topRightMotorAcceleration = 0;
-  private double bottomLeftMotorAcceleration = 0;
-  private double bottomRightMotorAcceleration = 0;
-
   private double topLeftStatorCurrent = 0.0;
   private double topRightStatorCurrent = 0.0;
   private double bottomLeftStatorCurrent = 0.0;
@@ -58,14 +59,11 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
 
   private boolean atGoal = false;
   private boolean atGoalDebounced = false;
-  private boolean atGoalLookaheadDebounced = false;
 
   private boolean turboMode = false;
 
   // Debounce for delay between shots at 15 bps
   private final Debouncer atGoalDebouncer = new Debouncer(1.0 / 15.0, DebounceType.kFalling);
-  private final Debouncer atGoalLookaheadDebouncer =
-      new Debouncer(1.0 / 15.0, DebounceType.kFalling);
 
   public Shooter(
       TalonFX topLeftMotor,
@@ -90,11 +88,23 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     this.topRightMotor = topRightMotor;
     this.bottomLeftMotor = bottomLeftMotor;
     this.bottomRightMotor = bottomRightMotor;
+
+    this.topLeftFollower = new Follower(topRightMotor.getDeviceID(), MotorAlignmentValue.Opposed);
+    this.bottomLeftFollower =
+        new Follower(topRightMotor.getDeviceID(), MotorAlignmentValue.Opposed);
+    this.bottomRightFollower =
+        new Follower(topRightMotor.getDeviceID(), MotorAlignmentValue.Aligned);
+
+    topLeftMotor.setControl(topLeftFollower);
+    bottomLeftMotor.setControl(bottomLeftFollower);
+    bottomRightMotor.setControl(bottomRightFollower);
   }
 
   public void prepareScoreRequest(double distance) {
     this.scoreDistance = distance;
-    setStateFromRequest(ShooterState.PREPARE_SCORE);
+    if (getState() != ShooterState.SCORE) {
+      setStateFromRequest(ShooterState.PREPARE_SCORE);
+    }
   }
 
   public void scoreRequest(double distance) {
@@ -130,6 +140,9 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     DogLog.log("Shooter/GoalFeedingRPM", feedingRpm);
     DogLog.log("Shooter/AtGoal", atGoal());
     DogLog.log("Shooter/TopRight/Voltage", topRightMotor.getMotorVoltage().getValueAsDouble());
+    DogLog.log(
+        "Shooter/TopRight/SupplyVoltage", topRightMotor.getSupplyVoltage().getValueAsDouble());
+
     DogLog.log("Shooter/TopLeft/Voltage", topLeftMotor.getMotorVoltage().getValueAsDouble());
     DogLog.log(
         "Shooter/BottomRight/Voltage", bottomRightMotor.getMotorVoltage().getValueAsDouble());
@@ -148,21 +161,18 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
         "Shooter/BottomRight/SupplyCurrent",
         bottomRightMotor.getSupplyCurrent().getValueAsDouble());
 
+    DogLog.log(
+        "Shooter/TopRight/TorqueCurrent", topRightMotor.getTorqueCurrent().getValueAsDouble());
+
     switch (state) {
       case IDLE -> {
-        topRightMotor.disable();
-        topLeftMotor.disable();
-        bottomLeftMotor.disable();
-        bottomRightMotor.disable();
-
-        DogLog.log("Shooter/RpmSetpoint", 0.0);
+        var setpoint = ShooterConfig.IDLE_RPM / 60.0;
+        topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
+        DogLog.log("Shooter/RpmSetpoint", ShooterConfig.IDLE_RPM);
       }
       case PREPARE_SCORE -> {
         var setpoint = shootingRpm / 60.0;
         topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
-        topLeftMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
-        bottomLeftMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
-        bottomRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
         DogLog.log("Shooter/RpmSetpoint", shootingRpm);
       }
       case SCORE -> {
@@ -172,37 +182,13 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
                 .withVelocity(setpoint)
                 .withFeedForward(
                     turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_VOLTAGE.get()
-                        : ShooterConfig.PREPARE_SHOT_FF_VOLTAGE.get()));
-        topLeftMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_VOLTAGE.get()
-                        : ShooterConfig.PREPARE_SHOT_FF_VOLTAGE.get()));
-        bottomLeftMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_VOLTAGE.get()
-                        : ShooterConfig.PREPARE_SHOT_FF_VOLTAGE.get()));
-        bottomRightMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_VOLTAGE.get()
-                        : ShooterConfig.PREPARE_SHOT_FF_VOLTAGE.get()));
+                        ? ShooterConfig.TURBO_MODE_FF_CURRENT.get()
+                        : ShooterConfig.ACTIVE_SHOT_FF_CURRENT.get()));
         DogLog.log("Shooter/RpmSetpoint", shootingRpm);
       }
       case PREPARE_FEED -> {
         var setpoint = feedingRpm / 60.0;
         topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
-        topLeftMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
-        bottomLeftMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
-        bottomRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
       }
       case FEED -> {
@@ -212,29 +198,8 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
                 .withVelocity(setpoint)
                 .withFeedForward(
                     turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_VOLTAGE.get()
-                        : ShooterConfig.PREPARE_SHOT_FF_VOLTAGE.get()));
-        topLeftMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_VOLTAGE.get()
-                        : ShooterConfig.PREPARE_SHOT_FF_VOLTAGE.get()));
-        bottomLeftMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_VOLTAGE.get()
-                        : ShooterConfig.PREPARE_SHOT_FF_VOLTAGE.get()));
-        bottomRightMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_VOLTAGE.get()
-                        : ShooterConfig.PREPARE_SHOT_FF_VOLTAGE.get()));
+                        ? ShooterConfig.TURBO_MODE_FF_CURRENT.get()
+                        : ShooterConfig.ACTIVE_SHOT_FF_CURRENT.get()));
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
       }
     }
@@ -256,22 +221,15 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     bottomRightStatorCurrent = bottomRightMotor.getStatorCurrent().getValueAsDouble();
 
     topLeftMotorRpm = topLeftMotor.getVelocity().getValueAsDouble() * 60.0;
-    topLeftMotorAcceleration = topLeftMotor.getAcceleration().getValueAsDouble() * 60.0;
 
     topRightMotorRpm = topRightMotor.getVelocity().getValueAsDouble() * 60.0;
-    topRightMotorAcceleration = topRightMotor.getAcceleration().getValueAsDouble() * 60.0;
 
     bottomLeftMotorRpm = bottomLeftMotor.getVelocity().getValueAsDouble() * 60.0;
-    bottomLeftMotorAcceleration = bottomLeftMotor.getAcceleration().getValueAsDouble() * 60.0;
 
     bottomRightMotorRpm = bottomRightMotor.getVelocity().getValueAsDouble() * 60.0;
-    bottomRightMotorAcceleration = bottomRightMotor.getAcceleration().getValueAsDouble() * 60.0;
 
     atGoal = calculateAtGoal();
     atGoalDebounced = atGoalDebouncer.calculate(atGoal);
-    atGoalLookaheadDebounced =
-        atGoalLookaheadDebouncer.calculate(
-            calculateAtGoalLookahead(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get()));
   }
 
   public boolean atGoal() {
@@ -280,57 +238,6 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
 
   public boolean atGoalDebounced() {
     return atGoalDebounced;
-  }
-
-  public boolean atGoalLookaheadDebounced() {
-    return atGoalLookaheadDebounced;
-  }
-
-  private double getTargetRpm() {
-    return switch (getState()) {
-      case PREPARE_SCORE, SCORE -> shootingRpm;
-      case PREPARE_FEED, FEED -> feedingRpm;
-      case IDLE -> ShooterConfig.IDLE_RPM;
-    };
-  }
-
-  private double getTolerance() {
-    return switch (getState()) {
-      case PREPARE_SCORE -> ShooterConfig.RPM_TOLERANCE;
-      case SCORE -> ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING;
-      case PREPARE_FEED, FEED -> ShooterConfig.RPM_TOLERANCE_FEEDING;
-      case IDLE -> 500.0;
-    };
-  }
-
-  public boolean calculateAtGoalLookahead(double lookaheadTimeSeconds) {
-    switch (getState()) {
-      case PREPARE_SCORE, SCORE, PREPARE_FEED, FEED -> {}
-      default -> {
-        return atGoal();
-      }
-    }
-
-    var targetRpm = getTargetRpm();
-    var tolerance = getTolerance();
-
-    // Calculate predicted RPM for each motor
-    double predictedTopLeftRpm =
-        topLeftMotorRpm + (topLeftMotorAcceleration * lookaheadTimeSeconds);
-    double predictedTopRightRpm =
-        topRightMotorRpm + (topRightMotorAcceleration * lookaheadTimeSeconds);
-    double predictedBottomLeftRpm =
-        bottomLeftMotorRpm + (bottomLeftMotorAcceleration * lookaheadTimeSeconds);
-    double predictedBottomRightRpm =
-        bottomRightMotorRpm + (bottomRightMotorAcceleration * lookaheadTimeSeconds);
-
-    // Check if all predicted RPMs are within tolerance of the target RPM
-    var topLeftAtGoal = predictedTopLeftRpm >= targetRpm - tolerance;
-    var topRightAtGoal = predictedTopRightRpm >= targetRpm - tolerance;
-    var bottomLeftAtGoal = predictedBottomLeftRpm >= targetRpm - tolerance;
-    var bottomRightAtGoal = predictedBottomRightRpm >= targetRpm - tolerance;
-
-    return topLeftAtGoal && topRightAtGoal && bottomLeftAtGoal && bottomRightAtGoal;
   }
 
   private boolean calculateAtGoal() {

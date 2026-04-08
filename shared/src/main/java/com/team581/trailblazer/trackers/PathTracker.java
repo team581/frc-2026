@@ -29,11 +29,11 @@ public interface PathTracker {
 
   /**
    * Reset the state of the path tracker, as well as set the new list of points to consider in
-   * {@link #getTargetPose()}.
+   * {@link #getTargetPose(Rotation2d)}.
    *
    * @param points The new list of points to store.
    */
-  void resetAndSetPoints(List<? extends AutoPoint<?>> points);
+  void resetAndSetPoints(List<AutoPoint<?>> points);
 
   /**
    * Reset the state of the path tracker, as well as set the new list of points to consider in
@@ -42,7 +42,7 @@ public interface PathTracker {
    * @param points The new list of points to store.
    * @param index The index to start at.
    */
-  void resetAndSetPoints(List<? extends AutoPoint<?>> points, int index);
+  void resetAndSetPoints(List<AutoPoint<?>> points, int index);
 
   /**
    * Runs once per loop cycle to update the tracker with the current robot state.

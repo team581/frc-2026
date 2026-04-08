@@ -1,10 +1,10 @@
 package frc.robot.deploy;
 
-import com.ctre.phoenix6.controls.DifferentialPositionVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.mechanisms.SimpleDifferentialMechanism;
+import com.ctre.phoenix6.mechanisms.DifferentialMechanism;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.team581.math.MathHelpers;
 import com.team581.mechanisms.PowerManaged;
@@ -20,10 +20,14 @@ import frc.robot.util.scheduling.SubsystemPriority;
 public class Deploy extends StateMachineSubsystem<DeployState> implements PowerManaged {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
-  private final SimpleDifferentialMechanism<TalonFX> differentialMechanism;
+  private final DifferentialMechanism<TalonFX> differentialMechanism;
 
-  private final DifferentialPositionVoltage differentialPositionVoltageRequest =
-      new DifferentialPositionVoltage(0, 0).withEnableFOC(true);
+  private final PositionTorqueCurrentFOC torqueCurrentFOCAverageRequest =
+      new PositionTorqueCurrentFOC(0).withSlot(0);
+
+  private final PositionTorqueCurrentFOC positionDifferentialRequest =
+      new PositionTorqueCurrentFOC(0).withSlot(1);
+
   private final NeutralOut neutralRequest = new NeutralOut();
   private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
@@ -35,7 +39,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
   private double leftSupplyCurrent = 0.0;
   private double rightSupplyCurrent = 0.0;
 
-  public Deploy(SimpleDifferentialMechanism<TalonFX> differentialMechanism) {
+  public Deploy(DifferentialMechanism<TalonFX> differentialMechanism) {
     super(SubsystemPriority.DEPLOY, DeployState.UNHOMED);
     this.differentialMechanism = differentialMechanism;
     this.leftMotor = differentialMechanism.getLeader();
@@ -126,9 +130,8 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
       }
       default ->
           differentialMechanism.setControl(
-              differentialPositionVoltageRequest
-                  .withAveragePosition(clamp(newState.getLength()))
-                  .withDifferentialPosition(0));
+              torqueCurrentFOCAverageRequest.withPosition(clamp(newState.getLength())),
+              positionDifferentialRequest.withPosition(0.0));
     }
   }
 

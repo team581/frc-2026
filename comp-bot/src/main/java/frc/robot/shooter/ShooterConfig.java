@@ -29,7 +29,7 @@ public class ShooterConfig {
 
   public static final double GP_DETECT_CURRENT_THRESHOLD = 70.0;
 
-  public static final double IDLE_RPM = 0;
+  public static final double IDLE_RPM = 750;
 
   public static final double PIT_FUNCTIONALITY_RPM = 800;
 
@@ -42,16 +42,16 @@ public class ShooterConfig {
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToScoreRPM",
-          Map.entry(4.92, 1900.0),
-          Map.entry(3.46, 1550.0),
-          Map.entry(2.79, 1500.0),
-          Map.entry(1.42, 1350.0));
+          Map.entry(4.92, 1850.0),
+          Map.entry(3.46, 1500.0),
+          Map.entry(2.79, 1450.0),
+          Map.entry(1.42, 1300.0));
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_FEEDING_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
           "Shooter/DistanceToFeedingRPM",
-          Map.entry(6.0, 1700.0),
-          Map.entry(8.71, 2500.0),
-          Map.entry(13.6, 4100.0));
+          Map.entry(6.0, 1500.0),
+          Map.entry(8.71, 2200.0),
+          Map.entry(13.6, 3900.0));
   public static final PolynomialRegression SCORING_REGRESSION_MODEL =
       PolynomialRegression.quadratic("Shooter/ScoringRegression", DISTANCE_TO_SCORE_RPM);
   public static final PolynomialRegression FEEDING_REGRESSION_MODEL =
@@ -83,27 +83,27 @@ public class ShooterConfig {
   public static final TalonFXConfiguration TOP_LEFT_MOTOR_CONFIGS =
       createMotorConfig()
           .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(0.65).withKV(0.13).withKD(0.00005));
+          .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0));
   public static final TalonFXConfiguration TOP_RIGHT_MOTOR_CONFIG =
       createMotorConfig()
           .withMotorOutput(
               new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(0.65).withKV(0.13).withKD(0.00005));
+          .withSlot0(new Slot0Configs().withKP(14.0).withKS(6.4).withKV(0.13));
   public static final TalonFXConfiguration BOTTOM_LEFT_MOTOR_CONFIG =
       createMotorConfig()
           .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(0.65).withKV(0.13).withKD(0.00005));
+          .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0));
   public static final TalonFXConfiguration BOTTOM_RIGHT_MOTOR_CONFIG =
       createMotorConfig()
           .withMotorOutput(
               new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(0.65).withKV(0.13).withKD(0.00005));
+          .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0));
 
-  public static DoubleSubscriber PREPARE_SHOT_FF_VOLTAGE =
-      DogLog.tunable("Shooter/PrepareShotFFVoltage", 0.5);
+  public static DoubleSubscriber ACTIVE_SHOT_FF_CURRENT =
+      DogLog.tunable("Shooter/ActiveShotFFCurrent", 30.0);
 
-  public static DoubleSubscriber TURBO_MODE_FF_VOLTAGE =
-      DogLog.tunable("Shooter/TurboPrepareShotFFVoltage", 1.0);
+  public static DoubleSubscriber TURBO_MODE_FF_CURRENT =
+      DogLog.tunable("Shooter/TurboShotFFCurrent", 0.0);
   // Calculated from average of CAPIN logs
   public static DoubleSubscriber FEEDER_TO_SHOOTER_TRAVEL_TIME =
       DogLog.tunable("Shooter/FeederToShooterTravelTime", 0.25);

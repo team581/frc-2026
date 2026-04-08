@@ -328,18 +328,18 @@ public class FieldUtil {
   // TODO: Validate these points
   private static final Pose2d BLUE_RIGHT_FALLBACK =
       new Pose2d(
-          BLUE_TRENCH_BUMP_HUB_X - TRENCH_LENGTH_X / 2.0, AprilTags.TAG_7.getY(), new Rotation2d());
+          BLUE_TRENCH_BUMP_HUB_X - TRENCH_LENGTH_X / 2.0, AprilTags.TAG_7.getY(), Rotation2d.kZero);
   private static final Pose2d BLUE_LEFT_FALLBACK =
       new Pose2d(
           BLUE_TRENCH_BUMP_HUB_X - TRENCH_LENGTH_X / 2.0,
           AprilTags.TAG_12.getY(),
-          new Rotation2d());
+          Rotation2d.kZero);
   private static final Pose2d RED_LEFT_FALLBACK =
       new Pose2d(
-          RED_TRENCH_BUMP_HUB_X + TRENCH_LENGTH_X / 2.0, AprilTags.TAG_17.getY(), new Rotation2d());
+          RED_TRENCH_BUMP_HUB_X + TRENCH_LENGTH_X / 2.0, AprilTags.TAG_17.getY(), Rotation2d.kZero);
   private static final Pose2d RED_RIGHT_FALLBACK =
       new Pose2d(
-          RED_TRENCH_BUMP_HUB_X + TRENCH_LENGTH_X / 2.0, AprilTags.TAG_22.getY(), new Rotation2d());
+          RED_TRENCH_BUMP_HUB_X + TRENCH_LENGTH_X / 2.0, AprilTags.TAG_22.getY(), Rotation2d.kZero);
 
   private static final Triangle2d RED_HUB_NO_FEED_ZONE =
       new Triangle2d(

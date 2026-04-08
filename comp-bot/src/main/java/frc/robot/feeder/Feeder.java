@@ -27,6 +27,10 @@ public class Feeder extends StateMachineSubsystem<FeederState> implements PowerM
     setStateFromRequest(FeederState.SHOOT);
   }
 
+  public void intakeRequest() {
+    setStateFromRequest(FeederState.INTAKING);
+  }
+
   public void idleRequest() {
     setStateFromRequest(FeederState.IDLE);
   }

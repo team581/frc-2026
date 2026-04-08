@@ -104,7 +104,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       // No auto transitions for these states
       case UNJAM, FORCE_SCORE, WARMUP_SCORE, WARMUP_FEED -> currentState;
       case PREPARE_FORCE_SCORE -> {
-        if (shooter.atGoalLookaheadDebounced() && shooterHood.atGoal()) {
+        if (shooter.atGoalDebounced() && shooterHood.atGoal()) {
           yield RobotState.FORCE_SCORE;
         }
         yield currentState;
@@ -114,14 +114,14 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case PREPARE_FALLBACK_SCORE, FALLBACK_SCORE -> {
         // In pit functionality, we don't care about anything other than raw mechanism states
         if (DSOptions.PIT_FUNCTIONALITY.getAsBoolean()) {
-          yield shooter.atGoalLookaheadDebounced() && shooterHood.atGoal()
+          yield shooter.atGoalDebounced() && shooterHood.atGoal()
               ? RobotState.FALLBACK_SCORE
               : RobotState.PREPARE_FALLBACK_SCORE;
         }
 
         yield !isMoving
                 && ((swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
-                        && shooter.atGoalLookaheadDebounced()
+                        && shooter.atGoalDebounced()
                         && shooterHood.atGoal())
                     || hubActivity.ableToForceScoreTransitionEndOfActiveHub())
             ? RobotState.FALLBACK_SCORE
@@ -129,7 +129,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       case PREPARE_FALLBACK_FEED, FALLBACK_FEED ->
           swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
-                  && shooter.atGoalLookaheadDebounced()
+                  && shooter.atGoalDebounced()
                   && shooterHood.atGoal()
               ? RobotState.FALLBACK_FEED
               : RobotState.PREPARE_FALLBACK_FEED;
@@ -146,7 +146,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if ((swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
                 && !swerve.isMovingBeyondSafeSpeed()
                 && localization.imu.accelerationLowEnoughToShoot()
-                && shooter.atGoalLookaheadDebounced()
+                && shooter.atGoalDebounced()
                 && shooterHood.atGoal()
                 && localization.isTrustworthy()
                 && localization.imu.isFlatDebounced()
@@ -154,7 +154,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 && isInSafeScoringLocation
                 && !nearTrench)
             || (hubActivity.ableToForceScoreTransitionEndOfActiveHub()
-                && shooter.atGoalLookaheadDebounced())) {
+                && shooter.atGoalDebounced())) {
           yield RobotState.SCORE;
         }
         yield currentState;
@@ -173,14 +173,14 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 || (swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
                     && !swerve.isMovingBeyondSafeSpeed()
                     && localization.imu.accelerationLowEnoughToShoot()
-                    && shooter.atGoalLookaheadDebounced()
+                    && shooter.atGoalDebounced()
                     && localization.isTrustworthy()
                     && shooterHood.atGoal()
                     && localization.imu.isFlatDebounced()
                     && isInSafeScoringLocation
                     && hubActivity.getTOFBasedHubActive())
                 || (hubActivity.ableToForceScoreTransitionEndOfActiveHub()
-                    && shooter.atGoalLookaheadDebounced()))
+                    && shooter.atGoalDebounced()))
             && !nearTrench) {
           yield currentState;
         }
@@ -196,8 +196,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
         if (swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
             && !swerve.isMovingBeyondSafeSpeed()
-            && localization.imu.accelerationLowEnoughToShoot()
-            && shooter.atGoalLookaheadDebounced()
+            && shooter.atGoalDebounced()
             && isInSafeFeedingLocation
             && localization.imu.isFlatDebounced()
             && shooterHood.atGoal()
@@ -216,9 +215,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
         logFeedTransition();
         if (!FeatureFlags.CANCEL_IN_PROGRESS_SHOT.getAsBoolean()
-            || (shooter.atGoalLookaheadDebounced()
+            || (shooter.atGoalDebounced()
                 && !swerve.isMovingBeyondSafeSpeed()
-                && localization.imu.accelerationLowEnoughToShoot()
                 && isInSafeFeedingLocation
                 && swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
                 && localization.imu.isFlatDebounced()
@@ -425,6 +423,9 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       default -> {}
     }
+
+    swerve.setUseLooseTolerance(getState().isFeeding() && timeout(1.5));
+
     DogLog.log("RobotManager/Feeding/FeedLocation", feedLocation);
     DogLog.log("RobotManager/Feeding/FeedParameters", feedingParameters);
     DogLog.log("RobotManager/Scoring/ScoringParameters", scoringParameters);
@@ -689,8 +690,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         "RobotManager/Scoring/ScoreTransition/SwerveLookaheadAtGoal",
         swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get()));
     DogLog.log(
-        "RobotManager/Scoring/ScoreTransition/ShooterLookaheadAtGoal",
-        shooter.atGoalLookaheadDebounced());
+        "RobotManager/Scoring/ScoreTransition/ShooterAtGoalDebounced", shooter.atGoalDebounced());
     DogLog.log("RobotManager/Scoring/ScoreTransition/ShooterHoodAtGoal", shooterHood.atGoal());
     DogLog.log(
         "RobotManager/Scoring/ScoreTransition/LocalizationTrustworthy",
@@ -709,8 +709,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         "RobotManager/Feeding/FeedTransition/SwerveLookaheadAtGoal",
         swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get()));
     DogLog.log(
-        "RobotManager/Feeding/FeedTransition/ShooterLookaheadAtGoal",
-        shooter.atGoalLookaheadDebounced());
+        "RobotManager/Feeding/FeedTransition/ShooterAtGoalDebounced", shooter.atGoalDebounced());
     DogLog.log("RobotManager/Feeding/FeedTransition/SafeFeedLocation", isInSafeFeedingLocation);
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterHoodAtGoal", shooterHood.atGoal());
     DogLog.log(

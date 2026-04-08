@@ -37,10 +37,16 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   private static final double ESTIMATED_DRIVE_SPEED_MPS = 4.0;
   private static final double PICKUP_OVERHEAD_TIME_SEC = 0.5;
 
+  // Limelight 3 V-FOV is 49.7 deg. Top edge is ~24.85 deg.
+  // 10% of 49.7 is ~4.97. 24.85 - 4.97 = 19.88 deg.
+  private static final double MAX_VALID_TY = 19.88;
+
+  // Hard cap to prevent the inverse-square law from predicting thousands of balls
+  private static final int MAX_CLUSTER_SIZE_CAP = 50;
+
   private static final double REFERENCE_BALL_AREA_AT_1M = calculateTheoreticalArea();
 
   private static final DoubleSubscriber SIMULATED_CLUSTER_X = DogLog.tunable("ClusterMapX", 9.0);
-
   private static final DoubleSubscriber SIMULATED_CLUSTER_Y = DogLog.tunable("ClusterMapY", 5.0);
 
   private static double calculateTheoreticalArea() {
@@ -89,74 +95,90 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   }
 
   public Lane getBestClusterLane() {
-    Optional<Pose2d> bestCluster = getBestClusterPose();
-
-    if (bestCluster.isEmpty()) {
+    if (clusterMap.isEmpty()) {
       return Lane.NONE;
     }
 
-    Pose2d targetPose = bestCluster.orElseThrow();
+    var robotPose = localization.getPose();
 
-    return laneSystem.getLane(targetPose, localization.getPose());
+    int[] ballsPerLane = new int[Lane.values().length];
+
+    for (ClusterMapElement element : clusterMap) {
+      Pose2d elementPose = new Pose2d(element.clusterTranslation(), Rotation2d.kZero);
+      Lane lane = laneSystem.getLane(elementPose, robotPose);
+
+      if (lane != Lane.NONE && lane != Lane.TRENCH) {
+        ballsPerLane[lane.ordinal()] =
+            (int) (ballsPerLane[lane.ordinal()] + element.detectionSize());
+      }
+    }
+
+    Lane bestLane = Lane.NONE;
+    int maxBalls = 0;
+
+    // Find the lane with the highest count
+    for (Lane lane : Lane.values()) {
+      if (lane == Lane.NONE || lane == Lane.TRENCH) continue;
+
+      int count = ballsPerLane[lane.ordinal()];
+      if (count > maxBalls) {
+        maxBalls = count;
+        bestLane = lane;
+      }
+    }
+
+    return bestLane;
   }
 
   public Optional<Pose2d> getBestClusterPose() {
 
     if (clusterMap.isEmpty()) {
       DogLog.log("ClusterMap/BestClusterPose", Pose2d.kZero);
-
       return Optional.empty();
     }
 
     ClusterMapElement bestElement = null;
-    double highestBallsPerSecond = MIN_BALLS_PER_SECOND_THRESHOLD;
+    double highestImmediateScore = 0.0;
     var robotPose = localization.getPose();
 
-    // Evaluate all active clusters
     for (ClusterMapElement element : clusterMap) {
-      // Create a dummy pose to check the lane
-      Pose2d elementPose = new Pose2d(element.clusterTranslation(), Rotation2d.kZero);
+      var translation = element.clusterTranslation();
+      var rotationToTarget =
+          MathHelpers.getDriveDirection(robotPose, new Pose2d(translation, Rotation2d.kZero));
 
-      // Skip this cluster if it's in the trench
-      if (laneSystem.getLane(elementPose, robotPose) == Lane.TRENCH) {
+      if (!MathUtil.isNear(
+          robotPose.getRotation().getDegrees(), rotationToTarget.getDegrees(), 45, -180, 180)) {
         continue;
       }
 
-      double distanceMeters = robotPose.getTranslation().getDistance(element.clusterTranslation());
+      double distanceMeters = robotPose.getTranslation().getDistance(translation);
 
-      // How long will it take to get there and grab it
       double estimatedTravelTime = distanceMeters / ESTIMATED_DRIVE_SPEED_MPS;
       double totalEstimatedTime = estimatedTravelTime + PICKUP_OVERHEAD_TIME_SEC;
-
-      // return on investment (Balls per second)
       double ballsPerSecond = element.detectionSize() / totalEstimatedTime;
 
-      if (ballsPerSecond > highestBallsPerSecond) {
-        highestBallsPerSecond = ballsPerSecond;
+      double immediateScore = ballsPerSecond / Math.max(0.5, distanceMeters);
+
+      if (ballsPerSecond >= MIN_BALLS_PER_SECOND_THRESHOLD
+          && immediateScore > highestImmediateScore) {
+        highestImmediateScore = immediateScore;
         bestElement = element;
       }
     }
 
     if (bestElement == null) {
-      DogLog.log("ClusterMap/BestClusterStatus", "None met threshold");
+      DogLog.log("ClusterMap/BestClusterStatus", "No valid front-facing target met threshold");
       DogLog.log("ClusterMap/BestClusterPose", Pose2d.kZero);
-
       return Optional.empty();
     }
 
     var bestTranslation = bestElement.clusterTranslation();
-    var rotation =
+    var finalRotation =
         MathHelpers.getDriveDirection(robotPose, new Pose2d(bestTranslation, Rotation2d.kZero));
 
-    if (!MathUtil.isNear(
-        robotPose.getRotation().getDegrees(), rotation.getDegrees(), 160, -180, 180)) {
-      DogLog.log("ClusterMap/BestClusterPose", Pose2d.kZero);
-
-      return Optional.empty();
-    }
-
-    var clusterPoseWithIntakeRotation = new Pose2d(bestTranslation, rotation);
+    var clusterPoseWithIntakeRotation = new Pose2d(bestTranslation, finalRotation);
     DogLog.log("ClusterMap/BestClusterPose", clusterPoseWithIntakeRotation);
+
     return Optional.of(clusterPoseWithIntakeRotation);
   }
 
@@ -224,6 +246,14 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
       return Optional.empty();
     }
 
+    double angleY = LimelightHelpers.getTY(limelight.limelightTableName);
+
+    // 🚨 FILTER: Reject data in the top 10% of the Limelight's vertical FOV 🚨
+    if (angleY > MAX_VALID_TY) {
+      DogLog.timestamp("ClusterMap/RejectedHighTY");
+      return Optional.empty();
+    }
+
     double rawArea = result[2];
     double clusterScore = result[4];
 
@@ -234,9 +264,7 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
 
     double timestamp = Timer.getFPGATimestamp() - latency;
     var robotPoseAtCapture = localization.getPose(timestamp);
-
     double angleX = LimelightHelpers.getTX(limelight.limelightTableName);
-    double angleY = LimelightHelpers.getTY(limelight.limelightTableName);
 
     gamePieceResult.update(angleX, angleY, timestamp);
 
@@ -247,10 +275,12 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
 
     double distanceMeters = robotPoseAtCapture.getTranslation().getDistance(clusterPose);
 
+    // Dynamic Size Estimation
     double estimatedBalls = (rawArea * Math.pow(distanceMeters, 2)) / REFERENCE_BALL_AREA_AT_1M;
 
+    // 🚨 FILTER: Clamp the output so a distant glare doesn't predict 2,000 balls 🚨
     int calculatedSize = (int) Math.round(estimatedBalls);
-    calculatedSize = Math.max(1, calculatedSize);
+    calculatedSize = Math.max(1, Math.min(MAX_CLUSTER_SIZE_CAP, calculatedSize));
 
     return Optional.of(new VisionClusterData(clusterPose, calculatedSize, clusterScore));
   }
