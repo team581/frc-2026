@@ -45,10 +45,32 @@ public class PidPathFollower implements PathFollower {
     // Sum the total linear distance and total angular work remaining through all waypoints in the
     // segment. These are used together to estimate how long the robot has to complete its rotation,
     // which drives the dynamic angular velocity cap.
-    var totalAngularWorkRadians =
-        Math.abs(
-            MathUtil.angleModulus(
-                targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians()));
+    //
+    // For arc segments with a midpoint rotation, we compute angular work through the midpoint
+    // (current -> midpoint + midpoint -> final) instead of using shortest-path angleModulus
+    // directly to the final rotation. This ensures the velocity cap accounts for the full
+    // intended rotation path and prevents the robot from trying to take a shortcut.
+    var totalAngularWorkRadians = 0.0;
+    var currentPointFinalRotation = currentPoint.getPose().getRotation();
+
+    if (currentPoint.arcMidpoint().isPresent()) {
+      var midRotation = currentPoint.arcMidpoint().orElseThrow().getRotation();
+      // Leg 1: current rotation -> midpoint rotation
+      totalAngularWorkRadians +=
+          Math.abs(
+              MathUtil.angleModulus(
+                  midRotation.getRadians() - currentPose.getRotation().getRadians()));
+      // Leg 2: midpoint rotation -> current waypoint's final rotation
+      totalAngularWorkRadians +=
+          Math.abs(
+              MathUtil.angleModulus(
+                  currentPointFinalRotation.getRadians() - midRotation.getRadians()));
+    } else {
+      totalAngularWorkRadians +=
+          Math.abs(
+              MathUtil.angleModulus(
+                  targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians()));
+    }
 
     // Find total distance and angular work to end of segment
     for (int i = currentPointIndex; i < segment.points.size() - 1; i++) {

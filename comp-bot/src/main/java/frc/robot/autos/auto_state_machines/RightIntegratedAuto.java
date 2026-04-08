@@ -143,8 +143,11 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                               Point.ofRed(new Pose2d(10.575, 4.4, Rotation2d.kCCW_90deg))))
                   .withMarker(Markers.CANCEL_CLUSTER_MAP_CHECK)
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 100))
-                  .withArcMidpoint(
-                      Point.ofRed(new Pose2d(9.985, 3.89, Rotation2d.fromDegrees(12.0))))
+                  .withArcExtension(
+                      Point.ofRed(new Pose2d(9.5, 4.4, Rotation2d.kCW_90deg)),
+                      -0.0525,
+                      -0.51,
+                      Rotation2d.fromDegrees(12.0))
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.5), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(
@@ -180,7 +183,8 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(new Pose2d(10.575, 4.7, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 100))
-                  .withArcMidpoint(Point.ofRed(new Pose2d(9.7875, 3.89, Rotation2d.kZero)))
+                  .withArcExtension(
+                      Point.ofRed(new Pose2d(9.0, 4.7, Rotation2d.kCW_90deg)), 0, -0.51)
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(
@@ -208,7 +212,8 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(new Pose2d(10.575, 4.4, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 100))
-                  .withArcMidpoint(Point.ofRed(new Pose2d(9.6625, 3.89, Rotation2d.kZero)))
+                  .withArcExtension(
+                      Point.ofRed(new Pose2d(8.75, 4.4, Rotation2d.kCW_90deg)), 0, -0.51)
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(
@@ -230,7 +235,8 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(new Pose2d(10.575, 4.4, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.7, 100))
-                  .withArcMidpoint(Point.ofRed(new Pose2d(9.35, 3.4, Rotation2d.kZero)))
+                  .withArcExtension(
+                      Point.ofRed(new Pose2d(7.983, 4.4, Rotation2d.kCW_90deg)), 0.071, -1.0)
                   .withAngularConstraints(
                       Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0)),
               AutoPoint.ofRed(

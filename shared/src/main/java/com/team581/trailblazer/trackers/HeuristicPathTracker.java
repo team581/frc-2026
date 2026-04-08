@@ -93,10 +93,21 @@ public class HeuristicPathTracker implements PathTracker {
                   .plus(p2.times(t * t));
         }
 
-        // Use the current waypoint's rotation directly — the follower is responsible for
-        // pacing rotation via a dynamic angular velocity cap, rather than the tracker
-        // interpolating an intermediate heading.
-        targetPose = new Pose2d(targetTranslation, targetPose.getRotation());
+        // Use a fixed rotation target — the follower is responsible for pacing rotation via
+        // a dynamic angular velocity cap, rather than the tracker interpolating an intermediate
+        // heading. For arcs, we output the midpoint rotation as a stable target for the first
+        // half, then switch to the final rotation for the second half. This disambiguates the
+        // rotation direction without creating a continuously moving setpoint that the PID
+        // would lag behind.
+        Rotation2d targetRotation;
+        if (isArc) {
+          var midRotation = currentPoint.arcMidpoint().orElseThrow().getRotation();
+          targetRotation = t < 0.5 ? midRotation : targetPose.getRotation();
+        } else {
+          targetRotation = targetPose.getRotation();
+        }
+
+        targetPose = new Pose2d(targetTranslation, targetRotation);
       }
     }
 
