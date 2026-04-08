@@ -12,7 +12,7 @@ public class Intake extends StateMachineSubsystem<IntakeState> implements PowerM
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
   private final NeutralOut neutralRequest = new NeutralOut();
-  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   public Intake(TalonFX leftMotor, TalonFX rightMotor) {
     super(SubsystemPriority.INTAKE, IntakeState.IDLE);

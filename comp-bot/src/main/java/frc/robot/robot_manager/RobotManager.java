@@ -544,18 +544,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     }
   }
 
-  public void setFeedGoalLeftRequest() {
-    feedLocation = FeedLocation.LEFT;
-  }
-
-  public void setFeedGoalRightRequest() {
-    feedLocation = FeedLocation.RIGHT;
-  }
-
-  public void setFeedGoalClosestRequest() {
-    feedLocation = FeedLocation.CLOSEST;
-  }
-
   public void setTrenchOverrideRequest(boolean trenchOverride) {
     this.trenchOverride = trenchOverride;
   }
@@ -701,6 +689,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         "RobotManager/Scoring/ScoreTransition/HubActive", hubActivity.getTOFBasedHubActive());
     DogLog.log("RobotManager/Scoring/ScoreTransition/IsInScoringZone", isInSafeScoringLocation);
     DogLog.log("RobotManager/Scoring/ScoreTransition/NotNearTrench", !nearTrench);
+    DogLog.log(
+        "RobotManager/Scoring/ScoreTransition/SwerveSafeSpeed", !swerve.isMovingBeyondSafeSpeed());
   }
 
   private void logFeedTransition() {
@@ -716,5 +706,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         "RobotManager/Feeding/FeedTransition/LocalizationHealthy", health.isLocalizationHealthy());
     DogLog.log("RobotManager/Feeding/FeedTransition/ImuFlat", localization.imu.isFlatDebounced());
     DogLog.log("RobotManager/Feeding/ScoreTransition/NotNearTrench", !nearTrench);
+    DogLog.log("RobotManager/Feeding/FeedTransition/IsMoving", isMoving);
   }
 }

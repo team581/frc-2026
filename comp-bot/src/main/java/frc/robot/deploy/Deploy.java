@@ -161,6 +161,13 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
     return atGoal(getState());
   }
 
+  public void waitHopperCompactionRequest() {
+    switch (getState()) {
+      case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {}
+      default -> setStateFromRequest(DeployState.HOPPER_COMPACTION_WAITING);
+    }
+  }
+
   public void hopperCompactionRequest() {
     switch (getState()) {
       case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {}
