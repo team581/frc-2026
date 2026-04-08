@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import frc.robot.config.FeatureFlags;
 import frc.robot.generated.CompTunerConstants.TunerSwerveDrivetrain;
 import frc.robot.imu.Imu;
 import frc.robot.swerve.Swerve;
@@ -81,23 +82,27 @@ public class Localization extends StateMachineSubsystem<LocalizationState> {
   @Override
   public void whileInState(LocalizationState currentState) {
     DogLog.log("Localization/EstimatedPose", getPose());
-    DogLog.log(
-        "Localization/StuckOnBall/RobotTiltPose",
-        new Pose3d(
-            new Translation3d(robotPose.getX(), robotPose.getY(), 0.0),
-            new Rotation3d(
-                Math.toRadians(imu.getRoll()),
-                Math.toRadians(imu.getPitch()),
-                robotPose.getRotation().getRadians())));
-    DogLog.log(
-        "Localization/StuckOnBall/RecoveryPose",
-        StuckOnBallRecovery.getRecoveryPose(
-            robotPose,
-            Rotation2d.fromDegrees(imu.getPitch()),
-            Rotation2d.fromDegrees(imu.getRoll())));
-    DogLog.log(
-        "Localization/StuckOnBall", StuckOnBallRecovery.stuckOnBall(imu.getPitch(), imu.getRoll()));
     DogLog.log("Localization/TrustFactor", getTrustFactor());
+
+    if (FeatureFlags.UNBEACH_AUTO.getAsBoolean()) {
+      DogLog.log(
+          "Localization/StuckOnBall/RobotTiltPose",
+          new Pose3d(
+              new Translation3d(robotPose.getX(), robotPose.getY(), 0.0),
+              new Rotation3d(
+                  Math.toRadians(imu.getRoll()),
+                  Math.toRadians(imu.getPitch()),
+                  robotPose.getRotation().getRadians())));
+      DogLog.log(
+          "Localization/StuckOnBall/RecoveryPose",
+          StuckOnBallRecovery.getRecoveryPose(
+              robotPose,
+              Rotation2d.fromDegrees(imu.getPitch()),
+              Rotation2d.fromDegrees(imu.getRoll())));
+      DogLog.log(
+          "Localization/StuckOnBall",
+          StuckOnBallRecovery.stuckOnBall(imu.getPitch(), imu.getRoll()));
+    }
   }
 
   public void zeroGyro() {

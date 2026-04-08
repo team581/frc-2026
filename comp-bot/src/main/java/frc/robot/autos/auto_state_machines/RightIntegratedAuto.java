@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autos.BaseImperativeAuto;
 import frc.robot.autos.auto_state_machines.auto_state.IntegratedAutoState;
 import frc.robot.cluster_map.Lane;
+import frc.robot.config.FeatureFlags;
 import frc.robot.robot_manager.RobotManager;
 
 public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> {
@@ -314,7 +315,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
   private AutoSegment storedStuckOnBallAutoSegment = intakeAcrossMidline;
   private int storedStuckOnBallIndex = 0;
 
-  // For sim testing
+  // FOR SIM ONLY!!!
   private boolean firstStuckOnBall = false;
   private boolean secondStuckOnBall = false;
 
@@ -343,18 +344,20 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
 
   @Override
   protected IntegratedAutoState getNextState(IntegratedAutoState currentState) {
-    switch (currentState) {
-      case INTAKE_ACROSS_MIDLINE,
-          DEFAULT_SECOND_INTAKE_SEGMENT,
-          INTAKE_LANE_1,
-          INTAKE_LANE_2,
-          INTAKE_TRENCH_LANE -> {
-        if (StuckOnBallRecovery.stuckOnBall(
-            robotManager.localization.imu.getPitch(), robotManager.localization.imu.getRoll())) {
-          return IntegratedAutoState.STUCK_ON_BALL_RECOVERY;
+    if (FeatureFlags.UNBEACH_AUTO.getAsBoolean()) {
+      switch (currentState) {
+        case INTAKE_ACROSS_MIDLINE,
+            DEFAULT_SECOND_INTAKE_SEGMENT,
+            INTAKE_LANE_1,
+            INTAKE_LANE_2,
+            INTAKE_TRENCH_LANE -> {
+          if (StuckOnBallRecovery.stuckOnBall(
+              robotManager.localization.imu.getPitch(), robotManager.localization.imu.getRoll())) {
+            return IntegratedAutoState.STUCK_ON_BALL_RECOVERY;
+          }
         }
+        default -> {}
       }
-      default -> {}
     }
 
     return switch (currentState) {
@@ -460,7 +463,8 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
     switch (newState) {
       case STUCK_ON_BALL_RECOVERY -> {
         trailblazer.setActiveSegment(stuckOnBall);
-        if (timeout(1.0) && RobotBase.isSimulation()) {
+
+        if (FeatureFlags.UNBEACH_AUTO.getAsBoolean() && timeout(1.0) && RobotBase.isSimulation()) {
           robotManager.localization.imu.setPitch(0.0);
           robotManager.localization.imu.setRoll(0.0);
         }
@@ -469,7 +473,11 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
         trailblazer.setActiveSegment(intakeAcrossMidline);
         robotManager.intakeAutoRequest();
         robotManager.powerManager.firstAutoSegmentRequest();
-        if (timeout(1.5) && RobotBase.isSimulation() && !firstStuckOnBall) {
+
+        if (FeatureFlags.UNBEACH_AUTO.getAsBoolean()
+            && timeout(1.5)
+            && RobotBase.isSimulation()
+            && !firstStuckOnBall) {
           firstStuckOnBall = true;
           robotManager.localization.imu.setPitch(-30.0);
         }
@@ -487,7 +495,11 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       case INTAKE_LANE_1 -> {
         trailblazer.setActiveSegment(lane1Segment);
         robotManager.intakeAutoRequest();
-        if (timeout(1.5) && RobotBase.isSimulation() && !secondStuckOnBall) {
+
+        if (FeatureFlags.UNBEACH_AUTO.getAsBoolean()
+            && timeout(1.5)
+            && RobotBase.isSimulation()
+            && !secondStuckOnBall) {
           secondStuckOnBall = true;
           robotManager.localization.imu.setPitch(-30.0);
         }
@@ -495,7 +507,11 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       case INTAKE_LANE_2 -> {
         trailblazer.setActiveSegment(lane2Segment);
         robotManager.intakeAutoRequest();
-        if (timeout(1.5) && RobotBase.isSimulation() && !secondStuckOnBall) {
+
+        if (FeatureFlags.UNBEACH_AUTO.getAsBoolean()
+            && timeout(1.5)
+            && RobotBase.isSimulation()
+            && !secondStuckOnBall) {
           secondStuckOnBall = true;
           robotManager.localization.imu.setPitch(-30.0);
         }

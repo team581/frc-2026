@@ -19,7 +19,7 @@ public class StuckOnBallRecovery {
   private static final DoubleSubscriber RECOVERY_POINT_DISTANCE =
       DogLog.tunable("StuckOnBallRecovery/RecoveryPointDistance", 1.5);
 
-  // For logging
+  // For logging visualization only
   public static Pose2d getRecoveryPose(Pose2d robotPose, Rotation2d pitch, Rotation2d roll) {
     var headingToGetUnstuck =
         Rotation2d.fromRadians(Math.atan2(pitch.getRadians(), roll.getRadians()));
