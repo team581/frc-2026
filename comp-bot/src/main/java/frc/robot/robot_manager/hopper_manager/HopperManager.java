@@ -27,7 +27,7 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
   public final CANrange hopperCANRange;
   public final DigitalInput towerSensor;
 
-  private final Debouncer towerSensorDebouncer = new Debouncer(0.5, DebounceType.kFalling);
+  private final Debouncer towerSensorDebouncer = new Debouncer(0.25, DebounceType.kFalling);
   private boolean towerSensorDebounced = false;
 
   private boolean driverWantsIntake = false;
