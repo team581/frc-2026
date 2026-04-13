@@ -284,7 +284,7 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
 
     // 🚨 FILTER: Clamp the output so a distant glare doesn't predict 2,000 balls 🚨
     int calculatedSize = (int) Math.round(estimatedBalls);
-    calculatedSize = Math.clamp(MAX_CLUSTER_SIZE_CAP, 1, calculatedSize);
+    calculatedSize = MathUtil.clamp(calculatedSize, 1, MAX_CLUSTER_SIZE_CAP);
 
     return Optional.of(new VisionClusterData(clusterPose, calculatedSize, clusterScore));
   }

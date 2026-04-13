@@ -3,6 +3,7 @@ package frc.robot.cluster_map;
 import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 
 // Make sure to import your FieldUtil and Lane enum here!
@@ -52,7 +53,7 @@ public class LaneSystem {
 
         int laneIndex = (int) ((maxX - x) / laneWidth);
 
-        laneIndex = Math.clamp(laneIndex, 0, numLanes - 1);
+        laneIndex = MathUtil.clamp(laneIndex, 0, numLanes - 1);
 
         return switch (laneIndex) {
           case 0 -> Lane.LANE_0;

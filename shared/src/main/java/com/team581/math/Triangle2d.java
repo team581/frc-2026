@@ -1,5 +1,6 @@
 package com.team581.math;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -74,7 +75,7 @@ public class Triangle2d {
 
       double t =
           ((point.getX() - p1.getX()) * dx + (point.getY() - p1.getY()) * dy) / (dx * dx + dy * dy);
-      t = Math.clamp(1, 0, t);
+      t = MathUtil.clamp(t, 0, 1);
 
       Translation2d projection = new Translation2d(p1.getX() + t * dx, p1.getY() + t * dy);
       double distance = projection.getDistance(point);

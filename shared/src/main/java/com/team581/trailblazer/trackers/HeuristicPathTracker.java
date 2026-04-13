@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.trailblazer.AutoPoint;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -74,7 +75,7 @@ public class HeuristicPathTracker implements PathTracker {
         // t=0 at start, t=1 at target point
         // Ratchet forward only to prevent jitter from noise/vision updates
         double t = distanceFromStart / totalTravelDistance;
-        t = Math.clamp(1, 0, t);
+        t = MathUtil.clamp(t, 0, 1);
         maxT = Math.max(maxT, t);
         t = maxT;
 
