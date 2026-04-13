@@ -4,9 +4,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 public record AngularConstraintOptions(
-    /** Max angular velocity allowed in radians per second. Set to 0 to disable. */
+    /* Max angular velocity allowed in radians per second. Set to 0 to disable. */
     double maxVelocity,
-    /** Max angular acceleration allowed in radians per second squared. Set to 0 to disable. */
+    /* Max angular acceleration allowed in radians per second squared. Set to 0 to disable. */
     double maxAcceleration) {
   /** Default constraint options to use if no point or segment specific options are set. */
   public AngularConstraintOptions() {

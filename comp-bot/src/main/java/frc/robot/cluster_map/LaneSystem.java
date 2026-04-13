@@ -52,7 +52,7 @@ public class LaneSystem {
 
         int laneIndex = (int) ((maxX - x) / laneWidth);
 
-        laneIndex = Math.max(0, Math.min(laneIndex, numLanes - 1));
+        laneIndex = Math.clamp(laneIndex, 0, numLanes - 1);
 
         return switch (laneIndex) {
           case 0 -> Lane.LANE_0;

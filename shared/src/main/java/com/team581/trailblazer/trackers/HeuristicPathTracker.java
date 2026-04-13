@@ -74,7 +74,7 @@ public class HeuristicPathTracker implements PathTracker {
         // t=0 at start, t=1 at target point
         // Ratchet forward only to prevent jitter from noise/vision updates
         double t = distanceFromStart / totalTravelDistance;
-        t = Math.max(0, Math.min(1, t));
+        t = Math.clamp(1, 0, t);
         maxT = Math.max(maxT, t);
         t = maxT;
 

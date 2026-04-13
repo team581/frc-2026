@@ -74,7 +74,7 @@ public class Triangle2d {
 
       double t =
           ((point.getX() - p1.getX()) * dx + (point.getY() - p1.getY()) * dy) / (dx * dx + dy * dy);
-      t = Math.max(0, Math.min(1, t));
+      t = Math.clamp(1, 0, t);
 
       Translation2d projection = new Translation2d(p1.getX() + t * dx, p1.getY() + t * dy);
       double distance = projection.getDistance(point);
