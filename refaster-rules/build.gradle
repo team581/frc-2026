@@ -12,7 +12,7 @@ dependencies {
 	// Refaster annotations for writing template rules
 	compileOnly "com.google.errorprone:error_prone_refaster:2.48.0"
 	// Additional annotations from error-prone-support (like @OnlineDocumentation)
-	compileOnly "tech.picnic.error-prone-support:refaster-support:0.28.0"
+	compileOnly "tech.picnic.error-prone-support:refaster-support:0.29.0"
 	// Annotation processor that compiles templates into .refaster files
 	annotationProcessor "tech.picnic.error-prone-support:refaster-compiler:0.28.0"
 
