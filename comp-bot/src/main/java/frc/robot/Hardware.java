@@ -50,7 +50,8 @@ public class Hardware {
 
   public final CANrange hopperCANRange = new CANrange(27, canivore);
   public final DigitalInput towerSensor = new DigitalInput(9);
-  // public final TalonFX extender = new TalonFX(28);
+  // TODO: get ID
+  public final DigitalInput jamSensor = new DigitalInput(8);
 
   public final TunerSwerveDrivetrain drivetrain =
       new TunerSwerveDrivetrain(

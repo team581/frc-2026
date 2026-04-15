@@ -327,8 +327,8 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case UNJAM -> {
         hopperManager.unjamRequest();
         vision.tagsRequest();
-        shooter.scoreRequest(3);
-        shooterHood.scoreRequest(3);
+        shooter.idleRequest();
+        shooterHood.idleRequest();
         swerve.normalDriveRequest();
         powerManager.idleRequest();
       }

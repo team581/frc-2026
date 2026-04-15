@@ -3,6 +3,7 @@ package frc.robot.robot_manager.hopper_manager;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -26,9 +27,13 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
   public final Feeder feeder;
   public final CANrange hopperCANRange;
   public final DigitalInput towerSensor;
+  public final DigitalInput jamSensor;
 
   private final Debouncer towerSensorDebouncer = new Debouncer(0.25, DebounceType.kFalling);
+  private final Debouncer jamSensorDebouncer = new Debouncer(0.25, DebounceType.kFalling);
+
   private boolean towerSensorDebounced = false;
+  private boolean jamSensorDebounced = false;
 
   private boolean driverWantsIntake = false;
   private boolean driverWantsEject = false;
@@ -53,7 +58,8 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
       Conveyor conveyor,
       Feeder feeder,
       CANrange hopperCANRange,
-      DigitalInput towerSensor) {
+      DigitalInput towerSensor,
+      DigitalInput jamSensor) {
     super(SubsystemPriority.HOPPER_MANAGER, HopperState.IDLE_DEPLOYED);
     this.deploy = deploy;
     this.intake = intake;
@@ -61,7 +67,7 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
     this.feeder = feeder;
     this.hopperCANRange = hopperCANRange;
     this.towerSensor = towerSensor;
-
+    this.jamSensor = jamSensor;
     hopperCANRange.getConfigurator().apply(HopperManagerConfig.CAN_RANGE_CONFIG);
     canRangeUpdateTimer.start();
   }
@@ -72,8 +78,21 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
       case IDLE_DEPLOYED, IDLE_STOWED, INTAKING, EJECTING -> {
         yield resolveIdleState();
       }
+      case AUTO_UNJAM -> {
+        if (isJammed()) {
+          yield currentState;
+        }
+        yield resolveIdleState();
+      }
       default -> currentState;
     };
+  }
+
+  private boolean isJammed() {
+    if (jamSensorDebounced && MathUtil.isNear(11.8, deploy.getPosition(), 0.2)) {
+      return true;
+    }
+    return false;
   }
 
   private boolean shouldFillBalls() {
@@ -149,6 +168,12 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
         conveyor.shootRequest();
         feeder.shootRequest();
       }
+      case AUTO_UNJAM -> {
+        deploy.intakeRequest();
+        intake.ejectRequest();
+        conveyor.shootRequest();
+        feeder.shootRequest();
+      }
       case SHOOT -> {
         // Don't move deploy back to intake if it's already compacting from a previous SHOOT cycle
         if (deploy.getState() != DeployState.HOPPER_COMPACTION_IN
@@ -177,6 +202,9 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
 
         smartBallFillRequest();
       }
+    }
+    if (isJammed()) {
+      setStateFromRequest(HopperState.AUTO_UNJAM);
     }
 
     switch (state) {
@@ -292,6 +320,8 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
       towerSensorRaw = towerSensor.get();
     }
     towerSensorDebounced = towerSensorDebouncer.calculate(towerSensorRaw);
+    var jamSensorRaw = jamSensor.get();
+    jamSensorDebounced = jamSensorDebouncer.calculate(jamSensorRaw);
     if (DSOptions.USE_CANRANGE.get()) {
       hopperDistance = Units.metersToInches(hopperCANRange.getDistance().getValueAsDouble());
     }
