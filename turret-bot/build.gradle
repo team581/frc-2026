@@ -73,7 +73,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	// https://central.sonatype.com/artifact/com.google.guava/guava
-	implementation 'com.google.guava:guava:33.5.0-jre'
+	implementation 'com.google.guava:guava:33.6.0-jre'
 }
 
 test {
