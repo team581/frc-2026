@@ -35,6 +35,7 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
   private boolean driverWantsEject = false;
   private boolean operatorWantsStow = false;
   private boolean towerSensorRaw = false;
+  private boolean ballFilling = false;
 
   private boolean shouldSuperScore = false;
 
@@ -47,6 +48,12 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
   public static final double MEDIUM_CAPACITY_THRESHOLD = 8.0;
 
   private HopperCapacity hopperCapacity = HopperCapacity.LOW;
+
+  public enum HopperBallPosition {
+    CLOSE_TO_SHOOTER,
+    AT_SENSOR,
+    BELOW_SENSOR,
+  }
 
   private final Timer canRangeUpdateTimer = new Timer();
 
@@ -67,6 +74,27 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
 
     hopperCANRange.getConfigurator().apply(HopperManagerConfig.CAN_RANGE_CONFIG);
     canRangeUpdateTimer.start();
+  }
+
+  private HopperBallPosition getShotPosition() {
+    if (towerSensorDebounced) {
+      if (ballFilling) {
+        return HopperBallPosition.AT_SENSOR;
+      }
+
+      return HopperBallPosition.CLOSE_TO_SHOOTER;
+    }
+
+    return HopperBallPosition.BELOW_SENSOR;
+  }
+
+  public double getFeederToShooterTime() {
+    return switch (getShotPosition()) {
+      // TODO: Validate this
+      case CLOSE_TO_SHOOTER -> 0.25;
+      case AT_SENSOR -> 0.2;
+      case BELOW_SENSOR -> 0.3;
+    };
   }
 
   @Override
