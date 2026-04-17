@@ -37,7 +37,8 @@ public class Imu extends BaseImuSubsystem {
 
     this.bumpCrossingTracker =
         new BumpCrossingTracker(
-            () -> Math.hypot(getPitch(), getRoll()),
+            () -> getPitch(),
+            () -> getRoll(),
             () -> driveState.Pose,
             translation ->
                 drivetrain.resetPose(new Pose2d(translation, driveState.Pose.getRotation())));

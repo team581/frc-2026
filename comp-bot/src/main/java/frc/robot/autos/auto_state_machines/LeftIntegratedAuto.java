@@ -2,6 +2,7 @@ package frc.robot.autos.auto_state_machines;
 
 import com.team581.autos.Point;
 import com.team581.autos.StuckOnBallRecovery;
+import com.team581.math.MathHelpers;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.mechanisms.imu.BumpCrossingTracker;
 import com.team581.trailblazer.AutoPoint;
@@ -95,7 +96,9 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
                                       13.709,
                                       FieldUtil.RED_DEPOT_BUMP_CENTER.getY() - BUMP_OFFSET,
                                       Rotation2d.kZero)),
-                              Point.ofRed(new Pose2d(13.9, 2.627 + BUMP_OFFSET, Rotation2d.kZero))))
+                              Point.ofRed(new Pose2d(13.9, 2.627 + BUMP_OFFSET, Rotation2d.kZero)),
+                              MathHelpers.getDriveDirection(
+                                  robotManager.swerve.getFieldRelativeSpeeds())))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(
@@ -291,7 +294,9 @@ public class LeftIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState> 
                                       13.709,
                                       FieldUtil.RED_DEPOT_BUMP_CENTER.getY() - BUMP_OFFSET,
                                       Rotation2d.kZero)),
-                              Point.ofRed(new Pose2d(13.9, 2.627 + BUMP_OFFSET, Rotation2d.kZero))))
+                              Point.ofRed(new Pose2d(13.9, 2.627 + BUMP_OFFSET, Rotation2d.kZero)),
+                              MathHelpers.getDriveDirection(
+                                  robotManager.swerve.getFieldRelativeSpeeds())))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100))
                   .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(

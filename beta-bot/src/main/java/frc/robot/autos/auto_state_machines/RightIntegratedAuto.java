@@ -1,6 +1,7 @@
 package frc.robot.autos.auto_state_machines;
 
 import com.team581.autos.Point;
+import com.team581.math.MathHelpers;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.mechanisms.imu.BumpCrossingTracker;
 import com.team581.trailblazer.AutoPoint;
@@ -61,7 +62,9 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                                       13.709,
                                       FieldUtil.RED_OUTPOST_BUMP_CENTER.getY(),
                                       Rotation2d.kCCW_90deg)),
-                              Point.ofRed(new Pose2d(13.9, 5.593, Rotation2d.kCCW_90deg))))
+                              Point.ofRed(new Pose2d(13.9, 5.593, Rotation2d.kCCW_90deg)),
+                              MathHelpers.getDriveDirection(
+                                  robotManager.swerve.getFieldRelativeSpeeds())))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(
@@ -127,7 +130,9 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                                       13.709,
                                       FieldUtil.RED_OUTPOST_BUMP_CENTER.getY(),
                                       Rotation2d.kCCW_90deg)),
-                              Point.ofRed(new Pose2d(13.9, 5.593, Rotation2d.kCCW_90deg))))
+                              Point.ofRed(new Pose2d(13.9, 5.593, Rotation2d.kCCW_90deg)),
+                              MathHelpers.getDriveDirection(
+                                  robotManager.swerve.getFieldRelativeSpeeds())))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(

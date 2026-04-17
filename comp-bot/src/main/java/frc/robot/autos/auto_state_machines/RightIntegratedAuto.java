@@ -2,6 +2,7 @@ package frc.robot.autos.auto_state_machines;
 
 import com.team581.autos.Point;
 import com.team581.autos.StuckOnBallRecovery;
+import com.team581.math.MathHelpers;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.mechanisms.imu.BumpCrossingTracker;
 import com.team581.trailblazer.AutoPoint;
@@ -94,7 +95,9 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                                       13.709,
                                       FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
                                       Rotation2d.kZero)),
-                              Point.ofRed(new Pose2d(13.9, 5.443 + BUMP_OFFSET, Rotation2d.kZero))))
+                              Point.ofRed(new Pose2d(13.9, 5.443 + BUMP_OFFSET, Rotation2d.kZero)),
+                              MathHelpers.getDriveDirection(
+                                  robotManager.swerve.getFieldRelativeSpeeds())))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(
@@ -290,7 +293,9 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                                       13.709,
                                       FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
                                       Rotation2d.kZero)),
-                              Point.ofRed(new Pose2d(13.9, 5.443 + BUMP_OFFSET, Rotation2d.kZero))))
+                              Point.ofRed(new Pose2d(13.9, 5.443 + BUMP_OFFSET, Rotation2d.kZero)),
+                              MathHelpers.getDriveDirection(
+                                  robotManager.swerve.getFieldRelativeSpeeds())))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100))
                   .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(
@@ -511,6 +516,17 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       case DRIVE_BACK_1 -> {
         trailblazer.setActiveSegment(driveBackAndShootOne);
         robotManager.cancelIntakeRequest();
+        if (RobotBase.isSimulation()) {
+          if (timeout(0.3)) {
+            robotManager.localization.imu.setPitch(-15.0);
+          }
+          if (timeout(0.9)) {
+            robotManager.localization.imu.setPitch(15.0);
+          }
+          if (timeout(1.5)) {
+            robotManager.localization.imu.setPitch(0.0);
+          }
+        }
       }
       case SHOOT_1 -> robotManager.prepareScoreRequest();
       case DEFAULT_SECOND_INTAKE_SEGMENT -> {
@@ -548,6 +564,17 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
       }
       case DRIVE_BACK_2 -> {
         trailblazer.setActiveSegment(driveBackAndShootTwo);
+        if (RobotBase.isSimulation()) {
+          if (timeout(0.3)) {
+            robotManager.localization.imu.setPitch(-15.0);
+          }
+          // if (timeout()) {
+          //   robotManager.localization.imu.setPitch(15.0);
+          // }
+          if (timeout(0.6)) {
+            robotManager.localization.imu.setPitch(0.0);
+          }
+        }
       }
       case SHOOT_2 -> robotManager.prepareScoreRequest();
       case DRIVE_BACK_TO_NEUTRAL_ZONE -> {
