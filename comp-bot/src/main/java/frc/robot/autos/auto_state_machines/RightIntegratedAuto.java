@@ -66,19 +66,19 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                           getCollisionPoint(
                               Point.ofRed(new Pose2d(8.280, 4.510, Rotation2d.fromDegrees(-50.0)))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(9.31, 4.510, Rotation2d.kZero))
+              AutoPoint.ofRed(new Pose2d(9.31, 4.510, Rotation2d.fromDegrees(32.0)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           9.575,
                           FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(32.0)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
-                          11.174,
+                          11.875,
                           FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(32.0)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 30))
                   .withMarker(Markers.CANCEL_INTAKE_RQ))
           .withLinearConstraints(4.5, 8)
@@ -94,8 +94,10 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                                   new Pose2d(
                                       13.709,
                                       FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                                      Rotation2d.kZero)),
-                              Point.ofRed(new Pose2d(13.9, 5.443 + BUMP_OFFSET, Rotation2d.kZero)),
+                                      Rotation2d.fromDegrees(32.0))),
+                              Point.ofRed(
+                                  new Pose2d(
+                                      13.9, 5.443 + BUMP_OFFSET, Rotation2d.fromDegrees(32.0))),
                               MathHelpers.getDriveDirection(
                                   robotManager.swerve.getFieldRelativeSpeeds())))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
@@ -168,7 +170,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       new Pose2d(
                           10.575,
                           FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(56)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.CANCEL_INTAKE_RQ))
           .withLinearConstraints(4.5, 8.0)
@@ -207,7 +209,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       new Pose2d(
                           10.575,
                           FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(56)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100))
                   .withMarker(Markers.CANCEL_INTAKE_RQ))
           .withLinearConstraints(4.5, 8.0)
@@ -241,7 +243,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       new Pose2d(
                           10.575,
                           FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(56)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.CANCEL_INTAKE_RQ))
           .withLinearConstraints(4.5, 4.0)
@@ -268,7 +270,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       new Pose2d(
                           10.575,
                           FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(56)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withMarker(Markers.CANCEL_INTAKE_RQ))
           .withLinearConstraints(4.5, 4.0)
@@ -281,7 +283,7 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       new Pose2d(
                           10.4,
                           FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(56)))
                   .withAngularConstraints(
                       Units.rotationsToRadians(4.0), Units.rotationsToRadians(4.0))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
@@ -292,8 +294,10 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                                   new Pose2d(
                                       13.709,
                                       FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                                      Rotation2d.kZero)),
-                              Point.ofRed(new Pose2d(13.9, 5.443 + BUMP_OFFSET, Rotation2d.kZero)),
+                                      Rotation2d.fromDegrees(56))),
+                              Point.ofRed(
+                                  new Pose2d(
+                                      13.9, 5.443 + BUMP_OFFSET, Rotation2d.fromDegrees(56))),
                               MathHelpers.getDriveDirection(
                                   robotManager.swerve.getFieldRelativeSpeeds())))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100))
