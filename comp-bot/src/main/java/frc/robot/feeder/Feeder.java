@@ -15,6 +15,8 @@ public class Feeder extends StateMachineSubsystem<FeederState> implements PowerM
   private final NeutralOut neutralRequest = new NeutralOut();
   private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
 
+  private double averageCurrent = 0.0;
+
   public Feeder(TalonFX topMotor, TalonFX bottomMotor) {
     super(SubsystemPriority.FEEDER, FeederState.IDLE);
     topMotor.getConfigurator().apply(FeederConfig.TOP_MOTOR_CONFIG);
@@ -62,6 +64,15 @@ public class Feeder extends StateMachineSubsystem<FeederState> implements PowerM
     DogLog.log("Feeder/Top/VelocityRPM", topMotor.getVelocity().getValueAsDouble() * 60.0);
     DogLog.log("Feeder/Bottom/VelocityRPM", bottomMotor.getVelocity().getValueAsDouble() * 60.0);
     DogLog.log("Feeder/Voltage", getState().getVoltage());
+
+    averageCurrent =
+        (topMotor.getStatorCurrent().getValueAsDouble()
+                + bottomMotor.getStatorCurrent().getValueAsDouble())
+            / 2.0;
+  }
+
+  public double getAverageCurrent() {
+    return averageCurrent;
   }
 
   @Override

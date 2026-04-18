@@ -23,7 +23,7 @@ import frc.robot.config.RobotKind;
 import java.util.Map;
 
 public class ShooterConfig {
-  public static final double RPM_TOLERANCE = 100.0;
+  public static final double RPM_TOLERANCE = 50.0;
   public static final double RPM_TOLERANCE_ACTIVELY_SHOOTING = 300.0;
 
   public static final double RPM_TOLERANCE_FEEDING = 500.0;
@@ -39,6 +39,14 @@ public class ShooterConfig {
   public static final double MAX_SAFE_RPM = 6000;
 
   public static final Transform2d SHOOTER_TO_ROBOT = new Transform2d(0.0, 0.0, Rotation2d.k180deg);
+
+  public static final InterpolatingDoubleTreeMap FEEDER_CURRENT_TO_SHOOTER_FEED_FORWARD =
+      TunableInterpolatingDoubleTreeMap.ofEntries(
+          "Shooter/FeederCurrentToShooterFeedForward",
+          Map.entry(0.0, 0.0),
+          Map.entry(50.0, 40.0),
+          Map.entry(20.0, 5.0),
+          Map.entry(30.0, 15.0));
 
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE_RPM =
       TunableInterpolatingDoubleTreeMap.ofEntries(
@@ -104,8 +112,10 @@ public class ShooterConfig {
               new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
           .withSlot0(new Slot0Configs().withKP(0.0).withKV(0.0));
 
-  public static DoubleSubscriber ACTIVE_SHOT_FF_CURRENT =
-      DogLog.tunable("Shooter/ActiveShotFFCurrent", 20.0);
+  public static DoubleSubscriber FULL_HOPPER_INITIAL_FF =
+      DogLog.tunable("Shooter/FullHopperInitialFF", 30.0);
+  public static DoubleSubscriber LOW_HOPPER_INITIAL_FFF =
+      DogLog.tunable("Shooter/LowHopperInitialFF", 20.0);
 
   public static DoubleSubscriber TURBO_MODE_FF_CURRENT =
       DogLog.tunable("Shooter/TurboShotFFCurrent", 30.0);

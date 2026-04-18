@@ -51,6 +51,9 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
   private double topRightMotorRpm = 0;
   private double bottomLeftMotorRpm = 0;
   private double bottomRightMotorRpm = 0;
+  private double feederCurrent = 0.0;
+  private double feederBasedFeedForward = 0.0;
+  private boolean hopperFull = false;
 
   private boolean atGoal = false;
   private boolean atGoalDebounced = false;
@@ -125,6 +128,11 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     turboMode = useTurboMode;
   }
 
+  public void updateHopperState(double feederCurrent, boolean hopperFull) {
+    this.feederCurrent = feederCurrent;
+    this.hopperFull = hopperFull;
+  }
+
   @Override
   protected void whileInState(ShooterState state) {
     DogLog.log("Shooter/TopLeft/RPM", topLeftMotorRpm);
@@ -133,6 +141,8 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     DogLog.log("Shooter/BottomRight/RPM", bottomRightMotorRpm);
     DogLog.log("Shooter/GoalShootingRPM", shootingRpm);
     DogLog.log("Shooter/GoalFeedingRPM", feedingRpm);
+    DogLog.log("Shooter/FeederCurrent", feederCurrent);
+    DogLog.log("Shooter/FeederBasedFeedForward", feederBasedFeedForward);
     DogLog.log("Shooter/AtGoal", atGoal());
     DogLog.log("Shooter/TopRight/Voltage", topRightMotor.getMotorVoltage().getValueAsDouble());
     DogLog.log(
@@ -163,34 +173,26 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
       }
       case PREPARE_SCORE -> {
         var setpoint = shootingRpm / 60.0;
-        topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
+        topRightMotor.setControl(
+            velocityRequest.withVelocity(setpoint).withFeedForward(feederBasedFeedForward));
         DogLog.log("Shooter/RpmSetpoint", shootingRpm);
       }
       case SCORE -> {
         var setpoint = shootingRpm / 60.0;
         topRightMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_CURRENT.get()
-                        : ShooterConfig.ACTIVE_SHOT_FF_CURRENT.get()));
+            velocityRequest.withVelocity(setpoint).withFeedForward(feederBasedFeedForward));
         DogLog.log("Shooter/RpmSetpoint", shootingRpm);
       }
       case PREPARE_FEED -> {
         var setpoint = feedingRpm / 60.0;
-        topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
+        topRightMotor.setControl(
+            velocityRequest.withVelocity(setpoint).withFeedForward(feederBasedFeedForward));
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
       }
       case FEED -> {
         var setpoint = feedingRpm / 60.0;
         topRightMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_CURRENT.get()
-                        : ShooterConfig.ACTIVE_SHOT_FF_CURRENT.get()));
+            velocityRequest.withVelocity(setpoint).withFeedForward(feederBasedFeedForward));
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
       }
     }
@@ -220,6 +222,29 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
 
     atGoal = calculateAtGoal();
     atGoalDebounced = atGoalDebouncer.calculate(atGoal);
+
+    switch (getState()) {
+      case SCORE, FEED -> {
+        if (!timeout(0.7) && hopperFull) {
+          feederBasedFeedForward =
+              Math.max(
+                  ShooterConfig.FEEDER_CURRENT_TO_SHOOTER_FEED_FORWARD.get(feederCurrent),
+                  ShooterConfig.FULL_HOPPER_INITIAL_FF.getAsDouble());
+        } else if (!timeout(0.1)) {
+          feederBasedFeedForward =
+              Math.max(
+                  ShooterConfig.FEEDER_CURRENT_TO_SHOOTER_FEED_FORWARD.get(feederCurrent),
+                  ShooterConfig.LOW_HOPPER_INITIAL_FFF.getAsDouble());
+        } else {
+          feederBasedFeedForward =
+              ShooterConfig.FEEDER_CURRENT_TO_SHOOTER_FEED_FORWARD.get(feederCurrent);
+        }
+      }
+      default -> {
+        feederBasedFeedForward =
+            ShooterConfig.FEEDER_CURRENT_TO_SHOOTER_FEED_FORWARD.get(feederCurrent);
+      }
+    }
   }
 
   public boolean atGoal() {
@@ -234,26 +259,12 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     return switch (getState()) {
       case IDLE -> false;
       case PREPARE_SCORE ->
-          MathUtil.isNear(topLeftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE)
-              && MathUtil.isNear(topRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE)
-              && MathUtil.isNear(bottomLeftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE)
-              && MathUtil.isNear(bottomRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE);
+          MathUtil.isNear(topRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE);
       case SCORE ->
           MathUtil.isNear(
-                  topLeftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
-              && MathUtil.isNear(
-                  topRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
-              && MathUtil.isNear(
-                  bottomLeftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
-              && MathUtil.isNear(
-                  bottomRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING);
+              topRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING);
       case PREPARE_FEED, FEED ->
-          MathUtil.isNear(topLeftMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING)
-              && MathUtil.isNear(topRightMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING)
-              && MathUtil.isNear(
-                  bottomLeftMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING)
-              && MathUtil.isNear(
-                  bottomRightMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING);
+          MathUtil.isNear(topRightMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING);
       default -> true;
     };
   }
