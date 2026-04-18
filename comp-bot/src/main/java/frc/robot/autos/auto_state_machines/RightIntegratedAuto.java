@@ -92,11 +92,11 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                             Point.ofRed(
                                 new Pose2d(
                                     13.9, 5.443 + BUMP_OFFSET, Rotation2d.fromDegrees(32.0))));
-                        return (Point.ofRed(
+                        return Point.ofRed(
                             new Pose2d(
                                 13.709,
                                 FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                                Rotation2d.fromDegrees(32.0))));
+                                Rotation2d.fromDegrees(32.0)));
                       })
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withLinearConstraints(4.5, 8),
