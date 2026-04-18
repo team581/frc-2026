@@ -130,7 +130,7 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
 
   public void updateHopperState(double feederCurrent, boolean hopperFull) {
     this.feederCurrent = feederCurrent;
-    this.hopperFull = hopperFull;
+    this.hopperFull = hopperFull || !DSOptions.USE_CANRANGE.getAsBoolean();
   }
 
   @Override
