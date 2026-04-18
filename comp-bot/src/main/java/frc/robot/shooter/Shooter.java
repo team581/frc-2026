@@ -2,6 +2,7 @@ package frc.robot.shooter;
 
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.sim.ChassisReference;
@@ -13,6 +14,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.LinearFilter;
 import frc.robot.config.DSOptions;
 import frc.robot.config.FeatureFlags;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -41,21 +43,33 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
   private final Follower bottomRightFollower;
 
   private final VelocityTorqueCurrentFOC velocityRequest = new VelocityTorqueCurrentFOC(0);
+  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(true);
 
   private double scoreDistance = 0;
   private double feedDistance = 0;
 
-  private double shootingRpm = 0;
+  private double scoringRpm = 0;
   private double feedingRpm = 0;
   private double topLeftMotorRpm = 0;
   private double topRightMotorRpm = 0;
   private double bottomLeftMotorRpm = 0;
   private double bottomRightMotorRpm = 0;
 
+  private double topLeftAppliedVoltage = 0;
+  private double topRightAppliedVoltage = 0;
+  private double bottomLeftAppliedVoltage = 0;
+  private double bottomRightAppliedVoltage = 0;
+
   private boolean atGoal = false;
   private boolean atGoalDebounced = false;
 
   private boolean turboMode = false;
+
+  private double realKV = 0;
+
+  private final int requiredkVBufferSize = 15;
+  private LinearFilter kvBuffer = LinearFilter.movingAverage(20);
+  private int kvBufferSize = 0;
 
   // Debounce for delay between shots at 15 bps
   private final Debouncer atGoalDebouncer = new Debouncer(1.0 / 15.0, DebounceType.kFalling);
@@ -125,13 +139,37 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     turboMode = useTurboMode;
   }
 
+  public double getRealkV() {
+    double topLeftMotorRps = topLeftMotorRpm / 60.0;
+    double topRightMotorRps = topRightMotorRpm / 60.0;
+
+    double bottomLeftMotorRps = bottomLeftMotorRpm / 60.0;
+    double bottomRightMotorRps = bottomRightMotorRpm / 60.0;
+
+    double averageRps =
+        (topLeftMotorRps + topRightMotorRps + bottomLeftMotorRps + bottomRightMotorRps) / 4.0;
+
+    if (averageRps < 1e-5) {
+      return 0;
+    }
+
+    double averageVoltage =
+        (topLeftAppliedVoltage
+                + topRightAppliedVoltage
+                + bottomLeftAppliedVoltage
+                + bottomRightAppliedVoltage)
+            / 4.0;
+
+    return averageVoltage / averageRps;
+  }
+
   @Override
   protected void whileInState(ShooterState state) {
     DogLog.log("Shooter/TopLeft/RPM", topLeftMotorRpm);
     DogLog.log("Shooter/TopRight/RPM", topRightMotorRpm);
     DogLog.log("Shooter/BottomLeft/RPM", bottomLeftMotorRpm);
     DogLog.log("Shooter/BottomRight/RPM", bottomRightMotorRpm);
-    DogLog.log("Shooter/GoalShootingRPM", shootingRpm);
+    DogLog.log("Shooter/GoalShootingRPM", scoringRpm);
     DogLog.log("Shooter/GoalFeedingRPM", feedingRpm);
     DogLog.log("Shooter/AtGoal", atGoal());
     DogLog.log("Shooter/TopRight/Voltage", topRightMotor.getMotorVoltage().getValueAsDouble());
@@ -155,6 +193,9 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     DogLog.log(
         "Shooter/TopRight/TorqueCurrent", topRightMotor.getTorqueCurrent().getValueAsDouble());
 
+    DogLog.log("Shooter/RealKV", realKV);
+    DogLog.log("Shooter/KVBufferSize", kvBufferSize);
+
     switch (state) {
       case IDLE -> {
         var setpoint = ShooterConfig.IDLE_RPM / 60.0;
@@ -162,47 +203,104 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
         DogLog.log("Shooter/RpmSetpoint", ShooterConfig.IDLE_RPM);
       }
       case PREPARE_SCORE -> {
-        var setpoint = shootingRpm / 60.0;
-        topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
-        DogLog.log("Shooter/RpmSetpoint", shootingRpm);
+        var setpoint = scoringRpm / 60.0;
+
+        double usedkV = kvBuffer.calculate(realKV);
+        kvBufferSize++;
+
+        double suggestedVoltage = usedkV * setpoint;
+
+        if (kvBufferSize >= requiredkVBufferSize) {
+          DogLog.timestamp("Shooter/RealKVRequest");
+
+          topRightMotor.setControl(voltageRequest.withOutput(suggestedVoltage));
+        } else {
+          topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
+        }
+        DogLog.log("Shooter/RpmSetpoint", scoringRpm);
       }
       case SCORE -> {
-        var setpoint = shootingRpm / 60.0;
-        topRightMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_CURRENT.get()
-                        : ShooterConfig.ACTIVE_SHOT_FF_CURRENT.get()));
-        DogLog.log("Shooter/RpmSetpoint", shootingRpm);
+        var setpoint = scoringRpm / 60.0;
+
+        double usedkV = kvBuffer.calculate(realKV);
+        kvBufferSize++;
+
+        double suggestedVoltage = usedkV * setpoint;
+
+        if (kvBufferSize >= requiredkVBufferSize) {
+          DogLog.timestamp("Shooter/RealKVRequest");
+
+          topRightMotor.setControl(voltageRequest.withOutput(suggestedVoltage));
+        } else {
+          topRightMotor.setControl(
+              velocityRequest
+                  .withVelocity(setpoint)
+                  .withFeedForward(
+                      turboMode
+                          ? ShooterConfig.TURBO_MODE_FF_CURRENT.get()
+                          : ShooterConfig.ACTIVE_SHOT_FF_CURRENT.get()));
+        }
+        DogLog.log("Shooter/RpmSetpoint", scoringRpm);
       }
       case PREPARE_FEED -> {
         var setpoint = feedingRpm / 60.0;
-        topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
+
+        double usedkV = kvBuffer.calculate(realKV);
+        kvBufferSize++;
+
+        double suggestedVoltage = usedkV * setpoint;
+
+        if (kvBufferSize >= requiredkVBufferSize) {
+          DogLog.timestamp("Shooter/RealKVRequest");
+
+          topRightMotor.setControl(voltageRequest.withOutput(suggestedVoltage));
+        } else {
+          topRightMotor.setControl(velocityRequest.withVelocity(setpoint).withFeedForward(0.0));
+        }
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
       }
       case FEED -> {
         var setpoint = feedingRpm / 60.0;
-        topRightMotor.setControl(
-            velocityRequest
-                .withVelocity(setpoint)
-                .withFeedForward(
-                    turboMode
-                        ? ShooterConfig.TURBO_MODE_FF_CURRENT.get()
-                        : ShooterConfig.ACTIVE_SHOT_FF_CURRENT.get()));
+
+        double usedkV = kvBuffer.calculate(realKV);
+        kvBufferSize++;
+
+        double suggestedVoltage = usedkV * setpoint;
+
+        if (kvBufferSize >= requiredkVBufferSize) {
+          DogLog.timestamp("Shooter/RealKVRequest");
+          topRightMotor.setControl(voltageRequest.withOutput(suggestedVoltage));
+        } else {
+          topRightMotor.setControl(
+              velocityRequest
+                  .withVelocity(setpoint)
+                  .withFeedForward(
+                      turboMode
+                          ? ShooterConfig.TURBO_MODE_FF_CURRENT.get()
+                          : ShooterConfig.ACTIVE_SHOT_FF_CURRENT.get()));
+        }
         DogLog.log("Shooter/RpmSetpoint", feedingRpm);
       }
     }
   }
 
   @Override
+  protected void afterTransition(ShooterState newState) {
+    switch (newState) {
+      case PREPARE_SCORE, PREPARE_FEED -> {
+        kvBuffer.reset();
+        kvBufferSize = 0;
+      }
+    }
+  }
+
+  @Override
   protected void collectInputs() {
-    shootingRpm = Math.min(ShooterConfig.MAX_SAFE_RPM, distanceToScoringRpm(scoreDistance));
+    scoringRpm = Math.min(ShooterConfig.MAX_SAFE_RPM, distanceToScoringRpm(scoreDistance));
     feedingRpm = Math.min(ShooterConfig.MAX_SAFE_RPM, distanceToFeedingRpm(feedDistance));
 
     if (DSOptions.PIT_FUNCTIONALITY.getAsBoolean()) {
-      shootingRpm = ShooterConfig.PIT_FUNCTIONALITY_RPM;
+      scoringRpm = ShooterConfig.PIT_FUNCTIONALITY_RPM;
       feedingRpm = ShooterConfig.PIT_FUNCTIONALITY_RPM;
     }
 
@@ -213,6 +311,13 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     bottomLeftMotorRpm = bottomLeftMotor.getVelocity().getValueAsDouble() * 60.0;
 
     bottomRightMotorRpm = bottomRightMotor.getVelocity().getValueAsDouble() * 60.0;
+
+    topLeftAppliedVoltage = topLeftMotor.getMotorVoltage().getValueAsDouble();
+    topRightAppliedVoltage = topRightMotor.getMotorVoltage().getValueAsDouble();
+    bottomLeftAppliedVoltage = bottomLeftMotor.getMotorVoltage().getValueAsDouble();
+    bottomRightAppliedVoltage = bottomRightMotor.getMotorVoltage().getValueAsDouble();
+
+    realKV = getRealkV();
 
     atGoal = calculateAtGoal();
     atGoalDebounced = atGoalDebouncer.calculate(atGoal);
@@ -230,19 +335,19 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     return switch (getState()) {
       case IDLE -> false;
       case PREPARE_SCORE ->
-          MathUtil.isNear(topLeftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE)
-              && MathUtil.isNear(topRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE)
-              && MathUtil.isNear(bottomLeftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE)
-              && MathUtil.isNear(bottomRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE);
+          MathUtil.isNear(topLeftMotorRpm, scoringRpm, ShooterConfig.RPM_TOLERANCE)
+              && MathUtil.isNear(topRightMotorRpm, scoringRpm, ShooterConfig.RPM_TOLERANCE)
+              && MathUtil.isNear(bottomLeftMotorRpm, scoringRpm, ShooterConfig.RPM_TOLERANCE)
+              && MathUtil.isNear(bottomRightMotorRpm, scoringRpm, ShooterConfig.RPM_TOLERANCE);
       case SCORE ->
           MathUtil.isNear(
-                  topLeftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
+                  topLeftMotorRpm, scoringRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
               && MathUtil.isNear(
-                  topRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
+                  topRightMotorRpm, scoringRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
               && MathUtil.isNear(
-                  bottomLeftMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
+                  bottomLeftMotorRpm, scoringRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING)
               && MathUtil.isNear(
-                  bottomRightMotorRpm, shootingRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING);
+                  bottomRightMotorRpm, scoringRpm, ShooterConfig.RPM_TOLERANCE_ACTIVELY_SHOOTING);
       case PREPARE_FEED, FEED ->
           MathUtil.isNear(topLeftMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING)
               && MathUtil.isNear(topRightMotorRpm, feedingRpm, ShooterConfig.RPM_TOLERANCE_FEEDING)
