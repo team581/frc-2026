@@ -3,6 +3,7 @@ package frc.robot.feeder;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team581.math.MathHelpers;
 import com.team581.mechanisms.PowerManaged;
 import com.team581.util.state_machines.StateMachineSubsystem;
 import dev.doglog.DogLog;
@@ -66,9 +67,9 @@ public class Feeder extends StateMachineSubsystem<FeederState> implements PowerM
     DogLog.log("Feeder/Voltage", getState().getVoltage());
 
     averageCurrent =
-        (topMotor.getStatorCurrent().getValueAsDouble()
-                + bottomMotor.getStatorCurrent().getValueAsDouble())
-            / 2.0;
+        MathHelpers.average(
+            topMotor.getStatorCurrent().getValueAsDouble(),
+            bottomMotor.getStatorCurrent().getValueAsDouble());
   }
 
   public double getAverageCurrent() {
