@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team581.math.PolynomialRegression;
 import com.team581.util.tuning.TunableInterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import frc.robot.config.RobotKind;
 import java.util.Map;
 
 public class ShooterHoodConfig {
@@ -44,7 +45,8 @@ public class ShooterHoodConfig {
               new MotorOutputConfigs()
                   .withNeutralMode(NeutralModeValue.Coast)
                   .withInverted(InvertedValue.Clockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(300.0).withKV(0).withKS(0));
+          .withSlot0(
+              new Slot0Configs().withKP(RobotKind.IS_COMP_BOT ? 0 : 300.0).withKV(0).withKS(0));
 
   // TODO: Update interpolating map numbers later
   public static final InterpolatingDoubleTreeMap DISTANCE_TO_SCORE =

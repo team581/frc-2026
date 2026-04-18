@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import frc.robot.config.RobotKind;
 import java.util.Map;
 
 public class ShooterConfig {
@@ -88,7 +89,11 @@ public class ShooterConfig {
       createMotorConfig()
           .withMotorOutput(
               new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(14.0).withKS(6.4).withKV(0.13));
+          .withSlot0(
+              new Slot0Configs()
+                  .withKP(RobotKind.IS_COMP_BOT ? 0 : 14.0)
+                  .withKS(RobotKind.IS_COMP_BOT ? 0 : 6.4)
+                  .withKV(RobotKind.IS_COMP_BOT ? 0 : 0.13));
   public static final TalonFXConfiguration BOTTOM_LEFT_MOTOR_CONFIG =
       createMotorConfig()
           .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
