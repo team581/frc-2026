@@ -1,5 +1,6 @@
 package com.team581.simkit;
 
+import static com.google.common.base.Preconditions.checkState;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
@@ -57,11 +58,7 @@ public class FuelSim {
       this.exitVelXMult = exitVelXMult;
     }
 
-    /**
-     * Get the current count of fuel scored in this hub
-     *
-     * @return
-     */
+    /** Get the current count of fuel scored in this hub */
     public int getScore() {
       return score;
     }
@@ -444,7 +441,7 @@ public class FuelSim {
       distance = 1;
     }
     normal = normal.div(distance);
-    double impulse = 0.5 * (1 + FUEL_COR) * (b.vel.minus(a.vel).dot(normal));
+    double impulse = 0.5 * (1 + FUEL_COR) * b.vel.minus(a.vel).dot(normal);
     double intersection = FUEL_RADIUS * 2 - distance;
     a.pos = a.pos.plus(normal.times(intersection / 2));
     b.pos = b.pos.minus(normal.times(intersection / 2));
@@ -521,16 +518,15 @@ public class FuelSim {
    * @param launchVelocity Initial launch velocity
    * @param hoodAngle Hood angle where 0 is launching horizontally and 90 degrees is launching
    *     straight up
-   * @param turretYaw <i>Robot-relative</i> turret yaw
    * @param launchHeight Height of the fuel to launch at. Make sure this is higher than your robot's
    *     bumper height, or else it will collide with your robot immediately.
    * @throws IllegalStateException if robot is not registered
    */
   public void launchFuel(
       LinearVelocity launchVelocity, Angle hoodAngle, Angle shotYaw, Distance launchHeight) {
-    if (robotPoseSupplier == null || robotFieldSpeedsSupplier == null) {
-      throw new IllegalStateException("Robot must be registered before launching fuel.");
-    }
+    checkState(
+        robotPoseSupplier != null && robotFieldSpeedsSupplier != null,
+        "Robot must be registered before launching fuel.");
 
     Pose3d launchPose =
         new Pose3d(this.robotPoseSupplier.get())
@@ -703,7 +699,6 @@ public class FuelSim {
    * @param width from left to right (y-axis)
    * @param length from front to back (x-axis)
    * @param bumperHeight from the ground
-   * @param poseSupplier
    * @param fieldSpeedsSupplier field-relative `ChassisSpeeds` supplier
    */
   public void registerRobot(
@@ -730,8 +725,6 @@ public class FuelSim {
    *
    * @param width from left to right (y-axis)
    * @param length from front to back (x-axis)
-   * @param bumperHeight
-   * @param poseSupplier
    * @param fieldSpeedsSupplier field-relative `ChassisSpeeds` supplier
    */
   public void registerRobot(

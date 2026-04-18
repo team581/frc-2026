@@ -176,7 +176,7 @@ public class Robot extends Base581Robot {
           LinearVelocity.ofBaseUnits(
               MathHelpers.rpmToLinearVelocity(shooter.getAverageRPM(), Units.inchesToMeters(1.6)),
               MetersPerSecond),
-          Angle.ofBaseUnits(Units.degreesToRadians(90 - shooterHood.getAngle()), Radian),
+          Angle.ofBaseUnits(Math.toRadians(90 - shooterHood.getAngle()), Radian),
           Angle.ofBaseUnits(Math.PI, Radian),
           Distance.ofBaseUnits(
               Units.inchesToMeters(20),

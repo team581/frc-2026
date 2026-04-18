@@ -281,8 +281,7 @@ public class MathHelpers {
   }
 
   public static final double rpmToLinearVelocity(double rpm, double radiusMeters) {
-    double v = rpm * radiusMeters * (Math.PI / 30.0);
-    return v;
+    return rpm * radiusMeters * (Math.PI / 30.0);
   }
 
   public static double signedSqrt(double value) {
