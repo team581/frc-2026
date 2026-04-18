@@ -39,13 +39,18 @@ public class Imu extends BaseImuSubsystem {
         new BumpCrossingTracker(
             () -> getPitch(),
             () -> getRoll(),
-            () -> driveState.Pose,
             translation ->
                 drivetrain.resetPose(new Pose2d(translation, driveState.Pose.getRotation())));
   }
 
   public boolean accelerationLowEnoughToShoot() {
     return accel < MAX_ACCELRATION_THRESHOLD_SHOOTING.get();
+  }
+
+  @Override
+  public void beforePeriodic() {
+    super.beforePeriodic();
+    bumpCrossingTracker.beforePeriodic();
   }
 
   @Override
@@ -92,5 +97,11 @@ public class Imu extends BaseImuSubsystem {
 
   public boolean collisionDetected() {
     return pigeonGForce > COLLISION_G_FORCE_THRESHOLD.get();
+  }
+
+  @Override
+  public void periodic() {
+    super.periodic();
+    bumpCrossingTracker.periodic();
   }
 }

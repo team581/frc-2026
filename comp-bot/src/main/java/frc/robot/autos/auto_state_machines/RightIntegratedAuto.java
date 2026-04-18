@@ -2,7 +2,6 @@ package frc.robot.autos.auto_state_machines;
 
 import com.team581.autos.Point;
 import com.team581.autos.StuckOnBallRecovery;
-import com.team581.math.MathHelpers;
 import com.team581.math.PoseErrorTolerance;
 import com.team581.mechanisms.imu.BumpCrossingTracker;
 import com.team581.trailblazer.AutoPoint;
@@ -88,18 +87,17 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
   private final AutoSegment driveBackAndShootOne =
       Trailblazer.segment(
               AutoPoint.of(
-                      () ->
-                          bumpCrossingTracker.getPoint(
-                              Point.ofRed(
-                                  new Pose2d(
-                                      13.709,
-                                      FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                                      Rotation2d.fromDegrees(32.0))),
-                              Point.ofRed(
-                                  new Pose2d(
-                                      13.9, 5.443 + BUMP_OFFSET, Rotation2d.fromDegrees(32.0))),
-                              MathHelpers.getDriveDirection(
-                                  robotManager.swerve.getFieldRelativeSpeeds())))
+                      () -> {
+                        bumpCrossingTracker.bumpCrossRequest(
+                            Point.ofRed(
+                                new Pose2d(
+                                    13.9, 5.443 + BUMP_OFFSET, Rotation2d.fromDegrees(32.0))));
+                        return (Point.ofRed(
+                            new Pose2d(
+                                13.709,
+                                FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
+                                Rotation2d.fromDegrees(32.0))));
+                      })
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
                   .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(
@@ -288,18 +286,16 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
                       Units.rotationsToRadians(4.0), Units.rotationsToRadians(4.0))
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.of(
-                      () ->
-                          bumpCrossingTracker.getPoint(
-                              Point.ofRed(
-                                  new Pose2d(
-                                      13.709,
-                                      FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                                      Rotation2d.fromDegrees(56))),
-                              Point.ofRed(
-                                  new Pose2d(
-                                      13.9, 5.443 + BUMP_OFFSET, Rotation2d.fromDegrees(56))),
-                              MathHelpers.getDriveDirection(
-                                  robotManager.swerve.getFieldRelativeSpeeds())))
+                      () -> {
+                        bumpCrossingTracker.bumpCrossRequest(
+                            Point.ofRed(
+                                new Pose2d(
+                                    13.709,
+                                    FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
+                                    Rotation2d.fromDegrees(56))));
+                        return Point.ofRed(
+                            new Pose2d(13.9, 5.443 + BUMP_OFFSET, Rotation2d.fromDegrees(56)));
+                      })
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100))
                   .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(
@@ -518,17 +514,21 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
         }
       }
       case DRIVE_BACK_1 -> {
+        bumpCrossingTracker.setCurrentSpeeds(robotManager.swerve.getFieldRelativeSpeeds());
         trailblazer.setActiveSegment(driveBackAndShootOne);
         robotManager.cancelIntakeRequest();
         if (RobotBase.isSimulation()) {
-          if (timeout(0.3)) {
-            robotManager.localization.imu.setPitch(-15.0);
+          if (timeout(0.5)) {
+            robotManager.localization.imu.setPitch(-7.5);
+            robotManager.localization.imu.setRoll(-7.5);
           }
-          if (timeout(0.9)) {
-            robotManager.localization.imu.setPitch(15.0);
+          if (timeout(0.7)) {
+            robotManager.localization.imu.setPitch(7.5);
+            robotManager.localization.imu.setRoll(7.5);
           }
-          if (timeout(1.5)) {
+          if (timeout(1.0)) {
             robotManager.localization.imu.setPitch(0.0);
+            robotManager.localization.imu.setRoll(0.0);
           }
         }
       }
@@ -567,16 +567,20 @@ public class RightIntegratedAuto extends BaseImperativeAuto<IntegratedAutoState>
         robotManager.intakeAutoRequest();
       }
       case DRIVE_BACK_2 -> {
+        bumpCrossingTracker.setCurrentSpeeds(robotManager.swerve.getFieldRelativeSpeeds());
         trailblazer.setActiveSegment(driveBackAndShootTwo);
         if (RobotBase.isSimulation()) {
-          if (timeout(0.3)) {
-            robotManager.localization.imu.setPitch(-15.0);
+          if (timeout(0.5)) {
+            robotManager.localization.imu.setPitch(-7.5);
+            robotManager.localization.imu.setRoll(-7.5);
           }
-          // if (timeout()) {
-          //   robotManager.localization.imu.setPitch(15.0);
-          // }
-          if (timeout(0.6)) {
+          if (timeout(0.7)) {
+            robotManager.localization.imu.setPitch(7.5);
+            robotManager.localization.imu.setRoll(7.5);
+          }
+          if (timeout(1.0)) {
             robotManager.localization.imu.setPitch(0.0);
+            robotManager.localization.imu.setRoll(0.0);
           }
         }
       }

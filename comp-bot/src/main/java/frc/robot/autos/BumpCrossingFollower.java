@@ -19,8 +19,6 @@ public class BumpCrossingFollower implements PathFollower {
 
   private final PathFollower follower;
 
-  // TODO: Actually use this
-  @SuppressWarnings("unused")
   private final BumpCrossingTracker bumpCrossingTracker;
 
   public BumpCrossingFollower(PathFollower follower, BumpCrossingTracker bumpCrossingTracker) {
@@ -36,11 +34,13 @@ public class BumpCrossingFollower implements PathFollower {
       AutoPoint<?> currentPoint,
       AutoSegment segment,
       int currentPointIndex) {
+    bumpCrossingTracker.setCurrentSpeeds(currentSpeeds);
+
     var originalSpeeds =
         follower.calculateSpeeds(
             currentSpeeds, currentPose, targetPose, currentPoint, segment, currentPointIndex);
 
-    var state = resolveState();
+    var state = bumpCrossingTracker.getState();
 
     if (state == BumpCrossingState.NOT_ON_BUMP) {
       return originalSpeeds;
@@ -62,11 +62,5 @@ public class BumpCrossingFollower implements PathFollower {
   @Override
   public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) {
     follower.reset(currentPose, currentSpeeds);
-  }
-
-  // TODO: We need to decide what state of crossing the bump (if any) we're in via
-  // BumpCrossingTracker
-  private BumpCrossingState resolveState() {
-    return BumpCrossingState.NOT_ON_BUMP;
   }
 }
