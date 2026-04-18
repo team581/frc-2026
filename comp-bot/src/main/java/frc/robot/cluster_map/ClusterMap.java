@@ -1,5 +1,8 @@
 package frc.robot.cluster_map;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.Map.Entry.comparingByValue;
+
 import com.team581.GlobalConfig;
 import com.team581.math.GamePieceDetectionCalculator;
 import com.team581.math.MathHelpers;
@@ -27,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   private static final double SAME_CLUSTER_DETECTION_THRESHOLD_METERS = 1.0;
@@ -103,7 +105,7 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
     return clusterMap.stream()
         // Sum up total detected balls per lane
         .collect(
-            Collectors.toMap(
+            toImmutableMap(
                 element ->
                     laneSystem.getLane(
                         new Pose2d(element.clusterTranslation(), Rotation2d.kZero), robotPose),
@@ -114,7 +116,7 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
         // Only consider actual scoring lanes
         .filter(entry -> entry.getKey() != Lane.NONE && entry.getKey() != Lane.TRENCH)
         // Pick the lane with the highest ball count
-        .max(Map.Entry.comparingByValue())
+        .max(comparingByValue())
         .map(Map.Entry::getKey)
         .orElse(Lane.NONE);
   }
