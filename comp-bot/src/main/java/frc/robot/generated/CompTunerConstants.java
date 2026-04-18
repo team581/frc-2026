@@ -84,7 +84,8 @@ public class CompTunerConstants {
     // This may need to be tuned to your individual robot
     private static final double kCoupleRatio = 5.4;
 
-    private static final double kDriveGearRatio = 6.821052631578947;
+    // Swerve X2c X1 with 11T pinion
+    private static final double kDriveGearRatio = 6.98;
     private static final double kSteerGearRatio = 12.1;
     private static final Distance kWheelRadius = Inches.of(2);
 
