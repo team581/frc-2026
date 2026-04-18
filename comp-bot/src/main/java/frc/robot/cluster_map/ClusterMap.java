@@ -25,7 +25,9 @@ import frc.robot.vision.limelight.Limelight;
 import frc.robot.vision.limelight.LimelightState;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   private static final double SAME_CLUSTER_DETECTION_THRESHOLD_METERS = 1.0;
@@ -94,40 +96,27 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
     this.limelight = limelight;
   }
 
+  /** Returns the lane with the most detected balls, ignoring the trench. */
   public Lane getBestClusterLane() {
-    if (clusterMap.isEmpty()) {
-      return Lane.NONE;
-    }
-
     var robotPose = localization.getPose();
 
-    int[] ballsPerLane = new int[Lane.values().length];
-
-    for (ClusterMapElement element : clusterMap) {
-      Pose2d elementPose = new Pose2d(element.clusterTranslation(), Rotation2d.kZero);
-      Lane lane = laneSystem.getLane(elementPose, robotPose);
-
-      if (lane != Lane.NONE && lane != Lane.TRENCH) {
-        ballsPerLane[lane.ordinal()] =
-            (int) (ballsPerLane[lane.ordinal()] + element.detectionSize());
-      }
-    }
-
-    Lane bestLane = Lane.NONE;
-    int maxBalls = 0;
-
-    // Find the lane with the highest count
-    for (Lane lane : Lane.values()) {
-      if (lane == Lane.NONE || lane == Lane.TRENCH) continue;
-
-      int count = ballsPerLane[lane.ordinal()];
-      if (count > maxBalls) {
-        maxBalls = count;
-        bestLane = lane;
-      }
-    }
-
-    return bestLane;
+    return clusterMap.stream()
+        // Sum up total detected balls per lane
+        .collect(
+            Collectors.toMap(
+                element ->
+                    laneSystem.getLane(
+                        new Pose2d(element.clusterTranslation(), Rotation2d.kZero), robotPose),
+                element -> (int) element.detectionSize(),
+                Integer::sum))
+        .entrySet()
+        .stream()
+        // Only consider actual scoring lanes
+        .filter(entry -> entry.getKey() != Lane.NONE && entry.getKey() != Lane.TRENCH)
+        // Pick the lane with the highest ball count
+        .max(Map.Entry.comparingByValue())
+        .map(Map.Entry::getKey)
+        .orElse(Lane.NONE);
   }
 
   public Optional<Pose2d> getBestClusterPose() {
