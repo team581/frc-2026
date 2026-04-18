@@ -28,6 +28,10 @@ public class FieldUtil {
   public static final Point FEED_LEFT_POSE = Point.ofRed(new Pose2d(15.75, 3.0, Rotation2d.kZero));
   public static final Point FEED_RIGHT_POSE =
       Point.ofRed(new Pose2d(15.75, FIELD_WIDTH_Y - 3.0, Rotation2d.kZero));
+  public static final Point BACKUP_FEED_LEFT_POSE =
+      Point.ofRed(new Pose2d(15.15, 1.0, Rotation2d.kZero));
+  public static final Point BACKUP_FEED_RIGHT_POSE =
+      Point.ofRed(new Pose2d(15.15, 7.1, Rotation2d.kZero));
 
   private static final double BLUE_STARTING_LINE_X = Units.inchesToMeters(156.61);
   private static final double RED_STARTING_LINE_X = FIELD_LENGTH_X - BLUE_STARTING_LINE_X;
@@ -436,6 +440,12 @@ public class FieldUtil {
 
   // Logs all trench/bump zone corners & points; only needs to run once
   public static void debugLogFieldZones() {
+    // Feed poses
+    DogLog.log("FieldUtil/Feeding/FEED_LEFT_POSE", FEED_LEFT_POSE);
+    DogLog.log("FieldUtil/Feeding/BACKUP_LEFT_POSE", BACKUP_FEED_LEFT_POSE);
+    DogLog.log("FieldUtil/Feeding/FEED_RIGHT_POSE", FEED_RIGHT_POSE);
+    DogLog.log("FieldUtil/Feeding/BACKUP_RIGHT_POSE", BACKUP_FEED_RIGHT_POSE);
+
     // Trenches
     DogLog.log(
         "FieldUtil/BlueOutpost/Trenches/Corner1",
