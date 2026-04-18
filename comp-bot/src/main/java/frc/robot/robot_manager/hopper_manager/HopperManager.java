@@ -344,6 +344,9 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
         && getState() != HopperState.SCORE_AND_INTAKE
         && getState() != HopperState.FEED
         && getState() != HopperState.FEED_AND_INTAKE) {
+      if (RobotBase.isSimulation()) {
+        return false;
+      }
       return true;
     }
 
