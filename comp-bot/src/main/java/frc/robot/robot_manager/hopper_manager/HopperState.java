@@ -6,8 +6,10 @@ public enum HopperState {
   INTAKING(true),
   EJECTING(false),
   UNJAMMING(false),
-  SHOOT(false),
-  SHOOT_AND_INTAKE(false);
+  SCORE(false),
+  SCORE_AND_INTAKE(false),
+  FEED(false),
+  FEED_AND_INTAKE(false);
 
   public final boolean canBallFill;
 

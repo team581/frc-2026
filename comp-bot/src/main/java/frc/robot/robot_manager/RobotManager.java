@@ -386,13 +386,13 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case SCORE -> {
         shooterHood.scoreRequest(scoringParameters.distance());
         swerve.scoreRequest(scoringParameters);
-        hopperManager.shootRequest(hubActivity.shouldSuperScore());
+        hopperManager.scoreRequest(hubActivity.shouldSuperScore());
         smartScoringPowerManagerRequest();
       }
       case FORCE_SCORE -> {
         shooter.scoreRequest(scoringParameters.distance());
         shooterHood.scoreRequest(scoringParameters.distance());
-        hopperManager.shootRequest(hubActivity.shouldSuperScore());
+        hopperManager.scoreRequest(hubActivity.shouldSuperScore());
       }
       case PREPARE_FEED -> {
         smartHoodPrepareFeedRequest();
@@ -402,7 +402,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       case FEED -> {
         shooterHood.feedRequest(feedingParameters.distance());
         swerve.feedRequest(feedingParameters);
-        hopperManager.shootRequest();
+        hopperManager.feedRequest();
       }
 
       // Fallback states
@@ -419,14 +419,14 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         // Automatically update scoring parameters with preset pose
         shooterHood.scoreRequest(scoringParameters.distance());
         swerve.scoreRequest(scoringParameters);
-        hopperManager.shootRequest(hubActivity.shouldSuperScore());
+        hopperManager.scoreRequest(hubActivity.shouldSuperScore());
       }
       case PREPARE_FALLBACK_FEED -> {
         swerve.feedRequest(fallbackFeedingParameters);
       }
       case FALLBACK_FEED -> {
         swerve.feedRequest(fallbackFeedingParameters);
-        hopperManager.shootRequest();
+        hopperManager.feedRequest();
       }
       case WARMUP_SCORE -> {
         shooter.prepareScoreRequest(scoringParameters.distance());

@@ -136,7 +136,7 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
           differentialMechanism.setControl(
               voltageRequest.withOutput(DeployConfig.HOMING_VOLTAGE_OUTWARD),
               voltageDifferentialRequest.withOutput(0));
-      case HOPPER_COMPACTION_IN, HOPPER_COMPACTION_WAITING -> {
+      case SCORE_COMPACTION, SCORE_COMPACTION_WAITING -> {
         differentialMechanism.setControl(
             motionMagicTorqueCurrentFOCAverageRequest.withPosition(clamp(newState.getLength())),
             positionDifferentialRequest.withPosition(0.0));
@@ -167,14 +167,21 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
   public void waitHopperCompactionRequest() {
     switch (getState()) {
       case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {}
-      default -> setStateFromRequest(DeployState.HOPPER_COMPACTION_WAITING);
+      default -> setStateFromRequest(DeployState.SCORE_COMPACTION_WAITING);
+    }
+  }
+
+  public void feedCompactionRequest() {
+    switch (getState()) {
+      case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {}
+      default -> setStateFromRequest(DeployState.FEED_COMPACTION);
     }
   }
 
   public void hopperCompactionRequest() {
     switch (getState()) {
       case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {}
-      default -> setStateFromRequest(DeployState.HOPPER_COMPACTION_IN);
+      default -> setStateFromRequest(DeployState.SCORE_COMPACTION);
     }
   }
 

@@ -7,8 +7,10 @@ public enum DeployState {
   INTAKE(DeployConfig.MAX_LENGTH),
   STOW(1.0),
   // placeholder values
-  HOPPER_COMPACTION_WAITING(DeployConfig.MAX_LENGTH - 3.5),
-  HOPPER_COMPACTION_IN(1.0),
+  SCORE_COMPACTION_WAITING(DeployConfig.MAX_LENGTH - 3.5),
+  SCORE_COMPACTION(1.0),
+  FEED_COMPACTION(DeployConfig.MAX_LENGTH - 3.5),
+
   SUPER_COMPACTION_IN(1.0),
 
   HOME_INWARD(DeployConfig.MIN_LENGTH),
