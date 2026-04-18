@@ -196,6 +196,10 @@ public class Shooter extends StateMachineSubsystem<ShooterState> implements Powe
     }
   }
 
+  public double getAverageRPM() {
+    return (topLeftMotorRpm + topRightMotorRpm + bottomLeftMotorRpm + bottomRightMotorRpm) / 4.0;
+  }
+
   @Override
   protected void collectInputs() {
     shootingRpm = Math.min(ShooterConfig.MAX_SAFE_RPM, distanceToScoringRpm(scoreDistance));

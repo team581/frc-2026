@@ -274,6 +274,10 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
   public boolean isShooting() {
     // You need to actually be in a shooting state
     if (getState() != HopperState.SHOOT && getState() != HopperState.SHOOT_AND_INTAKE) {
+      // Don't launch fuel sim unless actually in shot state
+      if (RobotBase.isSimulation()) {
+        return false;
+      }
       return true;
     }
 
