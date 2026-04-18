@@ -165,6 +165,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
 
         if (swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
             && !swerve.isMovingBeyondSafeSpeed()
+            && !swerve.driverStillDecidingSotm()
             && localization.imu.accelerationLowEnoughToShoot()
             && shooter.atGoalDebounced()
             && shooterHood.atGoal()
@@ -190,6 +191,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
         if ((!FeatureFlags.CANCEL_IN_PROGRESS_SHOT.getAsBoolean()
                 || (swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
                     && !swerve.isMovingBeyondSafeSpeed()
+                    && !swerve.driverStillDecidingSotm()
                     && localization.imu.accelerationLowEnoughToShoot()
                     && shooter.atGoalDebounced()
                     && localization.isTrustworthy()
@@ -428,12 +430,12 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
       }
       case WARMUP_SCORE -> {
         shooter.prepareScoreRequest(scoringParameters.distance());
-        shooterHood.scoreRequest(scoringParameters.distance());
+        shooterHood.idleRequest();
         swerve.warmupScoreRequest(scoringParameters);
       }
       case WARMUP_FEED -> {
         shooter.prepareFeedRequest(feedingParameters.distance());
-        shooterHood.feedRequest(feedingParameters.distance());
+        shooterHood.idleRequest();
         swerve.warmupFeedRequest(feedingParameters);
       }
       default -> {}

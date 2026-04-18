@@ -13,6 +13,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autos.Autos;
+import frc.robot.autos.BumpCrossingFollower;
 import frc.robot.cluster_map.ClusterMap;
 import frc.robot.config.FeatureFlags;
 import frc.robot.conveyor.Conveyor;
@@ -41,16 +42,6 @@ import java.nio.file.Path;
 public class Robot extends Base581Robot {
   private final Hardware hardware = new Hardware();
 
-  private final Trailblazer trailblazer =
-      new Trailblazer(
-          new HeuristicPathTracker(new PoseErrorTolerance(0.5, 10)),
-          new PidPathFollower(
-              new PIDController(3.5, 0, 0),
-              new PIDController(
-                  Swerve.ORIGINAL_HEADING_PID.getP(),
-                  Swerve.ORIGINAL_HEADING_PID.getI(),
-                  Swerve.ORIGINAL_HEADING_PID.getD())));
-
   private final Limelight shooterLimelight =
       new Limelight("shooter", LimelightState.TAGS, CameraConfigs.SHOOTER);
   private final Limelight leftLimelight =
@@ -61,9 +52,23 @@ public class Robot extends Base581Robot {
       new Limelight("ground", LimelightState.CLUSTER_MAP, CameraConfigs.GROUND);
   private final HealthManager health =
       new HealthManager(shooterLimelight, leftLimelight, rightLimelight, groundLimelight);
+
+  private final Imu imu = new Imu(hardware.drivetrain);
+
+  private final Trailblazer trailblazer =
+      new Trailblazer(
+          new HeuristicPathTracker(new PoseErrorTolerance(0.5, 10)),
+          new BumpCrossingFollower(
+              new PidPathFollower(
+                  new PIDController(3.5, 0, 0),
+                  new PIDController(
+                      Swerve.ORIGINAL_HEADING_PID.getP(),
+                      Swerve.ORIGINAL_HEADING_PID.getI(),
+                      Swerve.ORIGINAL_HEADING_PID.getD())),
+              imu.bumpCrossingTracker));
+
   private final Swerve swerve =
       new Swerve(hardware.drivetrain, health, hardware.driverController, trailblazer);
-  private final Imu imu = new Imu(swerve.drivetrain);
 
   private final ShooterHood shooterHood = new ShooterHood(hardware.shooterHoodMotor);
 

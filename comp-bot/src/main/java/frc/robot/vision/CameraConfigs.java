@@ -16,7 +16,7 @@ public class CameraConfigs {
           // Right
           Units.inchesToMeters(-0.0002),
           // Up
-          Units.inchesToMeters(16.0558),
+          Units.inchesToMeters(16.156),
           // Pitch
           20.0,
           // Yaw

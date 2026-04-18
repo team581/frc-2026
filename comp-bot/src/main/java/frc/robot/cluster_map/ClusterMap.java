@@ -248,7 +248,6 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
 
     double angleY = LimelightHelpers.getTY(limelight.limelightTableName);
 
-    // 🚨 FILTER: Reject data in the top 10% of the Limelight's vertical FOV 🚨
     if (angleY > MAX_VALID_TY) {
       DogLog.timestamp("ClusterMap/RejectedHighTY");
       return Optional.empty();
@@ -282,7 +281,6 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
     // Dynamic Size Estimation
     double estimatedBalls = (rawArea * Math.pow(distanceMeters, 2)) / REFERENCE_BALL_AREA_AT_1M;
 
-    // 🚨 FILTER: Clamp the output so a distant glare doesn't predict 2,000 balls 🚨
     int calculatedSize = (int) Math.round(estimatedBalls);
     calculatedSize = MathUtil.clamp(calculatedSize, 1, MAX_CLUSTER_SIZE_CAP);
 

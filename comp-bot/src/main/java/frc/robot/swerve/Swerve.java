@@ -69,7 +69,8 @@ public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerM
   private final SlewRateLimiter maxLinearVelocityRateLimiter = new SlewRateLimiter(5.0);
   private final SlewRateLimiter maxAngularVelocityRateLimiter = new SlewRateLimiter(5.0);
 
-  public static final PhoenixPIDController ORIGINAL_HEADING_PID = new PhoenixPIDController(5, 0, 0);
+  public static final PhoenixPIDController ORIGINAL_HEADING_PID =
+      new PhoenixPIDController(7.5, 0, 0);
 
   public final TunerSwerveDrivetrain drivetrain;
 
@@ -418,6 +419,14 @@ public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerM
     return driverWantsSotm;
   }
 
+  public boolean driverStillDecidingSotm() {
+    var requestedSpeeds = driveSource.getRequestedSpeeds();
+    return (!timeout(DRIVER_WANTS_SOTM_DELAY.get())
+            && (MathHelpers.getLinearVelocity(requestedSpeeds) > 1e-6
+                && (getState() == SwerveState.SCORE || getState() == SwerveState.FEED)))
+        && driveSource.getDriveSourceType() == DriveSourceType.DRIVER_PERSPECTIVE_OPEN_LOOP;
+  }
+
   private SwerveRequest.FieldCentricFacingAngle withFieldRelativeTargetDirection(
       SwerveRequest.FieldCentricFacingAngle request, Rotation2d targetDirection) {
     if (request.ForwardPerspective == ForwardPerspectiveValue.OperatorPerspective) {
@@ -596,6 +605,7 @@ public class Swerve extends StateMachineSubsystem<SwerveState> implements PowerM
         MathHelpers.getLinearVelocity(driveSource.getRequestedSpeeds()) < 1e-5);
 
     DogLog.log("Swerve/DriverWantsSOTM", driverWantsSotm);
+    DogLog.log("Swerve/DriverStillDecidingSotm", driverStillDecidingSotm());
   }
 
   private void startSimThread() {
