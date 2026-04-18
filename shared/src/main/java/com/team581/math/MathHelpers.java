@@ -280,6 +280,10 @@ public class MathHelpers {
     return Math.round(value * factor * (1 + EPSILON)) / factor;
   }
 
+  public static final double rpmToLinearVelocity(double rpm, double radiusMeters) {
+    return rpm * radiusMeters * (Math.PI / 30.0);
+  }
+
   public static double signedSqrt(double value) {
     return Math.copySign(Math.sqrt(Math.abs(value)), value);
   }

@@ -1,9 +1,15 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radian;
+
 import com.team581.Base581Robot;
 import com.team581.GlobalConfig;
 import com.team581.controller.ControllerBindings;
+import com.team581.math.MathHelpers;
 import com.team581.math.PoseErrorTolerance;
+import com.team581.simkit.FuelSim;
 import com.team581.trailblazer.Trailblazer;
 import com.team581.trailblazer.followers.PidPathFollower;
 import com.team581.trailblazer.trackers.HeuristicPathTracker;
@@ -11,6 +17,10 @@ import com.team581.util.FieldUtil;
 import com.team581.util.FmsUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autos.Autos;
 import frc.robot.cluster_map.ClusterMap;
@@ -64,6 +74,8 @@ public class Robot extends Base581Robot {
   private final Swerve swerve =
       new Swerve(hardware.drivetrain, health, hardware.driverController, trailblazer);
   private final Imu imu = new Imu(swerve.drivetrain);
+
+  public FuelSim fuelSim = new FuelSim("FuelSim");
 
   private final ShooterHood shooterHood = new ShooterHood(hardware.shooterHoodMotor);
 
@@ -138,6 +150,12 @@ public class Robot extends Base581Robot {
         throw new RuntimeException("Failed to write field obstacles SVG", e);
       }
     }
+
+    if (RobotBase.isSimulation()) {
+      initFuelSim();
+    }
+
+    FieldUtil.debugLogFieldZones();
   }
 
   @Override
@@ -149,6 +167,58 @@ public class Robot extends Base581Robot {
     } else {
       DogLog.clearFault("Clamped auto points are enabled but current alliance is blue");
     }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    if (hopperManager.isShooting()) {
+      fuelSim.launchFuel(
+          LinearVelocity.ofBaseUnits(
+              MathHelpers.rpmToLinearVelocity(shooter.getAverageRPM(), Units.inchesToMeters(1.6)),
+              MetersPerSecond),
+          Angle.ofBaseUnits(Math.toRadians(90 - shooterHood.getAngle()), Radian),
+          Angle.ofBaseUnits(Math.PI, Radian),
+          Distance.ofBaseUnits(
+              Units.inchesToMeters(20),
+              Meter)); // Spawns a fuel onto the field at the robot's position with a specified
+      // launch velocity and angles, accounting for robot movement (robot must be
+      // registered)
+    }
+    fuelSim.updateSim();
+  }
+
+  private void initFuelSim() {
+    fuelSim.setMaxAdditions(100);
+
+    // Register a robot for collision with fuel
+    fuelSim.registerRobot(
+        Units.inchesToMeters(34.5), // from left to right in meters
+        Units.inchesToMeters(33), // from front to back in meters
+        Units.inchesToMeters(4.5), // from floor to top of bumpers in meters
+        Units.inchesToMeters(21),
+        Units.inchesToMeters(-12),
+        Units.inchesToMeters(24.5),
+        () -> localization.getPose(), // Supplier<Pose2d> of robot pose
+        () -> swerve.getFieldRelativeSpeeds()); // Supplier<ChassisSpeeds> of field-centric chassis
+    // speeds
+
+    // Register an intake to remove fuel from the field as a rectangular bounding box
+    fuelSim.registerIntake(
+        Units.inchesToMeters(16.5),
+        Units.inchesToMeters(25),
+        -Units.inchesToMeters(17.25),
+        Units.inchesToMeters(17.25), // robot-centric coordinates for bounding box in meters
+        () -> {
+          return hopperManager.isIntaking();
+        }); // (optional) Runnable called whenever a fuel is intaked
+
+    fuelSim.setSubticks(
+        5); // sets the number of physics iterations to perform per 20ms loop. Default = 5
+
+    fuelSim.start(); // enables the simulation to run (updateSim must still be called periodically)
+
+    fuelSim.enableAirResistance(); // an additional drag force will be applied to fuel in physics
+    // update step
   }
 
   @Override
