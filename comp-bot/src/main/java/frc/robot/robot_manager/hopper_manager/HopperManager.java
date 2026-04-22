@@ -73,9 +73,7 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
     canRangeUpdateTimer.start();
   }
 
-  /**
-   * @return HopperBallPosition value depending on sensor values
-   */
+  /** Returns hopperBallPosition value depending on sensor values. */
   public HopperBallPosition getBallPositionInHopper() {
     if (sensorOnWhileBallFilling) {
       return HopperBallPosition.AT_SENSOR;
