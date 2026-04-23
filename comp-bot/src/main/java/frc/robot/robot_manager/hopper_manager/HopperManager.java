@@ -50,11 +50,8 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
 
   private HopperCapacity hopperCapacity = HopperCapacity.LOW;
 
-  public enum HopperBallPosition {
-    CLOSE_TO_SHOOTER,
-    AT_SENSOR,
-    BELOW_SENSOR,
-  }
+  private boolean sensorOnWhileShooting = false;
+  private boolean sensorOnWhileBallFilling = false;
 
   private final Timer canRangeUpdateTimer = new Timer();
 
@@ -77,25 +74,21 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
     canRangeUpdateTimer.start();
   }
 
-  private HopperBallPosition getShotPosition() {
-    if (towerSensorDebounced) {
+  /** Returns hopperBallPosition value depending on sensor values. */
+  public HopperBallPosition getBallPositionInHopper() {
+    if (sensorOnWhileBallFilling) {
       return HopperBallPosition.AT_SENSOR;
     }
 
-    if (shouldFillBalls()) {
+    if (sensorOnWhileShooting && !ballFilling) {
+      return HopperBallPosition.CLOSE_TO_SHOOTER;
+    }
+
+    if (towerSensorDebounced) {
       return HopperBallPosition.CLOSE_TO_SHOOTER;
     }
 
     return HopperBallPosition.BELOW_SENSOR;
-  }
-
-  public double getFeederToShooterTime() {
-    return switch (getShotPosition()) {
-      // TODO: Validate this
-      case CLOSE_TO_SHOOTER -> 0.25;
-      case AT_SENSOR -> 0.2;
-      case BELOW_SENSOR -> 0.3;
-    };
   }
 
   @Override
@@ -269,7 +262,7 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
     } else {
       DogLog.clearFault("CANrange distance not updating");
     }
-    DogLog.log("HopperManager/BallFilling", shouldFillBalls() && state.canBallFill);
+    DogLog.log("HopperManager/BallFilling", ballFilling);
     DogLog.log("HopperManager/DriverWantsEject", driverWantsEject);
     DogLog.log("HopperManager/DriverWantsIntake", driverWantsIntake);
     DogLog.log("HopperManager/OperatorWantsStow", operatorWantsStow);
@@ -390,6 +383,19 @@ public class HopperManager extends StateMachineSubsystem<HopperState> {
     } else {
       towerSensorRaw = RobotKind.IS_COMP_BOT != towerSensor.get();
     }
+    ballFilling = shouldFillBalls() && getState().canBallFill;
+
+    switch (getState()) {
+      case SCORE, SCORE_AND_INTAKE, FEED, FEED_AND_INTAKE -> {
+        sensorOnWhileShooting = towerSensorDebounced;
+      }
+      default -> {}
+    }
+
+    if (ballFilling) {
+      sensorOnWhileBallFilling = towerSensorDebounced;
+    }
+
     towerSensorDebounced = towerSensorDebouncer.calculate(towerSensorRaw);
     if (DSOptions.USE_CANRANGE.get()) {
       hopperDistance = Units.metersToInches(hopperCANRange.getDistance().getValueAsDouble());
