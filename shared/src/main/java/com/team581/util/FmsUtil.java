@@ -7,20 +7,21 @@ import java.util.Optional;
 
 public class FmsUtil {
   // Match period shift times in seconds
-  private static final double SHIFT1_TIMESTAMP = 30.0;
-  private static final double SHIFT2_TIMESTAMP = 55.0;
-  private static final double SHIFT3_TIMESTAMP = 80.0;
-  private static final double SHIFT4_TIMESTAMP = 105.0;
-  private static final double ENDGAME_TIMESTAMP = 130.0;
+  private static final double SHIFT1_TIMESTAMP = 33.0;
+  private static final double SHIFT2_TIMESTAMP = 58.0;
+  private static final double SHIFT3_TIMESTAMP = 83.0;
+  private static final double SHIFT4_TIMESTAMP = 108.0;
+  private static final double ENDGAME_TIMESTAMP = 133.0;
 
-  public static final double ENDGAME_DURATION = 160.0;
-  private static final double SHIFT4_TIME_DURATION = 130.0;
-  private static final double SHIFT3_TIME_DURATION = 105.0;
-  private static final double SHIFT2_TIME_DURATION = 80.0;
-  private static final double SHIFT1_TIME_DURATION = 55.0;
-  private static final double TRANSITION_DURATION = 30.0;
+  public static final double ENDGAME_DURATION = 163.0;
+  private static final double SHIFT4_TIME_DURATION = 133.0;
+  private static final double SHIFT3_TIME_DURATION = 108.0;
+  private static final double SHIFT2_TIME_DURATION = 83.0;
+  private static final double SHIFT1_TIME_DURATION = 58.0;
+  private static final double TRANSITION_DURATION = 33.0;
 
-  public static final double MATCH_TIME_AT_TELEOP_START = 20.0;
+  public static final double MATCH_TIME_AT_TELEOP_START = 23.0;
+  public static final double MATCH_TIME_AT_AUTO_START = 0;
 
   public static String currentShift(double timeSinceMatchStart) {
     if (DriverStation.isDisabled() || !DriverStation.isTeleop()) {
