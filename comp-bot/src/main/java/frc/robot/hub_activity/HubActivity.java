@@ -19,6 +19,7 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
       DogLog.tunable("HubActivity/FieldHubDelay", 2.0);
 
   private final Timer teleopTimer = new Timer();
+  private final Timer autoTimer = new Timer();
   private double timeSinceMatchStart = 0.0;
 
   private double timeUntilNextShift = 0.0;
@@ -31,7 +32,14 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
   public HubActivity() {
     super(SubsystemPriority.HUB_ACTIVITY, HubActivityState.DEFAULT_STATE);
 
+    autoTimer.start();
     teleopTimer.start();
+  }
+
+  @Override
+  public void autonomousInit() {
+    autoTimer.restart();
+    timeSinceMatchStart = FmsUtil.MATCH_TIME_AT_AUTO_START;
   }
 
   public boolean getActualHubActive() {
@@ -61,7 +69,7 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
 
   @Override
   public void teleopInit() {
-    teleopTimer.reset();
+    teleopTimer.restart();
     timeSinceMatchStart = FmsUtil.MATCH_TIME_AT_TELEOP_START;
   }
 
@@ -99,6 +107,11 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
 
   @Override
   protected void collectInputs() {
+    if (DriverStation.isAutonomous()) {
+      timeSinceMatchStart = autoTimer.get();
+    } else {
+      timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
+    }
     timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
     timeUntilNextShift =
         FmsUtil.timeUntilNextShift(timeSinceMatchStart, DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
@@ -113,6 +126,13 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
 
   @Override
   protected void whileInState(HubActivityState state) {
+    if (DriverStation.isDisabled()) {
+      teleopTimer.stop();
+      teleopTimer.reset();
+      autoTimer.stop();
+      autoTimer.reset();
+    }
+
     // Driver station logging
     DogLog.forceNt.log("HubActivity/CurrentShift", FmsUtil.currentShift(timeSinceMatchStart));
     DogLog.forceNt.log("HubActivity/Active", getHubStateColorHex());
