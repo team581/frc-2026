@@ -23,7 +23,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Setup Ruff
-        uses: astral-sh/ruff-action@v3
+        uses: astral-sh/ruff-action@v4.0.0
 
       - name: Fix Error Prone issues
         run: ./gradlew build
