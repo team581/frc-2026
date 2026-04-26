@@ -20,6 +20,8 @@ public class FmsUtil {
   private static final double SHIFT1_TIME_DURATION = 58.0;
   private static final double TRANSITION_DURATION = 33.0;
 
+  private static final double AUTO_DURATION = 20.0;
+
   public static final double MATCH_TIME_AT_TELEOP_START = 23.0;
   public static final double MATCH_TIME_AT_AUTO_START = 0;
 
@@ -84,10 +86,13 @@ public class FmsUtil {
 
   public static double timeUntilNextShift(
       double timeSinceMatchStart, boolean defaultAutoWinnerValue) {
-    if (DriverStation.isDisabled() || !DriverStation.isTeleop()) {
-      return 0.0;
-    }
 
+    if (timeSinceMatchStart <= AUTO_DURATION) {
+      return AUTO_DURATION - timeSinceMatchStart;
+    }
+    if (timeSinceMatchStart <= MATCH_TIME_AT_TELEOP_START) {
+      return MATCH_TIME_AT_TELEOP_START - timeSinceMatchStart;
+    }
     if (timeSinceMatchStart <= TRANSITION_DURATION) {
       return TRANSITION_DURATION - timeSinceMatchStart;
     }

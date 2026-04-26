@@ -27,6 +27,8 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
   private double scoringShooterTOF = 0.0;
   private boolean tofBasedHubActive = true;
 
+  private boolean hasStartedMatch = false;
+
   private boolean shouldBeastMode = false;
 
   public HubActivity() {
@@ -39,6 +41,7 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
   @Override
   public void autonomousInit() {
     autoTimer.restart();
+    hasStartedMatch = true;
     timeSinceMatchStart = FmsUtil.MATCH_TIME_AT_AUTO_START;
   }
 
@@ -107,12 +110,13 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
 
   @Override
   protected void collectInputs() {
-    if (DriverStation.isAutonomous()) {
+    if (DriverStation.isAutonomous()
+        || DriverStation.isDisabled()
+        || !DSOptions.USE_TELEOP_TIMER.getAsBoolean()) {
       timeSinceMatchStart = autoTimer.get();
-    } else {
+    } else if (DriverStation.isEnabled()) {
       timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
     }
-    timeSinceMatchStart = teleopTimer.get() + FmsUtil.MATCH_TIME_AT_TELEOP_START;
     timeUntilNextShift =
         FmsUtil.timeUntilNextShift(timeSinceMatchStart, DSOptions.DEFAULT_WON_AUTO.getAsBoolean());
 
@@ -126,7 +130,7 @@ public class HubActivity extends StateMachineSubsystem<HubActivityState> {
 
   @Override
   protected void whileInState(HubActivityState state) {
-    if (DriverStation.isDisabled()) {
+    if (DriverStation.isDisabled() && !hasStartedMatch) {
       teleopTimer.stop();
       teleopTimer.reset();
       autoTimer.stop();
