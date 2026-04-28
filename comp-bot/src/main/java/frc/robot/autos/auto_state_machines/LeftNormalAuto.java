@@ -25,6 +25,8 @@ import frc.robot.robot_manager.RobotManager;
 
 public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
 
+  private static final double SHOOTER_WARMUP_DISTANCE_FROM_HUB = 2.171;
+
   public enum Markers {
     PRIORITIZE_INTAKE,
     START_SHOOT_RQ,
@@ -543,7 +545,7 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
       case CROSS_BUMP_TO_SHOOT_1 -> {
         trailblazer.setActiveSegment(crossBumpToShootOne);
         robotManager.cancelIntakeRequest();
-        robotManager.shooter.prepareScoreRequest(2.171);
+        robotManager.shooter.prepareScoreRequest(SHOOTER_WARMUP_DISTANCE_FROM_HUB);
         if (RobotBase.isSimulation()) {
           if (timeout(0.2)) {
             robotManager.localization.imu.setPitch(-7.5);
@@ -590,7 +592,7 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
       }
       case CROSS_BUMP_TO_SHOOT_2 -> {
         trailblazer.setActiveSegment(crossBumpToShootTwo);
-        robotManager.shooter.prepareScoreRequest(2.171);
+        robotManager.shooter.prepareScoreRequest(SHOOTER_WARMUP_DISTANCE_FROM_HUB);
 
         if (RobotBase.isSimulation()) {
           if (timeout(0.2)) {
@@ -622,7 +624,7 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
       }
       case CROSS_BUMP_TO_SHOOT_3 -> {
         trailblazer.setActiveSegment(crossBumpToShootTwo);
-        robotManager.shooter.prepareScoreRequest(2.171);
+        robotManager.shooter.prepareScoreRequest(SHOOTER_WARMUP_DISTANCE_FROM_HUB);
 
         if (RobotBase.isSimulation()) {
           if (timeout(0.2)) {
