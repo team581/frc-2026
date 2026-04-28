@@ -36,7 +36,7 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
   public final Swerve swerve;
   public final Hardware hardware;
   private final ShooterHood shooterHood;
-  private final Shooter shooter;
+  public final Shooter shooter;
   private final Vision vision;
   public final XboxController driverController;
   private final HealthManager health;
