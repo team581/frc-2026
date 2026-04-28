@@ -7,9 +7,6 @@ public enum NormalAutoState {
 
   INTAKE_SECOND_CYCLE_FAR,
 
-  // Trench lane for cluster map (trench and then alliance lane)
-  INTAKE_SECOND_CYCLE_TRENCH_LANE,
-
   INTAKE_THIRD_CYCLE,
   CROSS_BUMP_TO_SHOOT_1,
   CROSS_BUMP_TO_SHOOT_2,

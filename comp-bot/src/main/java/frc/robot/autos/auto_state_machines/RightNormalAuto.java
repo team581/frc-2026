@@ -31,8 +31,6 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
     READY_TO_SHOOT_FOR_2,
     START_INTAKE_2,
     START_INTAKE_3,
-    CHECK_CLUSTER_MAP_TRENCH,
-    CANCEL_CLUSTER_MAP_TRENCH,
     MAKE_CLUSTER_MAP_DECISION,
     CANCEL_CLUSTER_MAP_CHECK,
     READY_TO_CROSS_BUMP
@@ -122,45 +120,6 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
           .withAngularConstraints(Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0))
           .untilFinished(new PoseErrorTolerance(1.0, 100));
 
-  private final AutoSegment intakeSecondCycleTrenchLane =
-      Trailblazer.segment(
-              AutoPoint.ofRed(
-                      new Pose2d(
-                          10.5,
-                          FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY() + Units.inchesToMeters(3),
-                          Rotation2d.fromDegrees(170)))
-                  .withLinearConstraints(3.0, 2.0)
-                  .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
-              AutoPoint.ofRed(
-                      new Pose2d(
-                          8.5,
-                          FieldUtil.RED_OUTPOST_TRENCH_CENTER.getY() + Units.inchesToMeters(3),
-                          Rotation2d.fromDegrees(170)))
-                  .withLinearConstraints(3.0, 2.0)
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(8.383, 5.593, Rotation2d.fromDegrees(-75)))
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(8.600, 4.31, Rotation2d.fromDegrees(-30.0)))
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(new Pose2d(9.31, 4.3, Rotation2d.fromDegrees(32.0)))
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(
-                      new Pose2d(
-                          10.2,
-                          FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
-              AutoPoint.ofRed(
-                      new Pose2d(
-                          SHOOT_X,
-                          FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                          Rotation2d.kZero))
-                  .withMarker(Markers.READY_TO_CROSS_BUMP)
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)))
-          .withLinearConstraints(4.5, 8)
-          .withAngularConstraints(Units.rotationsToRadians(4.0), Units.rotationsToRadians(3.0))
-          .untilFinished(new PoseErrorTolerance(0.5, 3));
-
   private final AutoSegment defaultIntakeSecondCycle =
       Trailblazer.segment(
               AutoPoint.ofRed(
@@ -191,10 +150,8 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
                   .withAngularConstraints(0.5, 0.5)
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.ofRed(new Pose2d(10.628, 7.2, Rotation2d.fromDegrees(-140)))
-                  .withMarker(Markers.CHECK_CLUSTER_MAP_TRENCH)
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
               AutoPoint.ofRed(new Pose2d(9.140, 6.653, Rotation2d.fromDegrees(-130)))
-                  .withMarker(Markers.CANCEL_CLUSTER_MAP_TRENCH)
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
               AutoPoint.ofRed(new Pose2d(8.7, 5.593, Rotation2d.fromDegrees(-85)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100))
@@ -450,15 +407,10 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
             case LANE_1 -> NormalAutoState.INTAKE_SECOND_CYCLE_FAR;
             default -> currentState;
           };
-        } else if (trailblazer.passedMarker(Markers.CHECK_CLUSTER_MAP_TRENCH)
-            && !trailblazer.passedMarker(Markers.CANCEL_CLUSTER_MAP_TRENCH)) {
-          if (robotManager.clusterMap.hasHighValueTrenchCluster()) {
-            yield NormalAutoState.INTAKE_SECOND_CYCLE_TRENCH_LANE;
-          }
         }
         yield currentState;
       }
-      case INTAKE_SECOND_CYCLE_FAR, INTAKE_SECOND_CYCLE_TRENCH_LANE -> {
+      case INTAKE_SECOND_CYCLE_FAR -> {
         if (trailblazer.passedMarker(Markers.READY_TO_CROSS_BUMP)) {
           yield NormalAutoState.CROSS_BUMP_TO_SHOOT_2;
         } else {
@@ -583,10 +535,6 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
           robotManager.localization.imu.setPitch(-30.0);
         }
       }
-      case INTAKE_SECOND_CYCLE_TRENCH_LANE -> {
-        trailblazer.setActiveSegment(intakeSecondCycleTrenchLane);
-        robotManager.intakeAutoRequest();
-      }
       case CROSS_BUMP_TO_SHOOT_2 -> {
         trailblazer.setActiveSegment(crossBumpToShootTwo);
         if (RobotBase.isSimulation()) {
@@ -687,10 +635,6 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
       }
       case INTAKE_SECOND_CYCLE_FAR -> {
         storedStuckOnBallAutoSegment = intakeSecondCycleFar;
-        robotManager.idleRequest();
-      }
-      case INTAKE_SECOND_CYCLE_TRENCH_LANE -> {
-        storedStuckOnBallAutoSegment = intakeSecondCycleTrenchLane;
         robotManager.idleRequest();
       }
       case INTAKE_THIRD_CYCLE -> {
