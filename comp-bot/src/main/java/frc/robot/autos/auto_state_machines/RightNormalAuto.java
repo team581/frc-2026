@@ -543,6 +543,7 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
       case CROSS_BUMP_TO_SHOOT_1 -> {
         trailblazer.setActiveSegment(crossBumpToShootOne);
         robotManager.cancelIntakeRequest();
+        robotManager.shooter.prepareScoreRequest(2.171);
         if (RobotBase.isSimulation()) {
           if (timeout(0.2)) {
             robotManager.localization.imu.setPitch(-7.5);
@@ -589,6 +590,8 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
       }
       case CROSS_BUMP_TO_SHOOT_2 -> {
         trailblazer.setActiveSegment(crossBumpToShootTwo);
+        robotManager.shooter.prepareScoreRequest(2.171);
+
         if (RobotBase.isSimulation()) {
           if (timeout(0.2)) {
             robotManager.localization.imu.setPitch(-7.5);
@@ -619,6 +622,8 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
       }
       case CROSS_BUMP_TO_SHOOT_3 -> {
         trailblazer.setActiveSegment(crossBumpToShootTwo);
+        robotManager.shooter.prepareScoreRequest(2.171);
+
         if (RobotBase.isSimulation()) {
           if (timeout(0.2)) {
             robotManager.localization.imu.setPitch(-7.5);
