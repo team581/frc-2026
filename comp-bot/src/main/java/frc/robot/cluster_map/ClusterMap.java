@@ -75,8 +75,6 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
   private Lane bestLane = Lane.LANE_0;
   private Optional<Pose2d> bestPose = Optional.empty();
 
-  private boolean hasHighValueTrenchCluster = false;
-
   private final Limelight limelight;
 
   private final ArrayList<ClusterMapElement> clusterMap = new ArrayList<>();
@@ -111,10 +109,6 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
 
   public Optional<Pose2d> getBestClusterPose() {
     return bestPose;
-  }
-
-  public boolean hasHighValueTrenchCluster() {
-    return hasHighValueTrenchCluster;
   }
 
   public void setDeployFullyExtended(boolean isFullyExtended) {
@@ -195,37 +189,6 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
     DogLog.log("ClusterMap/BestClusterPose", clusterPoseWithIntakeRotation);
 
     return Optional.of(clusterPoseWithIntakeRotation);
-  }
-
-  private boolean calculateHasHighValueCluster() {
-    if (clusterMap.isEmpty()) {
-      return false;
-    }
-    DogLog.timestamp("ClusterMap/RanHighValueCluster");
-
-    var robotPose = localization.getPose();
-
-    for (ClusterMapElement element : clusterMap) {
-      Pose2d elementPose = new Pose2d(element.clusterTranslation(), Rotation2d.kZero);
-
-      // Only evaluate clusters in the trench
-      if (laneSystem.getLane(elementPose, robotPose) == Lane.TRENCH) {
-
-        double distanceMeters =
-            robotPose.getTranslation().getDistance(element.clusterTranslation());
-        double estimatedTravelTime = distanceMeters / ESTIMATED_DRIVE_SPEED_MPS;
-        double totalEstimatedTime = estimatedTravelTime + PICKUP_OVERHEAD_TIME_SEC;
-
-        double ballsPerSecond = element.detectionSize() / totalEstimatedTime;
-
-        // Make sure we're confident in choosing this cluster
-        if (ballsPerSecond > 27.0) {
-          return true;
-        }
-      }
-    }
-
-    return false;
   }
 
   private OptionalVisionClusterData getRawClusterPoses() {
@@ -445,7 +408,6 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
         updateMap();
         bestLane = calculateBestClusterLane();
         bestPose = calculateBestClusterPose();
-        hasHighValueTrenchCluster = calculateHasHighValueCluster();
         warmupTickCount++;
       } else {
         // First enabled tick: drop any synthetic data we seeded during warmup so we start
@@ -458,7 +420,6 @@ public class ClusterMap extends StateMachineSubsystem<ClusterMapState> {
         updateMap();
         bestLane = calculateBestClusterLane();
         bestPose = calculateBestClusterPose();
-        hasHighValueTrenchCluster = calculateHasHighValueCluster();
       }
     }
   }
