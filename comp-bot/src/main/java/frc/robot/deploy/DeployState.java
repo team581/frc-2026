@@ -10,7 +10,7 @@ public enum DeployState {
   // placeholder values
   SCORE_COMPACTION_WAITING(DeployConfig.MAX_LENGTH - 3.5),
   SCORE_COMPACTION(1.0),
-  FEED_COMPACTION(5.915),
+  FEED_COMPACTION(6.915),
 
   BEAST_MODE_COMPACTION(1.0),
 
