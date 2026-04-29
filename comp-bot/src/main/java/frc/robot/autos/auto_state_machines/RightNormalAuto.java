@@ -47,7 +47,7 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
 
   private static final double BUMP_OFFSET = -0.13;
 
-  private static final double SHOOT_X = 13.6;
+  private static final double SHOOT_X = 13.7;
 
   private boolean collisionEverDetected = false;
 
@@ -60,17 +60,17 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
               AutoPoint.of(
                       () ->
                           getCollisionPoint(
-                              Point.ofRed(new Pose2d(9.140, 6.653, Rotation2d.fromDegrees(-120)))))
+                              Point.ofRed(new Pose2d(9.010, 6.653, Rotation2d.fromDegrees(-120)))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
               AutoPoint.of(
                       () ->
                           getCollisionPoint(
-                              Point.ofRed(new Pose2d(8.783, 5.593, Rotation2d.fromDegrees(-85)))))
+                              Point.ofRed(new Pose2d(8.553, 5.393, Rotation2d.fromDegrees(-85)))))
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
               AutoPoint.of(
                       () ->
                           getCollisionPoint(
-                              Point.ofRed(new Pose2d(8.800, 4.7, Rotation2d.fromDegrees(-30.0)))))
+                              Point.ofRed(new Pose2d(8.670, 4.7, Rotation2d.fromDegrees(-30.0)))))
                   .withMarker(Markers.PRIORITIZE_INTAKE)
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
               AutoPoint.ofRed(new Pose2d(9.31, 4.5, Rotation2d.fromDegrees(32.0)))
