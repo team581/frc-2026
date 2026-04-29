@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 
 public class BumpCrossingTracker extends StateMachine<BumpCrossingState> {
-  private static final double FLAT_DEBOUNCE_SECONDS = 0.02;
+  private static final double FLAT_DEBOUNCE_SECONDS = 0.04;
   private static final double FLAT_FALLBACK_DEBOUNCE_SECONDS = 0.75;
   private static final double STUCK_IN_STATE_TIMEOUT_DURATION = 2.5;
   private static final DoubleSubscriber FLAT_THRESHOLD =
