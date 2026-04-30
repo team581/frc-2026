@@ -110,7 +110,7 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
                   .withMarker(Markers.START_SHOOT_RQ))
           .withLinearConstraints(4.5, 8)
           .withAngularConstraints(Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0))
-          .untilFinished(new PoseErrorTolerance(1.0, 100));
+          .forever();
 
   private final AutoSegment defaultIntakeSecondCycle =
       Trailblazer.segment(
@@ -208,8 +208,7 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
                   .withMarker(Markers.START_SHOOT_RQ))
           .withLinearConstraints(4.5, 8)
           .withAngularConstraints(Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0))
-          .untilFinished(new PoseErrorTolerance(1.0, 100));
-
+          .forever();
   private final AutoSegment intakeThirdCycle =
       Trailblazer.segment(
               AutoPoint.ofRed(
@@ -282,8 +281,7 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
                   .withMarker(Markers.START_SHOOT_RQ))
           .withLinearConstraints(4.5, 8)
           .withAngularConstraints(Units.rotationsToRadians(2.0), Units.rotationsToRadians(2.0))
-          .untilFinished(new PoseErrorTolerance(1.0, 100));
-
+          .forever();
   private AutoSegment stuckOnBall =
       StuckOnBallRecovery.getRecoverySegment(
           () -> robotManager.localization.getPose(),
