@@ -73,13 +73,13 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
                               Point.ofRed(new Pose2d(8.670, 3.37, Rotation2d.fromDegrees(30)))))
                   .withMarker(Markers.PRIORITIZE_INTAKE)
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
-              AutoPoint.ofRed(new Pose2d(9.31, 3.57, Rotation2d.fromDegrees(-32)))
+              AutoPoint.ofRed(new Pose2d(9.31, 3.57, Rotation2d.fromDegrees(-90)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           9.7,
                           FieldUtil.RED_DEPOT_BUMP_CENTER.getY() - BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(-32)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
@@ -161,13 +161,13 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
               AutoPoint.ofRed(new Pose2d(8.500, 3.76, Rotation2d.fromDegrees(30)))
                   .withMarker(Markers.CANCEL_CLUSTER_MAP_CHECK)
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
-              AutoPoint.ofRed(new Pose2d(10.07, 3.77, Rotation2d.fromDegrees(-10)))
+              AutoPoint.ofRed(new Pose2d(10.07, 3.77, Rotation2d.fromDegrees(-15)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.5, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           10.2,
                           FieldUtil.RED_DEPOT_BUMP_CENTER.getY() - BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(-50)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.1, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
@@ -187,13 +187,13 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
                   .withMarker(Markers.CANCEL_CLUSTER_MAP_CHECK),
               AutoPoint.ofRed(new Pose2d(8.300, 3.76, Rotation2d.fromDegrees(30)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
-              AutoPoint.ofRed(new Pose2d(9.7, 3.77, Rotation2d.fromDegrees(-45)))
+              AutoPoint.ofRed(new Pose2d(9.7, 3.77, Rotation2d.fromDegrees(-15)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.5, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
                           10.2,
                           FieldUtil.RED_DEPOT_BUMP_CENTER.getY() - BUMP_OFFSET,
-                          Rotation2d.kZero))
+                          Rotation2d.fromDegrees(-50)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.1, 100)),
               AutoPoint.ofRed(
                       new Pose2d(
@@ -261,7 +261,7 @@ public class LeftNormalAuto extends BaseImperativeAuto<NormalAutoState> {
                   .withTransitionTolerance(new PoseErrorTolerance(0.2, 100)),
               AutoPoint.ofRed(new Pose2d(9.6, 1.717, Rotation2d.fromDegrees(130)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.4, 100)),
-              AutoPoint.ofRed(new Pose2d(8.7, 2.477, Rotation2d.kCCW_90deg))
+              AutoPoint.ofRed(new Pose2d(8.7, 2.477, Rotation2d.fromDegrees(90)))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
               AutoPoint.ofRed(new Pose2d(8.600, 3.76, Rotation2d.kCCW_90deg))
                   .withTransitionTolerance(new PoseErrorTolerance(0.3, 100)),
