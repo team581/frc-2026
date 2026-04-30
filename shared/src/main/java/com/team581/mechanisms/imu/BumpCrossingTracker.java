@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 
 public class BumpCrossingTracker extends StateMachine<BumpCrossingState> {
-  private static final double FLAT_DEBOUNCE_SECONDS = 0.08;
+  private static final double FLAT_DEBOUNCE_SECONDS = 0.1;
   private static final double FLAT_FALLBACK_DEBOUNCE_SECONDS = 0.75;
   private static final double STUCK_IN_STATE_TIMEOUT_DURATION = 2.5;
   private static final DoubleSubscriber FLAT_THRESHOLD =
@@ -24,7 +24,7 @@ public class BumpCrossingTracker extends StateMachine<BumpCrossingState> {
   private static final DoubleSubscriber UPHILL_THRESHOLD =
       DogLog.tunable("BumpCrossing/UphillThresholdDegrees", 5.0);
   private static final DoubleSubscriber DOWNHILL_THRESHOLD =
-      DogLog.tunable("BumpCrossing/DownhillThresholdDegrees", -2.0);
+      DogLog.tunable("BumpCrossing/DownhillThresholdDegrees", -5.0);
 
   private final Debouncer flatDebouncer =
       new Debouncer(FLAT_DEBOUNCE_SECONDS, DebounceType.kRising);
