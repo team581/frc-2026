@@ -20,7 +20,7 @@ public class DeployConfig {
   public static final double HOMING_END_POSITION_OUTWARD = 11.9;
   public static final double HOMING_VOLTAGE_INWARD = -2;
   public static final double HOMING_VOLTAGE_OUTWARD = 3;
-  public static final double HOMING_CURRENT = RobotKind.IS_COMP_BOT ? 40.0 : 10.0;
+  public static final double HOMING_CURRENT = RobotKind.IS_COMP_BOT ? 10.0 : 10.0;
   public static final double POSITION_TOLERANCE = 0.25;
 
   private static final Slot0Configs AVERAGE_GAINS =
