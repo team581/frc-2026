@@ -201,7 +201,9 @@ public class Robot extends Base581Robot {
               shooter.setTurboMode(false);
             });
 
-    operator.b().onPress(robotManager::prepareFeedRequest).onRelease(robotManager::idleRequest);
+    // operator.b().onPress(robotManager::prepareFeedRequest).onRelease(robotManager::idleRequest);
+
+    operator.b().onPress(deploy::fixDifferentialDesyncRequest).onRelease(deploy::intakeRequest);
 
     operator
         .rightTrigger()

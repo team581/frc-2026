@@ -14,6 +14,8 @@ public enum DeployState {
 
   BEAST_MODE_COMPACTION(1.0),
 
+  FIX_DIFFERENTIAL_DESYNC(DeployConfig.MAX_LENGTH),
+
   HOME_INWARD(DeployConfig.MIN_LENGTH),
   HOME_OUTWARD(DeployConfig.MAX_LENGTH),
   UNHOMED(0);

@@ -174,12 +174,17 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
       case SCORE_COMPACTION, SCORE_COMPACTION_WAITING -> {
         differentialMechanism.setControl(
             motionMagicTorqueCurrentFOCAverageRequest.withPosition(clamp(newState.getLength())),
-            positionDifferentialRequest.withPosition(0.0));
+            positionDifferentialRequest.withPosition(0.0).withSlot(1));
+      }
+      case FIX_DIFFERENTIAL_DESYNC -> {
+        differentialMechanism.setControl(
+            torqueCurrentFOCAverageRequest.withPosition(clamp(newState.getLength())),
+            positionDifferentialRequest.withPosition(0.0).withSlot(2));
       }
       default ->
           differentialMechanism.setControl(
               torqueCurrentFOCAverageRequest.withPosition(clamp(newState.getLength())),
-              positionDifferentialRequest.withPosition(0.0));
+              positionDifferentialRequest.withPosition(0.0).withSlot(1));
     }
   }
 
@@ -224,6 +229,13 @@ public class Deploy extends StateMachineSubsystem<DeployState> implements PowerM
     switch (getState()) {
       case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {}
       default -> setStateFromRequest(DeployState.BEAST_MODE_COMPACTION);
+    }
+  }
+
+  public void fixDifferentialDesyncRequest() {
+    switch (getState()) {
+      case UNHOMED, HOME_INWARD, HOME_OUTWARD -> {}
+      default -> setStateFromRequest(DeployState.FIX_DIFFERENTIAL_DESYNC);
     }
   }
 
