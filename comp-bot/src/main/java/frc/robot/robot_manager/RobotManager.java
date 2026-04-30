@@ -172,7 +172,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             && shooter.atGoalDebounced()
             && shooterHood.atGoal()
             && localization.isTrustworthy()
-            && localization.imu.isFlatDebounced()
             && hubActivity.getTOFBasedHubActive()
             && !nearTrench) {
           yield RobotState.SCORE;
@@ -197,7 +196,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                     && shooter.atGoalDebounced()
                     && localization.isTrustworthy()
                     && shooterHood.atGoal()
-                    && localization.imu.isFlatDebounced()
                     && hubActivity.getTOFBasedHubActive()))
             && !nearTrench) {
           yield currentState;
@@ -216,7 +214,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
             && !swerve.isMovingBeyondSafeSpeed()
             && shooter.atGoalDebounced()
             && isInSafeFeedingLocation
-            && localization.imu.isFlatDebounced()
             && shooterHood.atGoal()
             && health.isLocalizationHealthy()) {
 
@@ -236,7 +233,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
                 && !swerve.isMovingBeyondSafeSpeed()
                 && isInSafeFeedingLocation
                 && swerve.atGoal(ShooterConfig.FEEDER_TO_SHOOTER_TRAVEL_TIME.get())
-                && localization.imu.isFlatDebounced()
                 && shooterHood.atGoal()
                 && health.isLocalizationHealthy())) {
 
@@ -686,7 +682,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log(
         "RobotManager/Scoring/ScoreTransition/LocalizationTrustworthy",
         localization.isTrustworthy());
-    DogLog.log("RobotManager/Scoring/ScoreTransition/ImuFlat", localization.imu.isFlatDebounced());
 
     DogLog.log(
         "RobotManager/Scoring/ScoreTransition/HubActive", hubActivity.getTOFBasedHubActive());
@@ -706,7 +701,6 @@ public class RobotManager extends StateMachineSubsystem<RobotState> {
     DogLog.log("RobotManager/Feeding/FeedTransition/ShooterHoodAtGoal", shooterHood.atGoal());
     DogLog.log(
         "RobotManager/Feeding/FeedTransition/LocalizationHealthy", health.isLocalizationHealthy());
-    DogLog.log("RobotManager/Feeding/FeedTransition/ImuFlat", localization.imu.isFlatDebounced());
     DogLog.log("RobotManager/Feeding/ScoreTransition/NotNearTrench", !nearTrench);
     DogLog.log("RobotManager/Feeding/FeedTransition/IsMoving", isMoving);
   }
