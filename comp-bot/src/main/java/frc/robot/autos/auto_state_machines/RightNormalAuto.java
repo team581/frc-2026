@@ -100,16 +100,6 @@ public class RightNormalAuto extends BaseImperativeAuto<NormalAutoState> {
 
   private final AutoSegment crossBumpToShootOne =
       Trailblazer.segment(
-              AutoPoint.of(
-                      () -> {
-                        return Point.ofRed(
-                            new Pose2d(
-                                SHOOT_X,
-                                FieldUtil.RED_OUTPOST_BUMP_CENTER.getY() + BUMP_OFFSET,
-                                Rotation2d.kZero));
-                      })
-                  .withTransitionTolerance(new PoseErrorTolerance(0.3, 100))
-                  .withLinearConstraints(4.5, 8),
               AutoPoint.ofRed(
                       new Pose2d(
                           SHOOT_X,
